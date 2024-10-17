@@ -44,7 +44,10 @@ changes while the confidentiality of the note is maintained.
 
 Users can also create tags for notes, allowing them to categorise and organise notes
 by various topics. This feature complements the full text search functionality that will
-be implemented, allowing users to easily find notes based on their tags, title and even the content within the notes. This is especially beneficial for the terminal client,
+be implemented, allowing users to easily find notes based on their tags, title and
+
+
+even the content within the notes. This is especially beneficial for the terminal client,
 where users can quickly search for specific notes without having to go through the
 painful experience of sifting through each note individually.
 
