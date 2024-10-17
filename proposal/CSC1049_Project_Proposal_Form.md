@@ -6,9 +6,9 @@
 
 Project Title: Noted
 
-Student 1 Name: Ali Ahmad ID Number: 22312403
+Student 1 Name: Ali Ahmad           ID Number: 22312403
 
-Student 2 Name: Kaushal Sambhe ID Number: 22388443
+Student 2 Name: Kaushal Sambhe      ID Number: 22388443
 
 ## Staff Member Consulted: Prof. Stephen Blott
 
