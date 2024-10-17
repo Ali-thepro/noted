@@ -108,7 +108,7 @@ Shared Tasks:
 - Terminal Client: Cobra, Glamour, Crypto
 - Web Development: React, Redux.js, Tailwind CSS, markdown-it, codemirror,
     Y.js for collaboration, crypto.js
-- Image Hosting: Amazon S
+- Image Hosting: Amazon S3
 - Version Control: Git, GitLab
 - Testing Frameworks: Playwright, Jest
 
