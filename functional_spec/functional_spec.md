@@ -97,7 +97,7 @@ This system integrates seamlessly with any development environment that supports
 - All notes are encrypted asymmetrically on the users device before being sent to the database, ensuring data security during transmission and storage. A symmetric key is implemented for real-time collaboration. This symmetric key is encrypted and decrypted using the user's public/private key pairs, providing an additional layer of security.
 
 #### **Real-Time Collaboration**
-- The system will allow for notes to be edited simultaneously in web clients. Notes will be managed using CRDTs to ensure seamless real-time synchronisation and avoid any conflicts. Additionally, encrypted symmetric keys are employed to maintain privacy throughout the collaboration process.
+- The system will allow for notes to be edited simultaneously in web clients. Notes will be managed using CRDTs to ensure seamless real-time synchronisation and avoid any conflicts [3]. Additionally, encrypted symmetric keys are employed to maintain privacy throughout the collaboration process.
 
 #### **Note Creation and Management**
 - Users have the ability to create, edit, and delete Markdown notes through either the terminal client or the web interface. Regardless of the preferred environment, the notes will be managed seamlessly.
@@ -163,7 +163,7 @@ Listed below are the different scenarios users might find themselves in.
 
 | Objective | To authenticate users and allow them to login.|
 |--------------------|-------------|
-| **Description** | Users will be able to login using authentication methods such as Google OAuth, GitHub OAuth or Email and Password credentials in order to access the application|
+| **Description** | Users will be able to login using authentication methods such as Google OAuth, GitHub OAuth or Email and Password credentials in order to access the application.|
 | **Steps** |
 |1.| User accesses the  web interface via a browser and gets redirected to the web interface after running the `noted auth` command on CLI.  
 |2.| System prompts for login using Google OAuth, GitHub OAuth, or Email and Password.  
@@ -177,7 +177,7 @@ Listed below are the different scenarios users might find themselves in.
 
 ### **Scenario 2: Create a New Note**
 
-| **Objective** | To create a new note for editing  |
+| **Objective** | To create a new note for editing.  |
 |--------------------|-------------|
 | **Description** | Users can create new notes, which are saved to the data base and version-controlled. They can track changes over time, and revert to a previous version if necessary.
 | **Steps** | 
@@ -243,7 +243,7 @@ Listed below are the different scenarios users might find themselves in.
 || 1.5.| Image is displayed within the note. |
 |CLI workflow
 |2.|   | User runs the upload image command `noted upload-image <path-to-image>` on CLI and passes the path to image as a parameter     |
-||  2.1. |  System uploads image to Amazon S3 and generates a URL     |
+||  2.1. |  System uploads image to Amazon S3 and generates a URL.     |
 ||  2.2. | User embeds the URL into the note.  |
 ||  2.3. | User will be able to view the note by previewing it in the web.|
 
@@ -343,7 +343,7 @@ Listed below are the different scenarios users might find themselves in.
 
 | **Objective** | Allow real-time collaborative editing of a shared note between multiple users. |
 |--------------------|-------------|
-| **Description** | This feature allows multiple users to edit the same note simultaneously. Changes made by collaborators are synchronized in real-time, ensuring consistency and preventing conflicts through the use of Conflict-free Replicated Data Types (CRDTs). |
+| **Description** | This feature allows multiple users to edit the same note simultaneously. Changes made by collaborators are synchronized in real-time, ensuring consistency and preventing conflicts through the use of Conflict-free Replicated Data Types (CRDTs) [3]. |
 | **Steps** | 
 |1.| Both owner and collaborator open the shared note simultaneously.  
 |2.| Each user makes changes to the note’s content in real-time.  
@@ -406,7 +406,7 @@ MongoDB and Amazon S3 do not provide unlimited storage for free tiers. We must o
 # 3. Functional Requirements
 
 ## 3.1 User Authentication
-- **Description**: The system must allow users to authenticate through Google OAuth, GitHub OAuth, or by creating a local account. For a local account, the user must register before logging in. For OAuth, the system stores the user information in the database during their first authentication. On subsequent logins, the system grants access without additional registration. Once authenticated, the user is granted access. For the CLI, when a user first authenticates, the system will create a directory that will store all the notes that the user creates .
+- **Description**: The system must allow users to authenticate through Google OAuth, GitHub OAuth, or by creating a local account. For a local account, the user must register before logging in. For OAuth, the system stores the user information in the database during their first authentication. On subsequent logins, the system grants access without additional registration. Once authenticated, the user is granted access. For the CLI, when a user first authenticates, the system will create a directory that will store all the notes that the user creates.
 - **Criticality**: High - User authentication serves as the gateway to all functionality in the system.
 - **Technical Issues**:
     - Securely handling OAuth integration for Google and GitHub with the backend.
@@ -433,7 +433,7 @@ MongoDB and Amazon S3 do not provide unlimited storage for free tiers. We must o
 - **Description**: The system must support real-time collaboration, allowing multiple users to work on the same note simultaneously. Changes made by one user should be reflected for all collaborators. Notes should be securely encrypted during collaboration.
 - **Criticality**: High - Essential for teams that need to collaborate on notes.
 - **Technical Issues**:
-    - Implementing real-time synchronisation using Y.js to handle concurrent edits.
+    - Implementing real-time synchronisation using Y.js to handle concurrent edits [2].
     - Ensuring only users that have been given access can edit it.
     - Ensuring encryption doesn't delay transmission of data between clients.
     - Making sure conflicts are resolved correctly.
@@ -573,7 +573,7 @@ The web client interacts with the backend API where it will send and receive enc
 This is the Go-based CLI interface built using the Cobra framework where users can create, edit, and manage their Markdown notes [1]. It performs functions such as creating new notes, editing existing ones using terminal editors, pushing changes to the server, and pulling updates to keep notes synchronized.  It handles encryption and decryption locally to ensure security. It interacts with the API for communication with the backend and with the local file system for storing notes.
 
 ### 4.1.3 Collaborative Editor
-The collaborative editor is responsible for real-time collaboration. It utilises Y.js and CRDTs to resolve conflicts during simultaneous edits. It communicates with the WebSocket to synchronise changes across different clients. This is integrated within the web client.
+The collaborative editor is responsible for real-time collaboration. It utilises Y.js and CRDTs to resolve conflicts during simultaneous edits [2] [3]. It communicates with the WebSocket to synchronise changes across different clients. This is integrated within the web client.
 
 ### 4.1.4 API Layer
 The API layer acts as a communication interface between the clients and the backend server. It provides endpoints for operations such as user authentication, note management, tagging and version control. It interacts directly with the database to perform necessary operations with the users' notes.
@@ -693,5 +693,6 @@ We have chosen to work on some tasks together in order to avoid the scenario whe
 
 
 # 7. Appendix
-*[1] “Cobra.dev,” Cobra.Dev, https://cobra.dev/ (accessed Nov. 1, 2024).* 
-
+*[1] “Cobra.dev,” Cobra.Dev, https://cobra.dev/ (accessed Nov. 1, 2024).*<br>
+*[2] “Yjs,” Yjs, https://docs.yjs.dev/ (accessed Nov. 2, 2024).*<br>
+*[3] “About crdts • conflict-free replicated data types,” Conflict-free Replicated Data Types, https://crdt.tech/ (accessed Nov. 2, 2024).* 
