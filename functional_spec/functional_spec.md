@@ -41,14 +41,16 @@
   - [4.2 Stretch Goal System Architecture](#42-stretch-goal-system-architecture)
     - [4.2.1 Text Editor](#421-text-editor)
 - [5. High Level Design](#5-high-level-design)
-  - [5.1 Sequence Diagram](#51-sequence-diagram)
-    - [5.1.1 User Login on Web Interface](#511-user-login-on-web-interface)
-    - [5.1.2 User Login on CLI](#512-user-login-on-cli)	
-    - [5.1.3 Creating a Note](#513-creating-a-note)
-    - [5.1.4 Editing a Note on Both Clients - No Real-Time Collaboration](#514-editing-a-note-on-both-clients---no-real-time-collaboration)
-    - [5.1.5 Editing a Note on Web with Real-Time Collaboration](#515-editing-a-note-on-web-with-real-time-collaboration)
-    - [5.1.6 Pulling Notes on CLI](#516-pulling-notes-on-cli)
+- [5.1 User Login on Web Interface](#511-user-login-on-web-interface)
+- [5.2 User Login on CLI](#512-user-login-on-cli)	
+- [5.3 Creating a Note](#513-creating-a-note)
+- [5.4 Editing a Note on Both Clients - No Real-Time Collaboration](#514-editing-a-note-on-both-clients---no-real-time-collaboration)
+- [5.5 Editing a Note on Web with Real-Time Collaboration](#515-editing-a-note-on-web-with-real-time-collaboration)
+- [5.6 Pulling Notes on CLI](#516-pulling-notes-on-cli)
 - [6. Preliminary Schedule](#6-preliminary-schedule)
+  - [6.1 Project Plan](#61-project-plan)
+  - [6.2 GANTT Chart](#62-gantt-chart)
+  - [6.3 Resource Requirements](#63-resource-requirements)
 - [7. Appendix](#7-appendix)
 
 # 1. Introduction
@@ -597,46 +599,40 @@ Handles real-time collaboration. Communicates with the WebSocket and ensures cha
 
 # 5. High-Level Design
 
-### 5.1 Sequence Diagram
-
-### 5.1.1 User Login on Web Interface 
-
+## 5.1 User Login on Web Interface 
 
 ![](figures/User_Web_Login_Sequence_Diagram.png)
 
 *Figure 3: User Web Login Sequence Diagram*
 
 
-## 5.1.2 User Login on CLI
+## 5.2 User Login on CLI
 ![](figures/User_CLI_Login_Sequence_Diagram.png)
 
 *Figure 4: User CLI Login Sequence Diagram*
 
 
-## 5.1.3 Creating a Note
+## 5.3 Creating a Note
 ![](figures/Create_Note_Sequence_Diagram.png)
 
 *Figure 5: Create Note Sequence Diagram*
 
-## 5.1.4 Editing a Note on Both Clients - No Real-Time Collaboration
+## 5.4 Editing a Note on Both Clients - No Real-Time Collaboration
 ![](figures/Edit_Note_Sequence_Diagram.png)
 
 *Figure 6: Edit Note Sequence Diagram*
 
-## 5.1.5 Editing a Note on Web with Real-Time Collaboration
+## 5.5 Editing a Note on Web with Real-Time Collaboration
 ![](figures/Real_Time_Editing_Sequence_Diagram.png)
 
 *Figure 7: Real-Time Edit Sequence Diagram*
 
-## 5.1.6 Pulling Notes on CLI
+## 5.6 Pulling Notes on CLI
 ![](figures/Pull_Notes_Sequence_Diagram.png)
 
 *Figure 8: Pull Notes Sequence Diagram*
 
-<!-- ## 5.1 Web application overview
 
-## 5.2 CLI overviewz
- -->
 
 # 6. Preliminary Schedule
 
