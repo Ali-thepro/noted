@@ -1,7 +1,6 @@
 # CSC1049 Functional Spec
 
 # Table of Contents
-- [Revision History](#revision-history)
 - [1. Introduction](#1-introduction)
   - [1.1 Overview](#11-overview)
   - [1.2 Business Context](#12-business-context)
