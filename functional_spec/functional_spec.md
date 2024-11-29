@@ -242,7 +242,7 @@ Listed below are the different scenarios users might find themselves in.
 || 1.4.| URL is automatically inserted at the cursor of the user using correct Markdown syntax.
 || 1.5.| Image is displayed within the note. |
 |CLI workflow
-|2.|   | User runs the upload image command `noted upload-image <path-to-image` on CLI and passes the path to image as a parameter     |
+|2.|   | User runs the upload image command `noted upload-image <path-to-image>` on CLI and passes the path to image as a parameter     |
 ||  2.1. |  System uploads image to Amazon S3 and generates a URL     |
 ||  2.2. | User embeds the URL into the note.  |
 ||  2.3. | User will be able to view the note by previewing it in the web.|
@@ -315,7 +315,7 @@ Listed below are the different scenarios users might find themselves in.
 |--------------------|-------------|
 | **Description** | Users can perform keyword searches and apply tag-based filters to quickly locate specific notes. This functionality enhances the usability of the application by allowing users to manage large volumes of notes effectively. |
 | **Steps** |
-| 1.| User accesses the search bar on the web interface or runs the `noted search <keyword/title/tag` command in CLI.  
+| 1.| User accesses the search bar on the web interface or runs the `noted search <keyword/title/tag>` command in CLI.  
 |2. |User enters keywords related to the note's content or title.  
 |3.| User selects specific tags to narrow down search results.  
 |4.| System processes the query and applies filters.  
