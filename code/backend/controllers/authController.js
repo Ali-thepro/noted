@@ -54,6 +54,40 @@ const signup = async (request, response, next) => {
 
 
 
+const signin = async (request, response, next) => {
+  const { email, password } = request.body
+
+  if (!email || !password) {
+    return next(createError('Email and password are required', 400))
+  }
+
+  const user = await User.findOne({ email })
+  const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.passwordHash)
+
+  if (!(user && passwordCorrect)) {
+    return next(createError('Invalid email or password', 401))
+  }
+
+  const userForToken = {
+    email: user.email,
+    id: user._id,
+  }
+
+  const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
+
+  response
+    .status(200)
+    .cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+    })
+    .json(user)
+}
+
+
+
 module.exports = {
   signup,
+  signin,
 }
