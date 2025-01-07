@@ -1,8 +1,7 @@
-import { Navbar } from "flowbite-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Navbar } from 'flowbite-react'
+import { Link, useLocation } from 'react-router-dom'
 
 const Header = () => {
-  const navigate = useNavigate()
   const path = useLocation().pathname
 
 
@@ -16,10 +15,10 @@ const Header = () => {
       </Navbar.Brand>
       <Navbar.Collapse>
         <Navbar.Link active={path === '/'} as={Link} to='/'>
-            Home
+          Home
         </Navbar.Link>
         <Navbar.Link active={path === '/about'} as={Link} to='/about'>
-            About
+          About
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
