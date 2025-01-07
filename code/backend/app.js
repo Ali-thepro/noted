@@ -7,6 +7,8 @@ const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 const config = require('./utils/config')
 const logger = require('./utils/logger')
+const middleware = require('./utils/middleware')
+
 
 
 mongoose.set('strictQuery', false)
@@ -31,6 +33,11 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
+
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
+app.use(middleware.customErrorHandler)
 
 
 module.exports = app
