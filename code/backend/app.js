@@ -4,6 +4,7 @@ const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
+const cookieParser = require('cookie-parser')
 const config = require('./utils/config')
 const logger = require('./utils/logger')
 
@@ -25,10 +26,11 @@ app.use(cors({
   credentials: true,
   referrerPolicy: 'no-referrer-when-downgrade',
   allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
 }))
 app.use(express.json())
+app.use(cookieParser())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 
 module.exports = app
-
