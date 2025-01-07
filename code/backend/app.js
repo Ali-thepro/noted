@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser')
 const config = require('./utils/config')
 const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
-
+const authRouter = require('./routes/authRouter')
 
 
 mongoose.set('strictQuery', false)
@@ -34,6 +34,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
+app.use('/api/auth', authRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
