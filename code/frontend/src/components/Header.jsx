@@ -1,11 +1,14 @@
 import { Navbar, Button } from 'flowbite-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { FaMoon, FaSun } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTheme } from '../redux/reducers/themeReducer'
-import { FaMoon, FaSun } from 'react-icons/fa'
+import { signOutUser } from '../redux/reducers/authReducer'
 
 const Header = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const user = useSelector(state => state.auth.user)
   const theme = useSelector(state => state.theme)
   const path = useLocation().pathname
 
@@ -13,7 +16,10 @@ const Header = () => {
     dispatch(setTheme())
   }
 
-
+  const handleSignOut = () => {
+    dispatch(signOutUser())
+    navigate('/')
+  }
 
   return (
     <Navbar className="border-b-2">
@@ -27,6 +33,23 @@ const Header = () => {
           {theme === 'light' ? <FaMoon size='15'/> : <FaSun size='15'/>}
         </Button>
 
+        {user ? (
+          <Button
+            className="focus:ring-0 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 rounded-lg"
+            outline
+            onClick={handleSignOut}
+          >
+            Logout
+          </Button>
+        ) : (
+          <Link to="/signin">
+            <Button className="focus:ring-0 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 rounded-lg" outline>
+              Sign In
+            </Button>
+          </Link>
+        )}
+
+        <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
         <Navbar.Link active={path === '/'} as={Link} to='/'>
