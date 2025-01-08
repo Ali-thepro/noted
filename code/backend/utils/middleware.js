@@ -35,28 +35,28 @@ const unknownEndpoint = (request, response) => {
 
 const verifyUser = async (request, response, next) => {
   try {
-    const token = request.cookies.token;
+    const token = request.cookies.token
     if (!token) {
-      return next(createError('Unauthorised - No token', 401));
+      return next(createError('Unauthorised - No token', 401))
     }
 
-    const decodedToken = jwt.verify(token, config.SECRET);
+    const decodedToken = jwt.verify(token, config.SECRET)
     if (!decodedToken.id) {
-      return next(createError('Unauthorised - Invalid token', 401));
+      return next(createError('Unauthorised - Invalid token', 401))
     }
 
-    const user = await User.findById(decodedToken.id);
+    const user = await User.findById(decodedToken.id)
     if (!user) {
-      return next(createError('Unauthorised - User not found', 401));
+      return next(createError('Unauthorised - User not found', 401))
     }
 
-    request.user = user;
-    next();
+    request.user = user
+    next()
   } catch (error) {
-    console.error('Token verification error:', error);
-    return next(createError('Unauthorised - Token verification failed', 401));
+    console.error('Token verification error:', error)
+    return next(createError('Unauthorised - Token verification failed', 401))
   }
-};
+}
 
 module.exports = {
   errorHandler,

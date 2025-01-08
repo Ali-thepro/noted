@@ -1,0 +1,166 @@
+cache:
+  key: ${CI_COMMIT_REF_SLUG}-global
+  paths:
+    - .npm/
+    - go/pkg/mod/
+    - go/bin/
+    - go/cache/
+    - go/linter-cache/
+  policy: pull-push
+
+variables:
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  GOCACHE: "${CI_PROJECT_DIR}/go/cache"
+  GOPATH: "${CI_PROJECT_DIR}/go"
+  GOLANGCI_LINT_CACHE: "${CI_PROJECT_DIR}/go/linter-cache"
+  CGO_ENABLED: 0
+  GOFLAGS: ""
+  FF_USE_FASTZIP: "true"
+  ARTIFACT_COMPRESSION_LEVEL: fastest
+  CACHE_COMPRESSION_LEVEL: fastest
+
+.node_template: &node_definition
+  image: node:21.7.1
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-node
+    paths:
+      - .npm/
+      - code/frontend/node_modules/
+      - code/backend/node_modules/
+    policy: pull-push
+
+.golang_template: &golang_definition
+  image: golang:1.23.1
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-go
+    paths:
+      - vendor/go/pkg/mod/
+      - vendor/cache
+      - vendor/linter-cache
+    policy: pull-push
+  before_script:
+    - mkdir -p "${GOPATH}/bin"
+    - mkdir -p "${GOCACHE}"
+    - cd code/client
+    - go mod download
+    - go mod verify
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+stages:
+  - lint
+  - build
+  - test
+
+frontend-lint:
+  <<: *node_definition
+  stage: lint
+  rules:
+    - changes:
+      - code/frontend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/frontend
+    - npm install
+    - npm run lint
+    - npm run lint:fix
+
+frontend-build:
+  <<: *node_definition
+  stage: build
+  rules:
+    - changes:
+      - code/frontend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/frontend
+    - npm install
+    - npm run build
+    - test -d dist
+    - test -f dist/index.html
+
+.frontend-test:
+  <<: *node_definition
+  stage: test
+  rules:
+    - changes:
+      - code/backend/**/*
+      - code/frontend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/frontend
+    - npm install
+    - npm run test
+
+backend-lint:
+  <<: *node_definition
+  stage: lint
+  rules:
+    - changes:
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/backend
+    - npm install
+    - npm run lint
+    - npm run lint:fix
+
+backend-build:
+  <<: *node_definition
+  stage: build
+  rules:
+    - changes:
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/backend
+    - npm install
+
+.backend-test:
+  <<: *node_definition
+  stage: test
+  rules:
+    - changes:
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/backend
+    - npm install
+    - npm run test
+
+terminal-lint:
+  <<: *golang_definition
+  stage: lint
+  rules:
+    - changes:
+      - code/client/**/*
+      - .gitlab-ci.yml
+  script:
+    - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+    - ${GOPATH}/bin/golangci-lint run --timeout=5m
+    - go fmt ./...
+    - go vet ./...
+
+terminal-build:
+  <<: *golang_definition
+  stage: build
+  rules:
+    - changes:
+      - code/client/**/*
+      - .gitlab-ci.yml
+  script:
+    - make build
+    - test -x noted
+
+.terminal-test:
+  <<: *golang_definition
+  stage: test
+  rules:
+    - changes:
+      - code/client/**/*
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - make test
