@@ -20,7 +20,7 @@ variables:
   CACHE_COMPRESSION_LEVEL: fastest
 
 .node_template: &node_definition
-  image: node:21.7.1
+  image: node:23.6.0
   cache:
     key: ${CI_COMMIT_REF_SLUG}-node
     paths:

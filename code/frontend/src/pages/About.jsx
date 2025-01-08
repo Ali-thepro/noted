@@ -1,10 +1,10 @@
 const About = () => {
   return (
-    <div className='min-h-screen flex items-center justify-center'>
+    <div className='min-h-screen flex items-center justify-center pb-32'>
       <div className='max-w-2xl mx-auto p-3 text-center'>
         <div>
           <h1 className='text-3xl font-semibold text-center my-7'>
-            About Blog Verse
+            About Noted
           </h1>
           <div className='text-md text-gray-500 flex flex-col gap-6'>
             <p>
@@ -19,11 +19,6 @@ const About = () => {
               or brainstorming ideas, Noted ensures a seamless and secure experience.
             </p>
 
-            <p> We encourage you to explore the app
-              intuitive design, customize it to suit your workflow, and stay productive. Join a growing community of users who value
-              simplicity and functionality in their note-taking tools. With Noted,
-              you can work smarter, stay organized, and bring your ideas to life like never before.
-            </p>
           </div>
         </div>
       </div>
