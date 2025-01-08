@@ -15,6 +15,9 @@ variables:
   GOLANGCI_LINT_CACHE: "${CI_PROJECT_DIR}/go/linter-cache"
   CGO_ENABLED: 0
   GOFLAGS: ""
+  FF_USE_FASTZIP: "true"
+  ARTIFACT_COMPRESSION_LEVEL: fastest
+  CACHE_COMPRESSION_LEVEL: fastest
 
 .node_template: &node_definition
   image: node:21.7.1
@@ -78,6 +81,18 @@ frontend-build:
     - test -d dist
     - test -f dist/index.html
 
+.frontend-test:
+  <<: *node_definition
+  stage: test
+  rules:
+    - changes:
+      - code/backend/**/*
+      - code/frontend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/frontend
+    - npm install
+    - npm run test
 
 backend-lint:
   <<: *node_definition
@@ -103,6 +118,17 @@ backend-build:
     - cd code/backend
     - npm install
 
+.backend-test:
+  <<: *node_definition
+  stage: test
+  rules:
+    - changes:
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - cd code/backend
+    - npm install
+    - npm run test
 
 terminal-lint:
   <<: *golang_definition
@@ -127,3 +153,14 @@ terminal-build:
   script:
     - make build
     - test -x noted
+
+.terminal-test:
+  <<: *golang_definition
+  stage: test
+  rules:
+    - changes:
+      - code/client/**/*
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - make test
