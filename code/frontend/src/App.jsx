@@ -14,7 +14,7 @@ const App = () => {
         position="top-right"
         className="toast-position"
         pauseOnFocusLoss={false}
-        toastStyle={theme === 'dark' ? darkModeToastStyle : {}}
+
         draggable={true}
       />
       <Routes>
