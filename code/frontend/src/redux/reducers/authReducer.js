@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
 import { signin } from '../../services/auth'
 import { toast } from 'react-toastify'
+import { signOutUserFromDB } from '../../services/user'
 
 const initialState = {
   user: null,
@@ -20,6 +21,9 @@ const authSlice = createSlice({
     setError(state) {
       return { ...state,  loading: false }
     },
+    signOut() {
+      return { user: null, loading: false }
+    }
   }
 })
 
@@ -40,7 +44,21 @@ export const login = (credentials) => {
   }
 }
 
+export const signOutUser = () => {
+  return async dispatch => {
+    dispatch(initial())
+    try {
+      await signOutUserFromDB()
+      dispatch(signOut())
+      toast.success('User signed out sucessfully')
+      return true
+    } catch (error) {
+      dispatch(setNotification(error.response.data.error, 'failure'))
+      dispatch(setError())
+      return false
+    }
+  }
+}
 
-
-export const { setUser, initial, setError } = authSlice.actions
+export const { setUser, initial, setError, signOut } = authSlice.actions
 export default authSlice.reducer
