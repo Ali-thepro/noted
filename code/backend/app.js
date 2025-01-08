@@ -10,6 +10,7 @@ const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
+const imageRouter = require('./routes/imageRouter')
 
 
 mongoose.set('strictQuery', false)
@@ -37,6 +38,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
+app.use('/api/image', imageRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
