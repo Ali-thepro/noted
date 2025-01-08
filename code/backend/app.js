@@ -36,6 +36,7 @@ app.use(cookieParser())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.use('/api/auth', authRouter)
+app.use('/api/user', userRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
