@@ -1,13 +1,25 @@
-require('dotenv').config();
+require('dotenv').config()
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const PORT = process.env.PORT;
-const UI_URI = process.env.UI_URI;
-const SERVER_URI = process.env.SERVER_URI;
+const MONGODB_URI = process.env.MONGODB_URI
+const PORT = process.env.PORT
+const UI_URI = process.env.UI_URI
+const SERVER_URI = process.env.SERVER_URI
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET
+const GITHUB_REDIRECT_URI = process.env.GITHUB_REDIRECT_URI
 
 module.exports = {
   MONGODB_URI,
   PORT,
   UI_URI,
-  SERVER_URI
-};
+  SERVER_URI,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_REDIRECT_URI,
+}
