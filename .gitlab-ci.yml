@@ -38,7 +38,7 @@ variables:
   before_script:
     - mkdir -p "${GOPATH}/bin"
     - mkdir -p "${GOCACHE}"
-    - cd client
+    - cd code/client
     - go mod download
     - go mod verify
 
@@ -59,7 +59,7 @@ frontend-lint:
       - frontend/**/*
       - .gitlab-ci.yml
   script:
-    - cd frontend
+    - cd code/frontend
     - npm install
     - npm run lint
     - npm run lint:fix
@@ -72,7 +72,7 @@ frontend-build:
       - frontend/**/*
       - .gitlab-ci.yml
   script:
-    - cd frontend
+    - cd code/frontend
     - npm install
     - npm run build
     - test -d dist
@@ -87,7 +87,7 @@ backend-lint:
       - backend/**/*
       - .gitlab-ci.yml
   script:
-    - cd backend
+    - cd code/backend
     - npm install
     - npm run lint
     - npm run lint:fix
@@ -100,7 +100,7 @@ backend-build:
       - backend/**/*
       - .gitlab-ci.yml
   script:
-    - cd backend
+    - cd code/backend
     - npm install
 
 
