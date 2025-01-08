@@ -1,12 +1,15 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import { persistStore, persistReducer } from 'redux-persist'
+import expireReducer from 'redux-persist-expire'
 import storage from 'redux-persist/lib/storage'
 import notificationReducer from './reducers/notificationReducer'
 import themeReducer from './reducers/themeReducer'
+import authReducer from './reducers/authReducer'
 
 const rootReducer = combineReducers({
   notification: notificationReducer,
   theme: themeReducer,
+  auth: authReducer,
 })
 
 const persistConfig = {
@@ -14,6 +17,13 @@ const persistConfig = {
   storage,
   version: 1,
   blacklist: ['notification'],
+  transforms: [
+    expireReducer('auth', {
+      expireSeconds: 7200,
+      expiredState: {},
+      autoExpire: true,
+    })
+  ],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
