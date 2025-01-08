@@ -170,9 +170,96 @@ const google = async (request, response, next) => {
 }
 
 
+function getGitHubAuthURL() {
+  const rootUrl = 'https://github.com/login/oauth/authorize'
+  const options = {
+    client_id: config.GITHUB_CLIENT_ID,
+    redirect_uri: config.GITHUB_REDIRECT_URI,
+    scope: 'user:email',
+    allow_signup: 'true',
+  }
+  const queryOptions = new URLSearchParams(options).toString()
+
+  return `${rootUrl}?${queryOptions}`
+}
+
+const githubOauth = (request, response) => {
+  const githubAuthURL = getGitHubAuthURL()
+  response.redirect(githubAuthURL)
+}
+
+const github = async (request, response, next) => {
+  const code = request.query.code
+
+  try {
+    const { data } = await axios({
+      url: 'https://github.com/login/oauth/access_token',
+      method: 'post',
+      headers: {
+        accept: 'application/json',
+      },
+      data: {
+        client_id: config.GITHUB_CLIENT_ID,
+        client_secret: config.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: config.GITHUB_REDIRECT_URI,
+      },
+    })
+
+    const { access_token } = data
+
+    const { data: userProfile } = await axios({
+      url: 'https://api.github.com/user',
+      method: 'get',
+      headers: {
+        Authorization: `token ${access_token}`,
+      },
+    })
+
+    const { data: userEmail } = await axios({
+      url: 'https://api.github.com/user/emails',
+      method: 'get',
+      headers: {
+        Authorization: `token ${access_token}`,
+      },
+    })
+
+
+    const primaryEmail = userEmail.find(email => email.primary).email
+
+    const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(generatedPassword, saltRounds)
+    let user = await User.findOne({ email: primaryEmail, provider: 'github' })
+    if (!user) {
+      user = await User.create({
+        email: primaryEmail,
+        username: userProfile.login,
+        provider: 'github',
+        passwordHash,
+        oauth: true,
+      })
+    }
+    const userForToken = {
+      email: user.email,
+      id: user._id,
+    }
+
+    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
+    response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
+    response.status(200).json(user)
+
+  } catch (error) {
+    console.error('Error during GitHub OAuth callback:', error)
+    return next(createError('Error during GitHub OAuth callback', 500))
+  }
+}
+
 module.exports = {
   signup,
   signin,
   google,
   googleOauth,
+  github,
+  githubOauth,
 }
