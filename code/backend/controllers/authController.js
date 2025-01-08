@@ -257,15 +257,15 @@ const github = async (request, response, next) => {
 
 const me = async (request, response, next) => {
   try {
-    const user = request.user;
+    const user = request.user
     if (!user) {
-      return next(createError('Unauthorised', 401)); // User not authenticated
+      return next(createError('Unauthorised', 401)) // User not authenticated
     }
-    response.json(user);
+    response.json(user)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 module.exports = {
   signup,
