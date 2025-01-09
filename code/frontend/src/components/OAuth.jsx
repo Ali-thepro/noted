@@ -2,17 +2,33 @@ import { Button } from 'flowbite-react'
 import { AiFillGoogleCircle } from 'react-icons/ai'
 import { FaGithub } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
+import { useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { googleLogin, githubLogin } from '../redux/reducers/authReducer'
 
 const OAuth = () => {
+  const location = useLocation()
   const dispatch = useDispatch()
+  const [mode, setMode] = useState(null)
+  const [redirect, setRedirect] = useState(null)
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const mode = searchParams.get('mode')
+    const redirect = searchParams.get('redirect')
+    if (mode === 'cli' && redirect) {
+      setMode(mode)
+      setRedirect(redirect)
+    }
+
+  }, [location])
 
   const handleGoogleAuth = () => {
-    dispatch(googleLogin())
+    dispatch(googleLogin(mode, redirect))
   }
 
   const handleGitHubAuth = () => {
-    dispatch(githubLogin())
+    dispatch(githubLogin(mode, redirect))
   }
 
   return (

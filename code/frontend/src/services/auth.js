@@ -17,12 +17,20 @@ export const signin = async (credentials, mode, redirect) => {
   return response.data
 }
 
-export const googleAuth = () => {
-  window.location.href = `${BASE_URL}/google`
+export const googleAuth = (mode, redirect) => {
+  let url = `${BASE_URL}/google`
+  if (mode && redirect) {
+    url += `?mode=${mode}&redirect=${redirect}`
+  }
+  window.location.href = url
 }
 
-export const githubAuth = () => {
-  window.location.href = `${BASE_URL}/github`
+export const githubAuth = (mode, redirect) => {
+  let url = `${BASE_URL}/github`
+  if (mode && redirect) {
+    url += `?mode=${mode}&redirect=${redirect}`
+  }
+  window.location.href = url
 }
 
 export const me = async () => {

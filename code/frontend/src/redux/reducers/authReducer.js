@@ -68,10 +68,10 @@ export const signOutUser = () => {
   }
 }
 
-export const googleLogin = () => {
+export const googleLogin = (mode, redirect) => {
   return async (dispatch) => {
     try {
-      googleAuth()
+      googleAuth(mode, redirect)
       return true
     } catch (error) {
       dispatch(setNotification(error.message, 'failure'))
@@ -81,10 +81,10 @@ export const googleLogin = () => {
   }
 }
 
-export const githubLogin = () => {
+export const githubLogin = (mode, redirect) => {
   return async (dispatch) => {
     try {
-      githubAuth()
+      githubAuth(mode, redirect)
       return true
     } catch (error) {
       dispatch(setNotification(error.message, 'failure'))
