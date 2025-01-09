@@ -161,7 +161,7 @@ const google = async (request, response, next) => {
 
     const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
     response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
-    response.status(200).json(user)
+    response.redirect(config.UI_URI)
 
   } catch (error) {
     console.error('Error during Google OAuth callback:', error)
@@ -247,7 +247,7 @@ const github = async (request, response, next) => {
 
     const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
     response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
-    response.status(200).json(user)
+    response.redirect(config.UI_URI)
 
   } catch (error) {
     console.error('Error during GitHub OAuth callback:', error)
