@@ -1,6 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Label, TextInput, Button, Spinner } from 'flowbite-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { login } from '../redux/reducers/authReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import Notification from '../components/Notification'
@@ -10,9 +10,32 @@ import OAuth  from '../components/OAuth'
 const SignIn = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' })
   const loading = useSelector(state => state.auth.loading)
+  const user = useSelector(state => state.auth.user)
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [cliMode, setCliMode] = useState(false)
+  const [mode, setMode] = useState(null)
+  const [redirect, setRedirect] = useState(null)
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const mode = searchParams.get('mode')
+    const redirect = searchParams.get('redirect')
+    let tmpCliMode = false
+
+    if (mode) setMode(mode)
+    if (redirect) setRedirect(redirect)
+    if (mode === 'cli' && redirect) {
+      setCliMode(true)
+      tmpCliMode = true
+    }
+
+    if (!tmpCliMode && user) {
+      navigate('/')
+    }
+
+  }, [location, user, navigate])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value.trim() })
@@ -25,12 +48,15 @@ const SignIn = () => {
       return
     }
 
-    const success = await dispatch(login({ email: formData.email, password: formData.password }))
-    if (success) {
+    const result = await dispatch(login({ email: formData.email, password: formData.password }, mode, redirect))
+    if (result.success && !cliMode) {
       navigate('/')
+    } else if (result.success && cliMode && result.redirectUrl) {
+      dispatch(setNotification('Redirecting...', 'success'))
+      window.location.replace(result.redirectUrl)
+      return
     }
   }
-
 
   return (
     <div className="min-h-screen mt-20">
