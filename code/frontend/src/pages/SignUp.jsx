@@ -5,6 +5,7 @@ import { signup } from '../services/auth'
 import { setNotification } from '../redux/reducers/notificationReducer'
 import { useDispatch } from 'react-redux'
 import Notification from '../components/Notification'
+import OAuth  from '../components/OAuth'
 
 
 const SignUp = () => {
@@ -103,6 +104,7 @@ const SignUp = () => {
                 <span>Sign up</span>
               )}
             </Button>
+            <OAuth />
           </form>
           <div className="flex gap-2 text-sm mt-5">
             <span>Already have an account?</span>

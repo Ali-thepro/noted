@@ -5,6 +5,7 @@ import { login } from '../redux/reducers/authReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import Notification from '../components/Notification'
 import { setNotification } from '../redux/reducers/notificationReducer'
+import OAuth  from '../components/OAuth'
 
 const SignIn = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' })
@@ -76,6 +77,7 @@ const SignIn = () => {
                 <span>Sign in</span>
               )}
             </Button>
+            <OAuth />
           </form>
           <div className="flex gap-2 text-sm mt-5">
             <span>Don&apos;t have an account?</span>
