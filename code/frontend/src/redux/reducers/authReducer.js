@@ -24,15 +24,22 @@ const authSlice = createSlice({
     },
     signOut() {
       return { user: null, loading: false }
-    }
+    },
+    clearLoading(state) {
+      return { ...state, loading: false }
+    },
   }
 })
 
-export const login = (credentials) => {
+export const login = (credentials, mode, redirect) => {
   return async dispatch => {
     dispatch(initial())
     try {
-      const response = await signin(credentials)
+      const response = await signin(credentials, mode, redirect)
+      if (mode === 'cli' && response.redirectUrl) {
+        dispatch(clearLoading())
+        return { success: true, redirectUrl: response.redirectUrl }
+      }
       dispatch(setUser(response))
       toast.success('Logged in')
       return { success: true }
@@ -61,10 +68,10 @@ export const signOutUser = () => {
   }
 }
 
-export const googleLogin = () => {
+export const googleLogin = (mode, redirect) => {
   return async (dispatch) => {
     try {
-      googleAuth()
+      googleAuth(mode, redirect)
       return true
     } catch (error) {
       dispatch(setNotification(error.message, 'failure'))
@@ -74,10 +81,10 @@ export const googleLogin = () => {
   }
 }
 
-export const githubLogin = () => {
+export const githubLogin = (mode, redirect) => {
   return async (dispatch) => {
     try {
-      githubAuth()
+      githubAuth(mode, redirect)
       return true
     } catch (error) {
       dispatch(setNotification(error.message, 'failure'))
@@ -87,5 +94,5 @@ export const githubLogin = () => {
   }
 }
 
-export const { setUser, initial, setError, signOut } = authSlice.actions
+export const { setUser, initial, setError, signOut, clearLoading } = authSlice.actions
 export default authSlice.reducer

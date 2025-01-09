@@ -1,9 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Label, TextInput, Button, Spinner } from 'flowbite-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signup } from '../services/auth'
 import { setNotification } from '../redux/reducers/notificationReducer'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Notification from '../components/Notification'
 import OAuth  from '../components/OAuth'
 
@@ -13,6 +13,30 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
+  const user = useSelector(state => state.auth.user)
+  const [cliMode, setCliMode] = useState(false)
+  const [mode, setMode] = useState(null)
+  const [redirect, setRedirect] = useState(null)
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const mode = searchParams.get('mode')
+    const redirect = searchParams.get('redirect')
+    let tmpCliMode = false
+
+    if (mode) setMode(mode)
+    if (redirect) setRedirect(redirect)
+    if (mode === 'cli' && redirect) {
+      setCliMode(true)
+      tmpCliMode = true
+    }
+
+    if (!tmpCliMode && user) {
+      navigate('/')
+    }
+
+  }, [location, user, navigate])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value.trim() })
@@ -30,6 +54,9 @@ const SignUp = () => {
       const response = await signup(formData)
       if (response.status === 201) {
         setLoading(false)
+        if (cliMode) {
+          navigate(`/signin?mode=${mode}&redirect=${redirect}`)
+        }
         navigate('/signin')
       }
       setFormData({ username: '', email: '', password: '', confirmPassword: '' })
@@ -108,9 +135,17 @@ const SignUp = () => {
           </form>
           <div className="flex gap-2 text-sm mt-5">
             <span>Already have an account?</span>
-            <Link to="/signin" className="text-blue-500">
-              Sign in
-            </Link>
+            {
+              cliMode ? (
+                <Link to={`/signin?mode=${mode}&redirect=${redirect}`} className="text-blue-500">
+                  Sign in
+                </Link>
+              ) : (
+                <Link to="/signin" className="text-blue-500">
+                  Sign in
+                </Link>
+              )
+            }
           </div>
           <Notification />
         </div>
