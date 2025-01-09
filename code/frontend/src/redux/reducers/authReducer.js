@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
-import { signin } from '../../services/auth'
+import { signin, googleAuth, githubAuth } from '../../services/auth'
 import { toast } from 'react-toastify'
 import { signOutUserFromDB } from '../../services/user'
+
 
 const initialState = {
   user: null,
@@ -54,6 +55,32 @@ export const signOutUser = () => {
       return true
     } catch (error) {
       dispatch(setNotification(error.response.data.error, 'failure'))
+      dispatch(setError())
+      return false
+    }
+  }
+}
+
+export const googleLogin = () => {
+  return async (dispatch) => {
+    try {
+      googleAuth()
+      return true
+    } catch (error) {
+      dispatch(setNotification(error.message, 'failure'))
+      dispatch(setError())
+      return false
+    }
+  }
+}
+
+export const githubLogin = () => {
+  return async (dispatch) => {
+    try {
+      githubAuth()
+      return true
+    } catch (error) {
+      dispatch(setNotification(error.message, 'failure'))
       dispatch(setError())
       return false
     }

@@ -9,3 +9,12 @@ export const signin = async (credentials) => {
   const response = await axios.post(`${BASE_URL}/signin`, credentials)
   return response.data
 }
+
+
+export const googleAuth = () => {
+  window.location.href = '/api/auth/google'
+}
+
+export const githubAuth = () => {
+  window.location.href = '/api/auth/github'
+}
