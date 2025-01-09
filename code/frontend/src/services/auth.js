@@ -12,9 +12,14 @@ export const signin = async (credentials) => {
 
 
 export const googleAuth = () => {
-  window.location.href = '/api/auth/google'
+  window.location.href = `${BASE_URL}/google`
 }
 
 export const githubAuth = () => {
-  window.location.href = '/api/auth/github'
+  window.location.href = `${BASE_URL}/github`
+}
+
+export const me = async () => {
+  const response = await axios.get(`${BASE_URL}/me`)
+  return response.data
 }
