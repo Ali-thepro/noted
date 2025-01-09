@@ -152,7 +152,6 @@ const google = async (request, response, next) => {
         code,
       },
     })
-    
     const { id_token, access_token } = data
 
     const { data: userProfile } = await axios({
