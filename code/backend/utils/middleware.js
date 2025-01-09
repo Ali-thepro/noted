@@ -37,7 +37,7 @@ const verifyUser = async (request, response, next) => {
   try {
     const token = request.cookies.token
     if (!token) {
-      return next(createError('Unauthorised - No token', 401))
+      return next(createError('Unauthorised - No token, please re-authenticate', 401))
     }
 
     const decodedToken = jwt.verify(token, config.SECRET)

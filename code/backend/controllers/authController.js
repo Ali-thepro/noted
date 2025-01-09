@@ -77,12 +77,13 @@ const signin = async (request, response, next) => {
     id: user._id,
   }
 
-  const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
   if ( mode && redirect && mode === 'cli') {
+    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '30d' })
     return response.status(200).json({
       redirectUrl: `${redirect}?token=${token}`
     })
   } else {
+    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
     response
       .status(200)
       .cookie('token', token, {
@@ -183,11 +184,12 @@ const google = async (request, response, next) => {
       id: user._id,
     }
 
-    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-
+    
     if (mode === 'cli') {
+      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '10d' })
       response.redirect(`${redirect}?token=${token}`)
     } else {
+      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
       response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
       response.redirect(`${config.UI_URI}/oauth/callback`)
     }
@@ -290,11 +292,12 @@ const github = async (request, response, next) => {
       id: user._id,
     }
 
-    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-
+    
     if (mode === 'cli') {
+      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '10d' })
       return response.redirect(`${redirect}?token=${token}`)
     } else {
+      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
       response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
       response.redirect(`${config.UI_URI}/oauth/callback`)
     }
