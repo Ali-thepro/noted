@@ -135,9 +135,17 @@ const SignUp = () => {
           </form>
           <div className="flex gap-2 text-sm mt-5">
             <span>Already have an account?</span>
-            <Link to="/signin" className="text-blue-500">
-              Sign in
-            </Link>
+            {
+              cliMode ? (
+                <Link to={`/signin?mode=${mode}&redirect=${redirect}`} className="text-blue-500">
+                  Sign in
+                </Link>
+              ) : (
+                <Link to="/signin" className="text-blue-500">
+                  Sign in
+                </Link>
+              )
+            }
           </div>
           <Notification />
         </div>
