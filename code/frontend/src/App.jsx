@@ -8,10 +8,9 @@ import Header from './components/Header'
 import About from './pages/About'
 import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
-
+import OAuthCallback from './pages/OAuthCallback'
 
 const App = () => {
-
 
   return (
     <Router>
@@ -29,6 +28,7 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
       </Routes>
     </Router>
   )
