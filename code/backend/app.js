@@ -1,17 +1,22 @@
-const express = require('express');
-require('express-async-errors');
-const app = express();
-const cors = require('cors');
-const mongoose = require('mongoose');
-const morgan = require('morgan');
-const config = require('./utils/config');
-const logger = require('./utils/logger');
+const express = require('express')
+require('express-async-errors')
+const app = express()
+const cors = require('cors')
+const mongoose = require('mongoose')
+const morgan = require('morgan')
+const cookieParser = require('cookie-parser')
+const config = require('./utils/config')
+const logger = require('./utils/logger')
+const middleware = require('./utils/middleware')
+const authRouter = require('./routes/authRouter')
+const userRouter = require('./routes/userRouter')
+const imageRouter = require('./routes/imageRouter')
 
 
 mongoose.set('strictQuery', false)
 
 mongoose.connect(config.MONGODB_URI)
-  .then(request => {
+  .then(() => {
     logger.info('connected to MongoDB')
   })
   .catch(error => {
@@ -25,10 +30,19 @@ app.use(cors({
   credentials: true,
   referrerPolicy: 'no-referrer-when-downgrade',
   allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
 }))
 app.use(express.json())
+app.use(cookieParser())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
+app.use('/api/auth', authRouter)
+app.use('/api/user', userRouter)
+app.use('/api/image', imageRouter)
 
-module.exports = app;
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
+app.use(middleware.customErrorHandler)
 
+
+module.exports = app
