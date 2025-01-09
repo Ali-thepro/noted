@@ -184,7 +184,7 @@ const google = async (request, response, next) => {
       id: user._id,
     }
 
-    
+
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '10d' })
       response.redirect(`${redirect}?token=${token}`)
@@ -292,7 +292,7 @@ const github = async (request, response, next) => {
       id: user._id,
     }
 
-    
+
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '10d' })
       return response.redirect(`${redirect}?token=${token}`)
