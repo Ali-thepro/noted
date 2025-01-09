@@ -58,6 +58,8 @@ const signup = async (request, response, next) => {
 
 const signin = async (request, response, next) => {
   const { email, password } = request.body
+  const mode = request.query.mode
+  const redirect = request.query.redirect
 
   if (!email || !password) {
     return next(createError('Email and password are required', 400))
@@ -76,18 +78,23 @@ const signin = async (request, response, next) => {
   }
 
   const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-
-  response
-    .status(200)
-    .cookie('token', token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
+  if ( mode && redirect && mode === 'cli') {
+    return response.status(200).json({
+      redirectUrl: `${redirect}?token=${token}`
     })
-    .json(user)
+  } else {
+    response
+      .status(200)
+      .cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+      })
+      .json(user)
+  }
 }
 
-function getGoogleAuthURL() {
+function getGoogleAuthURL(mode, redirect) {
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
   const options = {
     redirect_uri: config.GOOGLE_REDIRECT_URI,
@@ -95,6 +102,10 @@ function getGoogleAuthURL() {
     access_type: 'offline',
     response_type: 'code',
     prompt: 'consent',
+    state: JSON.stringify({
+      mode,
+      redirect,
+    }),
     scope: [
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
@@ -108,13 +119,26 @@ function getGoogleAuthURL() {
 }
 
 const googleOauth = (request, response) => {
-  const googleAuthURL = getGoogleAuthURL()
+  const mode = request.query.mode
+  const redirect = request.query.redirect
+
+  const googleAuthURL = getGoogleAuthURL(mode, redirect)
   response.redirect(googleAuthURL)
 }
 
 
 const google = async (request, response, next) => {
   const code = request.query.code
+  const stateParam = request.query.state
+
+  let mode
+  let redirect
+
+  if (stateParam) {
+    const state = JSON.parse(stateParam)
+    mode = state.mode
+    redirect = state.redirect
+  }
 
   try {
     const { data } = await axios({
@@ -160,8 +184,13 @@ const google = async (request, response, next) => {
     }
 
     const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-    response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
-    response.redirect(config.UI_URI)
+
+    if (mode === 'cli') {
+      response.redirect(`${redirect}?token=${token}`)
+    } else {
+      response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
+      response.redirect(`${config.UI_URI}/oauth/callback`)
+    }
 
   } catch (error) {
     console.error('Error during Google OAuth callback:', error)
@@ -170,13 +199,17 @@ const google = async (request, response, next) => {
 }
 
 
-function getGitHubAuthURL() {
+function getGitHubAuthURL(mode,redirect) {
   const rootUrl = 'https://github.com/login/oauth/authorize'
   const options = {
     client_id: config.GITHUB_CLIENT_ID,
     redirect_uri: config.GITHUB_REDIRECT_URI,
     scope: 'user:email',
     allow_signup: 'true',
+    state: JSON.stringify({
+      mode,
+      redirect,
+    }),
   }
   const queryOptions = new URLSearchParams(options).toString()
 
@@ -184,12 +217,24 @@ function getGitHubAuthURL() {
 }
 
 const githubOauth = (request, response) => {
-  const githubAuthURL = getGitHubAuthURL()
+  const mode = request.query.mode
+  const redirect = request.query.redirect
+  const githubAuthURL = getGitHubAuthURL(mode, redirect)
   response.redirect(githubAuthURL)
 }
 
 const github = async (request, response, next) => {
   const code = request.query.code
+  const stateParam = request.query.state
+
+  let mode
+  let redirect
+
+  if (stateParam) {
+    const state = JSON.parse(stateParam)
+    mode = state.mode
+    redirect = state.redirect
+  }
 
   try {
     const { data } = await axios({
@@ -246,8 +291,13 @@ const github = async (request, response, next) => {
     }
 
     const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-    response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
-    response.redirect(config.UI_URI)
+
+    if (mode === 'cli') {
+      return response.redirect(`${redirect}?token=${token}`)
+    } else {
+      response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
+      response.redirect(`${config.UI_URI}/oauth/callback`)
+    }
 
   } catch (error) {
     console.error('Error during GitHub OAuth callback:', error)
