@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Home from './pages/Home'
@@ -11,6 +12,11 @@ import SignIn from './pages/SignIn'
 import OAuthCallback from './pages/OAuthCallback'
 
 const App = () => {
+  const theme = useSelector(state => state.theme)
+  const darkModeToastStyle = {
+    backgroundColor: '#2d3748',
+    color: '#a0aec0',
+  }
 
   return (
     <Router>
@@ -20,6 +26,7 @@ const App = () => {
         position="top-right"
         className="toast-position"
         pauseOnFocusLoss={false}
+        toastStyle={theme === 'dark' ? darkModeToastStyle : {}}
         draggable={true}
       />
       <Routes>
