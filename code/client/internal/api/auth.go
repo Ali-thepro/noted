@@ -8,6 +8,15 @@ import (
 	"noted/internal/token"
 )
 
+//https://stackoverflow.com/questions/17156371/how-to-get-json-response-from-http-get
+type UserResponse struct {
+	Username string `json:"usernmae"`
+	Email    string `json:"email"`
+	OAuth    bool `json:"oauth"`
+	Provider string `json:"provider"`
+	Id 	     string `json:"id"`
+}
+
 func GetMe() error {
 	cfg := config.NewConfig()
 	url := fmt.Sprintf("%s/auth/me", cfg.APIURL)
@@ -31,15 +40,17 @@ func GetMe() error {
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	var user UserResponse
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
 		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	fmt.Printf("User details:\n")
-	for k, v := range result {
-		fmt.Printf("  %s: %v\n", k, v)
-	}
+		fmt.Printf("  Username: %s\n", user.Username)
+		fmt.Printf("  Email: %s\n", user.Email)
+		fmt.Printf("  OAuth: %t\n", user.OAuth)
+		fmt.Printf("  Provider: %s\n", user.Provider)
+		fmt.Printf("  Id: %s\n", user.Id)
 
 	return nil
 }
