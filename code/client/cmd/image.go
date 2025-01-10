@@ -25,14 +25,19 @@ var uploadCmd = &cobra.Command{
 			return err
 		}
 
-		url, err := api.UploadImage(args[0])
+		client, err := api.NewClient()
+		if err != nil {
+			return fmt.Errorf("failed to create API client: %w", err)
+		}
+		result, err := client.UploadImage(args[0])
 		if err != nil {
 			return err
 		}
 
+		fmt.Printf("Image uploaded successfully - please use this URL in your markdown note: %s\n", result.URL)
 		if copyFlag {
 			clipboardManager := clipboard.NewManager(auth.IsWSL())
-			if err := clipboardManager.CopyToClipboard(url); err != nil {
+			if err := clipboardManager.CopyToClipboard(result.URL); err != nil {
 				return fmt.Errorf("failed to copy URL to clipboard: %w", err)
 			}
 			fmt.Println("URL copied to clipboard!")

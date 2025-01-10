@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/auth"
+	"fmt"
 )
 
 var authCmd = &cobra.Command{
@@ -35,7 +36,24 @@ var meCmd = &cobra.Command{
 	Short: "Get current user details",
 	Long:  `Fetch and display the current authenticated user's details`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return api.GetMe()
+		client, err := api.NewClient()
+		if err != nil {
+			return err
+		}
+	
+		user, err := client.GetMe()
+		if err != nil {
+			return err
+		}
+	
+		fmt.Printf("User details:\n")
+		fmt.Printf("  Username: %s\n", user.Username)
+		fmt.Printf("  Email: %s\n", user.Email)
+		fmt.Printf("  OAuth: %t\n", user.OAuth)
+		fmt.Printf("  Provider: %s\n", user.Provider)
+		fmt.Printf("  ID: %s\n", user.ID)
+	
+		return nil
 	},
 }
 
