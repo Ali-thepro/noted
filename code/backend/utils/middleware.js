@@ -33,11 +33,24 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    request.token = authorization.replace('Bearer ', '')
+  } else if (request.cookies.token) {
+    request.token = request.cookies.token
+  } else {
+    request.token = null
+  }
+  next()
+}
+
 const verifyUser = async (request, response, next) => {
   try {
-    const token = request.cookies.token
+    let token = request.token
+
     if (!token) {
-      return next(createError('Unauthorised - No token, please re-authenticate', 401))
+      return next(createError('Unauthorised - No toke, please re-authenticate', 401))
     }
 
     const decodedToken = jwt.verify(token, config.SECRET)
@@ -62,5 +75,6 @@ module.exports = {
   errorHandler,
   customErrorHandler,
   unknownEndpoint,
-  verifyUser
+  verifyUser,
+  tokenExtractor
 }
