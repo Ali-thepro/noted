@@ -18,92 +18,85 @@ type ImageResponse struct {
 	URL string `json:"imageUrl"`
 }
 
+func UploadImage(filePath string) (string, error) {
+    cfg := config.NewConfig()
+    url := fmt.Sprintf("%s/image/upload", cfg.APIURL)
 
-func UploadImage(filePath string) error {
-	cfg := config.NewConfig()
-	url := fmt.Sprintf("%s/image/upload", cfg.APIURL)
+    tokenStr, err := token.Load()
+    if err != nil {
+        return "", fmt.Errorf("failed to load token - please login again: %w", err)
+    }
 
-	tokenStr, err := token.Load()
-	if err != nil {
-		return fmt.Errorf("failed to load token - please login again: %w", err)
-	}
+    if err := validateFile(filePath); err != nil {
+        return "", fmt.Errorf("please ensure you only upload images, file validation failed: %w", err)
+    }
 
-	if err := validateFile(filePath); err != nil {
-		return fmt.Errorf("please ensure you only upload images, file validation failed: %w", err)
-	}
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
+    file, err := os.Open(filePath)
+    if err != nil {
+        return "", fmt.Errorf("failed to open file: %w", err)
+    }
+    defer file.Close()
 
 	// https://sebastianroy.de/sending-images-in-post-request-as-multipart-form-from-go-to-microservice/
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
+    body := &bytes.Buffer{}
+    writer := multipart.NewWriter(body)
+    part, err := writer.CreateFormFile("image", filepath.Base(filePath))
+    if err != nil {
+        return "", fmt.Errorf("failed to create form file: %w", err)
+    }
 
-	part, err := writer.CreateFormFile("image", filepath.Base(filePath))
-	if err != nil {
-		return fmt.Errorf("failed to create form file: %w", err)
-	}
+    if _, err := io.Copy(part, file); err != nil {
+        return "", fmt.Errorf("failed to copy file to request: %w", err)
+    }
+    if err := writer.Close(); err != nil {
+        return "", fmt.Errorf("failed to close mulitpart writer: %w", err)
+    }
 
-	if _, err := io.Copy(part, file); err != nil {
-		return fmt.Errorf("failed to copy file to request: %w", err)
-	}
+    req, err := http.NewRequest("POST", url, body)
+    if err != nil {
+        return "", fmt.Errorf("failed to create request: %w", err)
+    }
+    req.Header.Set("Content-Type", writer.FormDataContentType())
+    req.Header.Set("Authorization", "Bearer "+tokenStr)
 
-	if err := writer.Close(); err != nil {
-		return fmt.Errorf("failed to close mulitpart writer: %w", err)
-	}
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        return "", fmt.Errorf("failed to make request: %w", err)
+    }
+    defer resp.Body.Close()
 
-	req, err := http.NewRequest("POST", url, body)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
+    bodyResp, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return "", fmt.Errorf("failed to read response body: %w", err)
+    }
 
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", "Bearer "+tokenStr)
+    switch resp.StatusCode {
+    case http.StatusOK:
+        var image ImageResponse
+        if err := json.Unmarshal(bodyResp, &image); err != nil {
+            return "", fmt.Errorf("failed to decode response body: %w", err)
+        }
+        fmt.Printf("Image uploaded successfully - please use this URL in your markdown note: %s\n", image.URL)
+        return image.URL, nil
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
+    case http.StatusUnauthorized:
+        var errResponse ErrorResponse
+        if err := json.Unmarshal(bodyResp, &errResponse); err != nil {
+            return "", fmt.Errorf("failed to parse error response: %w", err)
+        }
+        fmt.Println("Error:", errResponse.Error)
+        fmt.Println("Your session has expired. Please login again.")
+        os.Exit(1)
 
-	bodyResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		var image ImageResponse
-		if err := json.Unmarshal(bodyResp, &image); err != nil {
-			return fmt.Errorf("failed to decode response body: %w", err)
-		}
-		fmt.Printf("Image uploaded successfully - please use this URL in your markdown note: %s\n", image.URL)
-
-	case http.StatusUnauthorized:
-		var errResponse ErrorResponse
-		if err := json.Unmarshal(bodyResp, &errResponse); err != nil {
-			return fmt.Errorf("failed to parse error response: %w", err)
-		}
-
-		fmt.Println("Error:", errResponse.Error)
-		fmt.Println("Your session has expired. Please login again.")
-
-		os.Exit(1)
-
-	default:
-		var errorResp ErrorResponse
-		if err := json.Unmarshal(bodyResp, &errorResp); err != nil {
-			return fmt.Errorf("unexpected status code %d and failed to parse error message: %w", resp.StatusCode, err)
-		}
-		return fmt.Errorf("server returned status %d: %s", resp.StatusCode, errorResp.Error)
-
-	}
-
-	return nil
+    default:
+        var errorResp ErrorResponse
+        if err := json.Unmarshal(bodyResp, &errorResp); err != nil {
+            return "", fmt.Errorf("unexpected status code %d and failed to parse error message: %w", resp.StatusCode, err)
+        }
+        return "", fmt.Errorf("server returned status %d: %s", resp.StatusCode, errorResp.Error)
+    }
+    return "", nil
 }
 
 func validateFile(filePath string) error {
