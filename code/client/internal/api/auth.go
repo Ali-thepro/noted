@@ -3,10 +3,25 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"net/http"
 	"noted/internal/config"
 	"noted/internal/token"
 )
+
+// https://stackoverflow.com/questions/17156371/how-to-get-json-response-from-http-get
+type UserResponse struct {
+	Username string `json:"usernmae"`
+	Email    string `json:"email"`
+	OAuth    bool   `json:"oauth"`
+	Provider string `json:"provider"`
+	Id       string `json:"id"`
+}
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
 
 func GetMe() error {
 	cfg := config.NewConfig()
@@ -31,14 +46,43 @@ func GetMe() error {
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
+	// https://www.golangprograms.com/how-do-you-handle-http-errors-in-go.html
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	fmt.Printf("User details:\n")
-	for k, v := range result {
-		fmt.Printf("  %s: %v\n", k, v)
+	switch resp.StatusCode {
+	case http.StatusOK:
+		var user UserResponse
+		if err := json.Unmarshal(body, &user); err != nil {
+			return fmt.Errorf("failed to decode response body: %w", err)
+		}
+
+		fmt.Printf("User details:\n")
+		fmt.Printf("  Username: %s\n", user.Username)
+		fmt.Printf("  Email: %s\n", user.Email)
+		fmt.Printf("  OAuth: %t\n", user.OAuth)
+		fmt.Printf("  Provider: %s\n", user.Provider)
+		fmt.Printf("  Id: %s\n", user.Id)
+
+	case http.StatusUnauthorized:
+		var errResponse ErrorResponse
+		if err := json.Unmarshal(body, &errResponse); err != nil {
+			return fmt.Errorf("failed to parse error response: %w", err)
+		}
+
+		fmt.Println("Error:", errResponse.Error)
+		fmt.Println("Your session has expired. Please login again.")
+
+		os.Exit(1)
+	
+	default:
+        var errorResp ErrorResponse
+        if err := json.Unmarshal(body, &errorResp); err != nil {
+            return fmt.Errorf("unexpected status code %d and failed to parse error message: %w", resp.StatusCode, err)
+        }
+        return fmt.Errorf("server returned status %d: %s", resp.StatusCode, errorResp.Error)
 	}
 
 	return nil
