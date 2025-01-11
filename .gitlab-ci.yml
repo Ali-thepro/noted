@@ -34,9 +34,10 @@ variables:
   cache:
     key: ${CI_COMMIT_REF_SLUG}-go
     paths:
-      - vendor/go/pkg/mod/
-      - vendor/cache
-      - vendor/linter-cache
+      - go/pkg/mod/
+      - go/bin/
+      - go/cache
+      - go/linter-cache
     policy: pull-push
   before_script:
     - mkdir -p "${GOPATH}/bin"
