@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -12,30 +12,30 @@ import (
 )
 
 type ImageResponse struct {
-    URL string `json:"imageUrl"`
+	URL string `json:"imageUrl"`
 }
 
 func (c *Client) UploadImage(filePath string) (*ImageResponse, error) {
-    if err := validateFile(filePath); err != nil {
-        return nil, fmt.Errorf("file validation failed: %w", err)
-    }
+	if err := validateFile(filePath); err != nil {
+		return nil, fmt.Errorf("file validation failed: %w", err)
+	}
 
-    body, contentType, err := c.createMultipartForm(filePath)
-    if err != nil {
-        return nil, err
-    }
+	body, contentType, err := c.createMultipartForm(filePath)
+	if err != nil {
+		return nil, err
+	}
 
-    resp, err := c.doMultipartRequest("/image/upload", body, contentType)
-    if err != nil {
-        return nil, err
-    }
+	resp, err := c.doMultipartRequest("/image/upload", body, contentType)
+	if err != nil {
+		return nil, err
+	}
 
-    var result ImageResponse
-    if err := c.handleResponse(resp, &result); err != nil {
-        return nil, err
-    }
+	var result ImageResponse
+	if err := c.handleResponse(resp, &result); err != nil {
+		return nil, err
+	}
 
-    return &result, nil
+	return &result, nil
 }
 func validateFile(filePath string) error {
 	info, err := os.Stat(filePath)
@@ -62,7 +62,7 @@ func validateFile(filePath string) error {
 	if _, err := file.Read(buf); err != nil {
 		return fmt.Errorf("failed to read file for MIME check: %w", err)
 	}
-	
+
 	// https://www.codecademy.com/resources/docs/go/strings/hasprefix
 	contentType := http.DetectContentType(buf)
 	if !strings.HasPrefix(contentType, "image/") {
@@ -73,28 +73,28 @@ func validateFile(filePath string) error {
 }
 
 func (c *Client) createMultipartForm(filePath string) (*bytes.Buffer, string, error) {
-    // https://sebastianroy.de/sending-images-in-post-request-as-multipart-form-from-go-to-microservice/
-    body := &bytes.Buffer{}
-    writer := multipart.NewWriter(body)
+	// https://sebastianroy.de/sending-images-in-post-request-as-multipart-form-from-go-to-microservice/
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
 
-    file, err := os.Open(filePath)
-    if err != nil {
-        return nil, "", fmt.Errorf("failed to open file: %w", err)
-    }
-    defer file.Close()
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
 
-    part, err := writer.CreateFormFile("image", filepath.Base(filePath))
-    if err != nil {
-        return nil, "", fmt.Errorf("failed to create form file: %w", err)
-    }
+	part, err := writer.CreateFormFile("image", filepath.Base(filePath))
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to create form file: %w", err)
+	}
 
-    if _, err := io.Copy(part, file); err != nil {
-        return nil, "", fmt.Errorf("failed to copy file to request: %w", err)
-    }
+	if _, err := io.Copy(part, file); err != nil {
+		return nil, "", fmt.Errorf("failed to copy file to request: %w", err)
+	}
 
-    if err := writer.Close(); err != nil {
-        return nil, "", fmt.Errorf("failed to close multipart writer: %w", err)
-    }
+	if err := writer.Close(); err != nil {
+		return nil, "", fmt.Errorf("failed to close multipart writer: %w", err)
+	}
 
-    return body, writer.FormDataContentType(), nil
+	return body, writer.FormDataContentType(), nil
 }
