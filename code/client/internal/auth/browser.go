@@ -20,7 +20,7 @@ func openBrowser(loginURL string) error {
 	case "darwin":
 		cmd = exec.Command("open", loginURL)
 	case "linux":
-		if isWSL() {
+		if IsWSL() {
 			escapedURL := strings.ReplaceAll(loginURL, "&", "^&")
 			cmd = exec.Command("cmd.exe", "/c", "start", escapedURL)
 		} else {
@@ -33,7 +33,7 @@ func openBrowser(loginURL string) error {
 	return cmd.Start()
 }
 
-func isWSL() bool {
+func IsWSL() bool {
 	output, err := exec.Command("uname", "-r").Output()
 	return err == nil && strings.Contains(strings.ToLower(string(output)), "microsoft")
 }
