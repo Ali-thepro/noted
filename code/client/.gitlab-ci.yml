@@ -1,0 +1,66 @@
+image: golang:1.23.1
+
+stages:
+  - lint
+  - build
+  - test
+
+variables:
+  FF_USE_FASTZIP: "true"
+  ARTIFACT_COMPRESSION_LEVEL: fastest
+  CACHE_COMPRESSION_LEVEL: fastest
+
+cache:
+  key: gocache
+  paths:
+    - go/pkg/mod/
+    - go/bin/
+    - go/cache/
+    - go/linter-cache/
+
+variables:
+  GOCACHE: "${CI_PROJECT_DIR}/go/cache"
+  GOPATH: "${CI_PROJECT_DIR}/go"
+  GOLANGCI_LINT_CACHE: "${CI_PROJECT_DIR}/go/linter-cache"
+
+before_script:
+  - cd code/client
+  - mkdir -p "${GOPATH}/bin"
+  - mkdir -p "${GOCACHE}"
+  - go mod download
+  - go mod tidy
+
+lint:
+  stage: lint
+  rules:
+    - changes:
+      - code/client/**/*
+      - code/client/.gitlab-ci.yml
+      - .gitlab-ci.yml
+  image: golangci/golangci-lint:latest-alpine
+  script:
+    - golangci-lint run --timeout=5m
+    - go fmt ./...
+    - go vet ./...
+
+build:
+  stage: build
+  rules:
+    - changes:
+      - code/client/**/*
+      - code/client/.gitlab-ci.yml
+      - .gitlab-ci.yml
+  script: 
+    - make build
+    - test -x noted
+
+test:
+  stage: test
+  rules:
+    - changes:
+      - code/client/**/*
+      - code/client/.gitlab-ci.yml
+      - code/backend/**/*
+      - .gitlab-ci.yml
+  script:
+    - make test
