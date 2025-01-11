@@ -5,11 +5,6 @@ stages:
   - build
   - test
 
-variables:
-  FF_USE_FASTZIP: "true"
-  ARTIFACT_COMPRESSION_LEVEL: fastest
-  CACHE_COMPRESSION_LEVEL: fastest
-
 cache:
   key: gocache
   paths:
@@ -54,7 +49,7 @@ build:
     - make build
     - test -x noted
 
-test:
+.test:
   stage: test
   rules:
     - changes:

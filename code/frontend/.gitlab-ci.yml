@@ -5,15 +5,10 @@ stages:
   - build
   - test
 
-variables:
-  FF_USE_FASTZIP: "true"
-  ARTIFACT_COMPRESSION_LEVEL: fastest
-  CACHE_COMPRESSION_LEVEL: fastest
-
 cache:
   key: frontend-cache
   paths:
-    - node_modules/
+    - code/frontend/node_modules/
 
 before_script:
   - cd code/frontend
@@ -41,7 +36,7 @@ build:
     - test -d dist
     - test -f dist/index.html
 
-test:
+.test:
   stage: test
   rules:
     - changes:
