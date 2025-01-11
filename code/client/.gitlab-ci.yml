@@ -27,11 +27,6 @@ before_script:
 
 lint:
   stage: lint
-  rules:
-    - changes:
-      - code/client/**/*
-      - code/client/.gitlab-ci.yml
-      - .gitlab-ci.yml
   image: golangci/golangci-lint:latest-alpine
   script:
     - golangci-lint run --timeout=5m
@@ -40,22 +35,11 @@ lint:
 
 build:
   stage: build
-  rules:
-    - changes:
-      - code/client/**/*
-      - code/client/.gitlab-ci.yml
-      - .gitlab-ci.yml
   script: 
     - make build
     - test -x noted
 
 .test:
   stage: test
-  rules:
-    - changes:
-      - code/client/**/*
-      - code/client/.gitlab-ci.yml
-      - code/backend/**/*
-      - .gitlab-ci.yml
   script:
     - make test

@@ -16,21 +16,11 @@ before_script:
 
 lint:
   stage: lint
-  rules:
-    - changes:
-      - code/frontend/**/*
-      - code/frontend/.gitlab-ci.yml
-      - .gitlab-ci.yml
   script:
     - npm run lint
   
 build:
   stage: build
-  rules:
-    - changes:
-      - code/frontend/**/*
-      - code/frontend/.gitlab-ci.yml
-      - .gitlab-ci.yml
   script:
     - npm run build
     - test -d dist
@@ -38,11 +28,5 @@ build:
 
 .test:
   stage: test
-  rules:
-    - changes:
-      - code/frontend/**/*
-      - code/frontend/.gitlab-ci.yml
-      - code/backend/**/*
-      - .gitlab-ci.yml
   script:
     - npm run test

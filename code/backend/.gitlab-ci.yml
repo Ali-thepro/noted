@@ -16,20 +16,10 @@ before_script:
 
 lint:
   stage: lint
-  rules:
-    - changes:
-      - code/backend/**/*
-      - code/backend/.gitlab-ci.yml
-      - .gitlab-ci.yml
   script:
     - npm run lint
 
 .test:
   stage: test
-  rules:
-    - changes:
-      - code/backend/**/*
-      - code/backend/.gitlab-ci.yml
-      - .gitlab-ci.yml
   script:
     - npm run test
