@@ -14,9 +14,9 @@ cache:
     - go/linter-cache/
 
 variables:
-  GOCACHE: "${CI_PROJECT_DIR}/go/cache"
-  GOPATH: "${CI_PROJECT_DIR}/go"
-  GOLANGCI_LINT_CACHE: "${CI_PROJECT_DIR}/go/linter-cache"
+  GOCACHE: ${CI_PROJECT_DIR}/go/cache
+  GOPATH: ${CI_PROJECT_DIR}/go
+  GOLANGCI_LINT_CACHE: ${CI_PROJECT_DIR}/go/linter-cache
 
 before_script:
   - cd code/client
