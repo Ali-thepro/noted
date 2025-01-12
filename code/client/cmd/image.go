@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"noted/internal/api"
-	"github.com/spf13/cobra"
-	"noted/internal/clipboard"
-	"noted/internal/auth"
 	"fmt"
+	"github.com/spf13/cobra"
+	"noted/internal/api"
+	"noted/internal/auth"
+	"noted/internal/clipboard"
 )
 
 var imageCmd = &cobra.Command{

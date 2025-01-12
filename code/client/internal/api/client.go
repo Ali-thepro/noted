@@ -1,13 +1,13 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"noted/internal/config"
 	"noted/internal/token"
-	"bytes"
 )
 
 type Client struct {
@@ -29,7 +29,7 @@ func NewClient() (*Client, error) {
 
 func (c *Client) doRequest(method, path string, body io.Reader) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, path)
-	
+
 	// https://www.digitalocean.com/community/tutorials/how-to-make-http-requests-in-go
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
@@ -57,7 +57,7 @@ func (c *Client) doRequest(method, path string, body io.Reader) (*http.Response,
 
 func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 	defer resp.Body.Close()
-	
+
 	// https://www.golangprograms.com/how-do-you-handle-http-errors-in-go.html
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -91,25 +91,25 @@ func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 }
 
 func (c *Client) doMultipartRequest(path string, body *bytes.Buffer, contentType string) (*http.Response, error) {
-    url := fmt.Sprintf("%s%s", c.baseURL, path)
-    
-    req, err := http.NewRequest("POST", url, body)
-    if err != nil {
-        return nil, fmt.Errorf("failed to create request: %w", err)
-    }
+	url := fmt.Sprintf("%s%s", c.baseURL, path)
 
-    tokenStr, err := token.Load()
-    if err != nil {
-        return nil, fmt.Errorf("failed to load token - please login again: %w", err)
-    }
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
 
-    req.Header.Set("Authorization", "Bearer "+tokenStr)
-    req.Header.Set("Content-Type", contentType)
+	tokenStr, err := token.Load()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load token - please login again: %w", err)
+	}
 
-    resp, err := c.httpClient.Do(req)
-    if err != nil {
-        return nil, fmt.Errorf("failed to make request: %w", err)
-    }
+	req.Header.Set("Authorization", "Bearer "+tokenStr)
+	req.Header.Set("Content-Type", contentType)
 
-    return resp, nil
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to make request: %w", err)
+	}
+
+	return resp, nil
 }

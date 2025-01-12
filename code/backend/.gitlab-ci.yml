@@ -1,0 +1,25 @@
+image: node:23.6.0
+
+stages:
+  - lint
+  - test
+
+
+cache:
+  key: backend-cache
+  paths:
+    - code/backend/node_modules/
+
+before_script:
+  - cd code/backend
+  - npm install
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+
+.test:
+  stage: test
+  script:
+    - npm run test
