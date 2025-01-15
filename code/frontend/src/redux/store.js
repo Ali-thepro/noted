@@ -5,11 +5,13 @@ import storage from 'redux-persist/lib/storage'
 import notificationReducer from './reducers/notificationReducer'
 import themeReducer from './reducers/themeReducer'
 import authReducer from './reducers/authReducer'
+import noteReducer from './reducers/noteReducer'
 
 const rootReducer = combineReducers({
   notification: notificationReducer,
   theme: themeReducer,
   auth: authReducer,
+  note: noteReducer,
 })
 
 const persistConfig = {
