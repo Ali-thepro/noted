@@ -10,6 +10,8 @@ import About from './pages/About'
 import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
 import OAuthCallback from './pages/OAuthCallback'
+import DemoPage from './pages/DemoPage'
+
 
 const App = () => {
   const theme = useSelector(state => state.theme)
@@ -36,6 +38,7 @@ const App = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
+        <Route path="/demo" element={<DemoPage />} />
       </Routes>
     </Router>
   )
