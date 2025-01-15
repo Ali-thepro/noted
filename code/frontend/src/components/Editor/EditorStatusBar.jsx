@@ -2,23 +2,20 @@ import { Select } from 'flowbite-react'
 import PropTypes from 'prop-types'
 
 const EditorStatusBar = ({
-  position = { line: 1, column: 1 },
-  keymap = 'default',
-  indentWithTabs = false,
-  tabSize = 2,
-  onKeymapChange,
-  onIndentationChange
+  position,
+  config,
+  onConfigChange
 }) => {
   return (
     <div className="flex items-center justify-between px-4 py-2 text-sm border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky bottom-0">
       <div className="flex items-center space-x-4">
-        {/* Keymap selector */}
+        {/* Mapping selector */}
         <div className="flex items-center space-x-2">
-          <span className="text-gray-500">Keymap:</span>
+          <span className="text-gray-500">Mapping:</span>
           <Select
             className="ring-0 focus:ring-0"
-            value={keymap}
-            onChange={(e) => onKeymapChange(e.target.value)}
+            value={config.mapping}
+            onChange={(e) => onConfigChange({ mapping: e.target.value })}
             size="sm"
           >
             <option value="default">Default</option>
@@ -33,11 +30,8 @@ const EditorStatusBar = ({
           <span className="text-gray-500">Indent:</span>
           <Select
             className="ring-0 focus:ring-0"
-            value={indentWithTabs ? 'tabs' : 'spaces'}
-            onChange={(e) => onIndentationChange({
-              type: e.target.value,
-              size: tabSize
-            })}
+            value={config.indent}
+            onChange={(e) => onConfigChange({ indent: e.target.value })}
             size="sm"
           >
             <option value="tabs">Tabs</option>
@@ -45,16 +39,13 @@ const EditorStatusBar = ({
           </Select>
         </div>
 
-        {/* Tab size */}
+        {/* Indent size */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Size:</span>
           <Select
             className="ring-0 focus:ring-0"
-            value={tabSize}
-            onChange={(e) => onIndentationChange({
-              type: indentWithTabs ? 'tabs' : 'spaces',
-              size: Number(e.target.value)
-            })}
+            value={config.indentSize}
+            onChange={(e) => onConfigChange({ indentSize: Number(e.target.value) })}
             size="sm"
           >
             <option value="2">2</option>
@@ -73,12 +64,11 @@ const EditorStatusBar = ({
 }
 
 EditorStatusBar.propTypes = {
-  position: PropTypes.object.isRequired,
-  keymap: PropTypes.string.isRequired,
-  indentWithTabs: PropTypes.bool.isRequired,
-  tabSize: PropTypes.number.isRequired,
-  onKeymapChange: PropTypes.func.isRequired,
-  onIndentationChange: PropTypes.func.isRequired
+  position: PropTypes.shape({
+    line: PropTypes.number.isRequired,
+    column: PropTypes.number.isRequired
+  }).isRequired,
+  onConfigChange: PropTypes.func.isRequired
 }
 
 export default EditorStatusBar

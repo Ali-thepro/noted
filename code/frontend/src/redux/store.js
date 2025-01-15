@@ -6,12 +6,14 @@ import notificationReducer from './reducers/notificationReducer'
 import themeReducer from './reducers/themeReducer'
 import authReducer from './reducers/authReducer'
 import noteReducer from './reducers/noteReducer'
+import editorConfigReducer from './reducers/editorConfigReducer'
 
 const rootReducer = combineReducers({
   notification: notificationReducer,
   theme: themeReducer,
   auth: authReducer,
   note: noteReducer,
+  editorConfig: editorConfigReducer,
 })
 
 const persistConfig = {

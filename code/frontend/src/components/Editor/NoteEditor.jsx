@@ -7,12 +7,13 @@ import { vim } from '@replit/codemirror-vim'
 import { emacs } from '@replit/codemirror-emacs'
 import { vscodeKeymap } from '@replit/codemirror-vscode-keymap'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import EditorStatusBar from './EditorStatusBar'
 import { indentUnit } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
 import { keymap as keymapView } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
+import { updateConfig } from '../../redux/reducers/editorConfigReducer'
 import PropTypes from 'prop-types'
 
 import '@fontsource/fira-code/400.css'
@@ -33,14 +34,10 @@ const editorTheme = EditorView.theme({
 })
 
 const NoteEditor = ({ content, onChange }) => {
+  const dispatch = useDispatch()
   const theme = useSelector(state => state.theme)
   const [position, setPosition] = useState({ line: 1, column: 1 })
-  const [keymap, setKeymap] = useState('default')
-  const [indentSettings, setIndentSettings] = useState({
-    type: 'spaces',
-    size: 2
-  })
-
+  const config = useSelector(state => state.editorConfig)
 
   const getKeymapExtension = (type) => {
     switch (type) {
@@ -57,13 +54,17 @@ const NoteEditor = ({ content, onChange }) => {
     }
   }
 
+  const handleConfigChange = (newConfig) => {
+    dispatch(updateConfig(newConfig))
+  }
+
   const tabKeymap = keymapView.of([{
     key: 'Tab',
     run: indentWithTab
   }])
 
   const indentationExtensions = [
-    indentUnit.of(' '.repeat(indentSettings.size)),
+    indentUnit.of(' '.repeat(config.indentSize)),
     tabKeymap
   ]
 
@@ -87,7 +88,7 @@ const NoteEditor = ({ content, onChange }) => {
         extensions={[
           markdown({ base: markdownLanguage, codeLanguages: languages }),
           editorTheme,
-          getKeymapExtension(keymap),
+          getKeymapExtension(config.mapping),
           EditorView.lineWrapping,
           ...indentationExtensions
         ]}
@@ -97,11 +98,8 @@ const NoteEditor = ({ content, onChange }) => {
       />
       <EditorStatusBar
         position={position}
-        keymap={keymap}
-        indentWithTabs={indentSettings.type === 'tabs'}
-        tabSize={indentSettings.size}
-        onKeymapChange={setKeymap}
-        onIndentationChange={setIndentSettings}
+        config={config}
+        onConfigChange={handleConfigChange}
       />
     </div>
   )
