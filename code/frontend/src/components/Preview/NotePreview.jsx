@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
@@ -19,6 +20,7 @@ const md = new MarkdownIt({
 })
 
 const NotePreview = ({ content }) => {
+  const viewMode = useSelector(state => state.note.viewMode)
   const [html, setHtml] = useState('')
 
   useEffect(() => {
@@ -28,7 +30,7 @@ const NotePreview = ({ content }) => {
 
   return (
     <div
-      className="prose prose-slate dark:prose-invert max-w-none h-full overflow-auto p-4"
+      className={`${viewMode === 'preview' ? 'text-center' : ''} prose prose-slate dark:prose-invert max-w-none h-full overflow-auto p-4 `}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
