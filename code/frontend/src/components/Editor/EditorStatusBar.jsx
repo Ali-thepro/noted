@@ -9,11 +9,9 @@ const EditorStatusBar = ({
   return (
     <div className="flex items-center justify-between px-4 py-2 text-sm border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky bottom-0">
       <div className="flex items-center space-x-4">
-        {/* Mapping selector */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Mapping:</span>
           <Select
-            className="ring-0 focus:ring-0"
             value={config.mapping}
             onChange={(e) => onConfigChange({ mapping: e.target.value })}
             size="sm"
@@ -25,11 +23,9 @@ const EditorStatusBar = ({
           </Select>
         </div>
 
-        {/* Indentation type */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Indent:</span>
           <Select
-            className="ring-0 focus:ring-0"
             value={config.indent}
             onChange={(e) => onConfigChange({ indent: e.target.value })}
             size="sm"
@@ -39,11 +35,9 @@ const EditorStatusBar = ({
           </Select>
         </div>
 
-        {/* Indent size */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Size:</span>
           <Select
-            className="ring-0 focus:ring-0"
             value={config.indentSize}
             onChange={(e) => onConfigChange({ indentSize: Number(e.target.value) })}
             size="sm"
@@ -67,6 +61,11 @@ EditorStatusBar.propTypes = {
   position: PropTypes.shape({
     line: PropTypes.number.isRequired,
     column: PropTypes.number.isRequired
+  }).isRequired,
+  config: PropTypes.shape({
+    mapping: PropTypes.string.isRequired,
+    indent: PropTypes.string.isRequired,
+    indentSize: PropTypes.number.isRequired
   }).isRequired,
   onConfigChange: PropTypes.func.isRequired
 }
