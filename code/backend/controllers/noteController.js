@@ -7,11 +7,11 @@ const getNotes = async (request, response, next) => {
 
   try {
     let query = { user: user.id }
-    
+
     if (tag) {
       query.tags = tag
     }
-    
+
     if (search) {
       query.$text = { $search: search }
     }
