@@ -7,11 +7,11 @@ const getNotes = async (request, response, next) => {
 
   try {
     let query = { user: user.id }
-    
+
     if (tag) {
       query.tags = tag
     }
-    
+
     if (search) {
       query.$text = { $search: search }
     }
@@ -72,7 +72,7 @@ const updateNote = async (request, response, next) => {
     note.title = title
     note.content = content
     note.tags = tags || []
-    
+
     const updatedNote = await note.save()
     response.json(updatedNote)
   } catch (error) {

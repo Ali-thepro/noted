@@ -1,5 +1,5 @@
 const noteRouter = require('express').Router()
-const { getNotes, getNote, createNote } = require('../controllers/noteController')
+const { getNotes, getNote, createNote, updateNote, deleteNote } = require('../controllers/noteController')
 const middleware = require('../utils/middleware')
 
 noteRouter.use(middleware.verifyUser)
