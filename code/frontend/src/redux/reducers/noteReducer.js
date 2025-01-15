@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
-import * as noteService from '../../services/notes'
+import * as noteService from '../../services/note'
 
 const initialState = {
   notes: [],
