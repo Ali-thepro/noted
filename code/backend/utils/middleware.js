@@ -50,7 +50,7 @@ const verifyUser = async (request, response, next) => {
     let token = request.token
 
     if (!token) {
-      return next(createError('Unauthorised - No toke, please re-authenticate', 401))
+      return next(createError('Unauthorised - No token, please re-authenticate', 401))
     }
 
     const decodedToken = jwt.verify(token, config.SECRET)
