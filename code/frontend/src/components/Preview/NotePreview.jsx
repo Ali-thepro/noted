@@ -3,7 +3,7 @@ import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 import DOMPurify from 'dompurify'
-
+import PropTypes from 'prop-types'
 const md = new MarkdownIt({
   html: true,
   linkify: true,
@@ -12,7 +12,7 @@ const md = new MarkdownIt({
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(str, { language: lang }).value
-      } catch (__) {}
+      } catch (__) { } // eslint-disable-line no-unused-vars, no-empty
     }
     return '' // use external default escaping
   }
@@ -27,11 +27,15 @@ const NotePreview = ({ content }) => {
   }, [content])
 
   return (
-    <div 
+    <div
       className="prose prose-slate dark:prose-invert max-w-none h-full overflow-auto p-4"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
 }
 
-export default NotePreview 
+NotePreview.propTypes = {
+  content: PropTypes.string.isRequired
+}
+
+export default NotePreview

@@ -7,7 +7,7 @@ import { useState } from 'react'
 function DemoPage() {
   const [markdownText, setMarkdownText] = useState('# Hello, world!\n\nSome **bold** text.')
   const viewMode = useSelector(state => state.note.viewMode)
-  
+
   const handleAction = (actionObj) => {
     if (actionObj?.prefix || actionObj?.suffix) {
       setMarkdownText(prev => (prev + ' ' + actionObj.prefix + 'Your text here' + actionObj.suffix))
@@ -25,7 +25,7 @@ function DemoPage() {
             </div>
           </div>
         )}
-        
+
         {(viewMode === 'preview' || viewMode === 'split') && (
           <div className={`${viewMode === 'split' ? 'w-1/2' : 'w-full'} h-full overflow-auto border-l dark:border-gray-700`}>
             <NotePreview content={markdownText} />

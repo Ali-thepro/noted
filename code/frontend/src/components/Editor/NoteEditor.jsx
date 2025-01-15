@@ -13,6 +13,7 @@ import { indentUnit } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
 import { keymap as keymapView } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
+import PropTypes from 'prop-types'
 
 import '@fontsource/fira-code/400.css'
 import '@fontsource/fira-code/500.css'
@@ -34,7 +35,7 @@ const editorTheme = EditorView.theme({
 const NoteEditor = ({ content, onChange }) => {
   const theme = useSelector(state => state.theme)
   const [position, setPosition] = useState({ line: 1, column: 1 })
-  const [keymap, setKeymap] = useState('vim')
+  const [keymap, setKeymap] = useState('default')
   const [indentSettings, setIndentSettings] = useState({
     type: 'spaces',
     size: 2
@@ -43,16 +44,16 @@ const NoteEditor = ({ content, onChange }) => {
 
   const getKeymapExtension = (type) => {
     switch (type) {
-      case 'vim':
-        return [vim()]
-      case 'emacs':
-        return [emacs()]
-      case 'vscode':
-        return [keymapView.of(vscodeKeymap)]
-      case 'default':
-        return [keymapView.of(defaultKeymap)]
-      default:
-        return []
+    case 'vim':
+      return [vim()]
+    case 'emacs':
+      return [emacs()]
+    case 'vscode':
+      return [keymapView.of(vscodeKeymap)]
+    case 'default':
+      return [keymapView.of(defaultKeymap)]
+    default:
+      return []
     }
   }
 
@@ -68,7 +69,7 @@ const NoteEditor = ({ content, onChange }) => {
 
   const handleChange = useCallback((value, viewUpdate) => {
     onChange(value)
-    
+
     const pos = viewUpdate.state.selection.main.head
     const line = viewUpdate.state.doc.lineAt(pos)
     setPosition({
@@ -82,7 +83,7 @@ const NoteEditor = ({ content, onChange }) => {
       <CodeMirror
         value={content}
         height="100%"
-        basicSetup={{defaultKeymap: false}}
+        basicSetup={{ defaultKeymap: false }}
         extensions={[
           markdown({ base: markdownLanguage, codeLanguages: languages }),
           editorTheme,
@@ -104,6 +105,11 @@ const NoteEditor = ({ content, onChange }) => {
       />
     </div>
   )
+}
+
+NoteEditor.propTypes = {
+  content: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired
 }
 
 export default NoteEditor

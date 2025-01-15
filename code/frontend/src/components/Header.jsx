@@ -4,7 +4,7 @@ import { FaMoon, FaSun, FaColumns, FaPen, FaEye } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTheme } from '../redux/reducers/themeReducer'
 import { setViewMode } from '../redux/reducers/noteReducer'
-
+import { signOut } from '../redux/reducers/authReducer'
 const Header = () => {
   const dispatch = useDispatch()
   const location = useLocation()
@@ -21,6 +21,10 @@ const Header = () => {
     dispatch(setViewMode(mode))
   }
 
+  const handleSignOut = () => {
+    dispatch(signOut())
+  }
+
   return (
     <Navbar className="border-b-2">
       <div className="flex items-center gap-4">
@@ -34,30 +38,30 @@ const Header = () => {
 
         {isNotePage && (
           <ButtonGroup>
-            <Button 
-              color="gray" 
+            <Button
+              color="gray"
               size="sm"
               className="focus:ring-0"
               onClick={() => changeViewMode('edit')}
-              gradientDuoTone={viewMode === 'edit' ? "purpleToBlue" : undefined}
+              gradientDuoTone={viewMode === 'edit' ? 'purpleToBlue' : undefined}
             >
               <FaPen />
             </Button>
-            <Button 
-              color="gray" 
+            <Button
+              color="gray"
               size="sm"
               className="focus:ring-0"
               onClick={() => changeViewMode('split')}
-              gradientDuoTone={viewMode === 'split' ? "purpleToBlue" : undefined}
+              gradientDuoTone={viewMode === 'split' ? 'purpleToBlue' : undefined}
             >
               <FaColumns />
             </Button>
-            <Button 
-              color="gray" 
+            <Button
+              color="gray"
               size="sm"
               className="focus:ring-0"
               onClick={() => changeViewMode('preview')}
-              gradientDuoTone={viewMode === 'preview' ? "purpleToBlue" : undefined}
+              gradientDuoTone={viewMode === 'preview' ? 'purpleToBlue' : undefined}
             >
               <FaEye />
             </Button>
@@ -66,10 +70,10 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button 
-          className="w-13 h-10 focus:ring-0" 
-          color='gray' 
-          pill 
+        <Button
+          className="w-13 h-10 focus:ring-0"
+          color='gray'
+          pill
           onClick={changeTheme}
         >
           {theme === 'light' ? <FaMoon size='15'/> : <FaSun size='15'/>}

@@ -1,10 +1,9 @@
 import { Button, ButtonGroup } from 'flowbite-react'
-import { 
-  FaBold, FaItalic, FaLink, FaImage, 
+import {
+  FaBold, FaItalic, FaLink, FaImage,
   FaListUl, FaListOl, FaCode, FaQuoteLeft,
-  FaColumns, FaExpand, FaCompress
 } from 'react-icons/fa'
-import { useDispatch, useSelector } from 'react-redux'
+import PropTypes from 'prop-types'
 
 const Toolbar = ({ onAction }) => {
 
@@ -58,4 +57,8 @@ const Toolbar = ({ onAction }) => {
   )
 }
 
-export default Toolbar 
+Toolbar.propTypes = {
+  onAction: PropTypes.func.isRequired
+}
+
+export default Toolbar
