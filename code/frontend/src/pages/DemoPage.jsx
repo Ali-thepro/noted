@@ -10,7 +10,7 @@ function DemoPage() {
 
   const handleAction = (actionObj) => {
     if (actionObj?.prefix || actionObj?.suffix) {
-      setMarkdownText(prev => (prev + ' ' + actionObj.prefix + 'Your text here' + actionObj.suffix))
+      setMarkdownText(prev => (prev + actionObj.prefix + 'Your text here' + actionObj.suffix))
     }
   }
 
