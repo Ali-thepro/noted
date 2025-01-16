@@ -53,7 +53,7 @@ const Toolbar = ({ onAction }) => {
       <div className="overflow-x-auto">
         <div className="inline-flex min-w-max">
           {toolbarItems.map((item, index) => (
-            <Tooltip 
+            <Tooltip
               key={item.action}
               content={item.tooltip}
             >
