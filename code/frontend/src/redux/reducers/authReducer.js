@@ -44,8 +44,8 @@ export const login = (credentials, mode, redirect) => {
       toast.success('Logged in')
       return { success: true }
     } catch (error) {
-      console.log(error)
-      dispatch(setNotification(error.response.data.error, 'failure'))
+      const message = error.response?.data?.error || error.message
+      dispatch(setNotification(message, 'failure'))
       dispatch(setError())
       return false
     }
@@ -61,7 +61,8 @@ export const signOutUser = () => {
       toast.success('User signed out sucessfully')
       return true
     } catch (error) {
-      dispatch(setNotification(error.response.data.error, 'failure'))
+      const message = error.response?.data?.error || error.message
+      dispatch(setNotification(message, 'failure'))
       dispatch(setError())
       return false
     }
@@ -74,7 +75,8 @@ export const googleLogin = (mode, redirect) => {
       googleAuth(mode, redirect)
       return true
     } catch (error) {
-      dispatch(setNotification(error.message, 'failure'))
+      const message = error.response?.data?.error || error.message
+      dispatch(setNotification(message, 'failure'))
       dispatch(setError())
       return false
     }
@@ -87,7 +89,8 @@ export const githubLogin = (mode, redirect) => {
       githubAuth(mode, redirect)
       return true
     } catch (error) {
-      dispatch(setNotification(error.message, 'failure'))
+      const message = error.response?.data?.error || error.message
+      dispatch(setNotification(message, 'failure'))
       dispatch(setError())
       return false
     }

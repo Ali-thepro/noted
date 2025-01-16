@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import ImageUploader from './ImageUploader'
 import { Button, Tooltip } from 'flowbite-react'
 import {
   FaBold, FaItalic, FaLink, FaImage,
@@ -8,44 +10,40 @@ import {
 import PropTypes from 'prop-types'
 
 const toolbarItems = [
-  { action: 'header', icon: <FaHeading />, tooltip: 'Add Heading', id: 'header-button' },
-  { action: 'bold', icon: <FaBold />, tooltip: 'Bold Text', id: 'bold-button' },
-  { action: 'italic', icon: <FaItalic />, tooltip: 'Italic Text', id: 'italic-button' },
-  { action: 'strikethrough', icon: <FaStrikethrough />, tooltip: 'Strikethrough Text', id: 'strikethrough-button' },
-  { action: 'link', icon: <FaLink />, tooltip: 'Insert Link', id: 'link-button' },
-  { action: 'image', icon: <FaImage />, tooltip: 'Upload Image', id: 'image-button' },
+  { action: 'header', icon: <FaHeading />, tooltip: 'Add Heading', id: 'header-button', prefix: '# ', suffix: '' },
+  { action: 'bold', icon: <FaBold />, tooltip: 'Bold Text', id: 'bold-button', prefix: '**', suffix: '**' },
+  { action: 'italic', icon: <FaItalic />, tooltip: 'Italic Text', id: 'italic-button', prefix: '_', suffix: '_' },
+  { action: 'strikethrough', icon: <FaStrikethrough />, tooltip: 'Strikethrough Text', id: 'strikethrough-button', prefix: '~~', suffix: '~~' },
+  { action: 'link', icon: <FaLink />, tooltip: 'Insert Link', id: 'link-button', prefix: '[', suffix: '](url)' },
+  { action: 'image', icon: <FaImage />, tooltip: 'Upload Image', id: 'image-button', prefix: '![', suffix: '](url)' },
   { action: 'upload', icon: <FaUpload />, tooltip: 'Upload File', id: 'upload-button' },
-  { action: 'ul', icon: <FaListUl />, tooltip: 'Unordered List', id: 'ul-button' },
-  { action: 'ol', icon: <FaListOl />, tooltip: 'Ordered List', id: 'ol-button' },
-  { action: 'checklist', icon: <FaCheckSquare />, tooltip: 'Checklist', id: 'checklist-button' },
-  { action: 'code', icon: <FaCode />, tooltip: 'Code Block', id: 'code-button' },
-  { action: 'quote', icon: <FaQuoteLeft />, tooltip: 'Quote Block', id: 'quote-button' },
-  { action: 'table', icon: <FaTable />, tooltip: 'Insert Table', id: 'table-button' },
-  { action: 'line', icon: <FaMinus />, tooltip: 'Horizontal Line', id: 'line-button' },
-  { action: 'comment', icon: <FaComment />, tooltip: 'Add Comment', id: 'comment-button' }
+  { action: 'ul', icon: <FaListUl />, tooltip: 'Unordered List', id: 'ul-button', prefix: '- ', suffix: '' },
+  { action: 'ol', icon: <FaListOl />, tooltip: 'Ordered List', id: 'ol-button', prefix: '1. ', suffix: '' },
+  { action: 'checklist', icon: <FaCheckSquare />, tooltip: 'Checklist', id: 'checklist-button', prefix: '- [ ] ', suffix: '' },
+  { action: 'code', icon: <FaCode />, tooltip: 'Code Block', id: 'code-button', prefix: '```\n', suffix: '\n```' },
+  { action: 'quote', icon: <FaQuoteLeft />, tooltip: 'Quote Block', id: 'quote-button', prefix: '> ', suffix: '' },
+  { action: 'table', icon: <FaTable />, tooltip: 'Insert Table', id: 'table-button', prefix: '| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |', suffix: '' },
+  { action: 'line', icon: <FaMinus />, tooltip: 'Horizontal Line', id: 'line-button', prefix: '\n---\n', suffix: '' },
+  { action: 'comment', icon: <FaComment />, tooltip: 'Add Comment', id: 'comment-button', prefix: '<!-- ', suffix: ' -->' }
 ]
 
 const Toolbar = ({ onAction }) => {
-  const handleMarkdownAction = (action) => {
-    const actions = {
-      header: { prefix: '# ', suffix: '' },
-      bold: { prefix: '**', suffix: '**' },
-      italic: { prefix: '_', suffix: '_' },
-      strikethrough: { prefix: '~~', suffix: '~~' },
-      link: { prefix: '[', suffix: '](url)' },
-      image: { prefix: '![', suffix: '](url)' },
-      upload: { prefix: '![', suffix: '](url)' },
-      ul: { prefix: '- ', suffix: '' },
-      ol: { prefix: '1. ', suffix: '' },
-      checklist: { prefix: '- [ ] ', suffix: '' },
-      code: { prefix: '```\n', suffix: '\n```' },
-      quote: { prefix: '> ', suffix: '' },
-      table: { prefix: '| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |', suffix: '' },
-      line: { prefix: '\n---\n', suffix: '' },
-      comment: { prefix: '<!-- ', suffix: ' -->' }
+  const [showImageUploader, setShowImageUploader] = useState(false)
+
+  const handleMarkdownAction = (item) => {
+    if (item.action === 'upload') {
+      setShowImageUploader(true)
+      return
     }
 
-    onAction(actions[action])
+    onAction({ prefix: item.prefix, suffix: item.suffix })
+  }
+
+  const handleImageUpload = (response) => {
+    if (response.imageUrl) {
+      onAction({ prefix: '![', suffix: `](${response.imageUrl})` })
+      setShowImageUploader(false)
+    }
   }
 
   return (
@@ -60,7 +58,7 @@ const Toolbar = ({ onAction }) => {
               <Button
                 color="gray"
                 size="sm"
-                onClick={() => handleMarkdownAction(item.action)}
+                onClick={() => handleMarkdownAction(item)}
                 className={`
                   focus:ring-0
                   ${index === 0 ? 'rounded-l-lg rounded-r-none' : ''}
@@ -76,6 +74,12 @@ const Toolbar = ({ onAction }) => {
           ))}
         </div>
       </div>
+      {showImageUploader && (
+        <ImageUploader
+          onUpload={handleImageUpload}
+          onClose={() => setShowImageUploader(false)}
+        />
+      )}
     </div>
   )
 }

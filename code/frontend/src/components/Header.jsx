@@ -4,7 +4,7 @@ import { FaMoon, FaSun, FaColumns, FaPen, FaEye } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTheme } from '../redux/reducers/themeReducer'
 import { setViewMode } from '../redux/reducers/noteReducer'
-import { signOut } from '../redux/reducers/authReducer'
+import { signOutUser } from '../redux/reducers/authReducer'
 const Header = () => {
   const dispatch = useDispatch()
   const location = useLocation()
@@ -22,7 +22,7 @@ const Header = () => {
   }
 
   const handleSignOut = () => {
-    dispatch(signOut())
+    dispatch(signOutUser())
   }
 
   return (
