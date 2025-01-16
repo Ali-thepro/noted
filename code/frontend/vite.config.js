@@ -10,6 +10,7 @@ export default defineConfig({
       include: [
         /markmarkdown-it-plantuml/,
         /markdown-it-abbr/,
+        /@mdit\/plugin-spoiler/
       ]
     })
   ],

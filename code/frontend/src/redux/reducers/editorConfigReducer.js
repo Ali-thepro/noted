@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
   mapping: 'default',
   indent: 'spaces',
-  indentSize: 2
+  indentSize: 4
 }
 
 const editorConfigSlice = createSlice({

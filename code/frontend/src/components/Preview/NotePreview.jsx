@@ -18,6 +18,7 @@ import mark from 'markdown-it-mark'
 import math from 'markdown-it-math'
 import plantuml from 'markdown-it-plantuml'
 import abbr from 'markdown-it-abbr'
+import { imgSize } from '@mdit/plugin-img-size'
 import linkifyit from 'linkify-it'
 
 linkifyit()
@@ -26,6 +27,7 @@ const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
+  breaks: true,
   highlight: function (str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
@@ -47,6 +49,7 @@ const md = new MarkdownIt({
   .use(math)
   .use(plantuml)
   .use(abbr)
+  .use(imgSize)
 
 const NotePreview = ({ content }) => {
   const viewMode = useSelector(state => state.note.viewMode)
