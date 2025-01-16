@@ -1,20 +1,27 @@
 import { useCallback, useState } from 'react'
+import EditorStatusBar from './EditorStatusBar'
+import { updateConfig } from '../../redux/reducers/editorConfigReducer'
+import PropTypes from 'prop-types'
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { EditorView } from '@codemirror/view'
+import { indentUnit } from '@codemirror/language'
 import { vim } from '@replit/codemirror-vim'
 import { emacs } from '@replit/codemirror-emacs'
 import { vscodeKeymap } from '@replit/codemirror-vscode-keymap'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { useSelector, useDispatch } from 'react-redux'
-import EditorStatusBar from './EditorStatusBar'
-import { indentUnit } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
 import { keymap as keymapView } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
-import { updateConfig } from '../../redux/reducers/editorConfigReducer'
-import PropTypes from 'prop-types'
+import { oneDark } from '@codemirror/theme-one-dark'
+import { useSelector, useDispatch } from 'react-redux'
+import { python } from '@codemirror/lang-python'
+import { javascript } from '@codemirror/lang-javascript'
+import { sql } from '@codemirror/lang-sql'
+import { xml } from '@codemirror/lang-xml'
+import { css } from '@codemirror/lang-css'
+import { yaml } from '@codemirror/lang-yaml'
+import { go } from '@codemirror/lang-go'
 
 import '@fontsource/fira-code/400.css'
 import '@fontsource/fira-code/500.css'
@@ -88,6 +95,13 @@ const NoteEditor = ({ content, onChange }) => {
         extensions={[
           markdown({ base: markdownLanguage, codeLanguages: languages }),
           editorTheme,
+          python(),
+          javascript(),
+          sql(),
+          xml(),
+          css(),
+          yaml(),
+          go(),
           getKeymapExtension(config.mapping),
           EditorView.lineWrapping,
           ...indentationExtensions
