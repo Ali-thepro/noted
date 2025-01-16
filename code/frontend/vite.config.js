@@ -7,7 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     commonjs({
-      include: /node_modules/
+      include: [
+        /markmarkdown-it-plantuml/,
+        /markdown-it-abbr/,
+      ]
     })
   ],
   server: {
