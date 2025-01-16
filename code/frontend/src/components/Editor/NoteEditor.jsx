@@ -23,10 +23,6 @@ import { css } from '@codemirror/lang-css'
 import { yaml } from '@codemirror/lang-yaml'
 import { go } from '@codemirror/lang-go'
 
-import '@fontsource/fira-code/400.css'
-import '@fontsource/fira-code/500.css'
-import '@fontsource/fira-code/600.css'
-
 const editorTheme = EditorView.theme({
   '&': {
     fontSize: '16px',
