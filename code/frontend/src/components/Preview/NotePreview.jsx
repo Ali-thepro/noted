@@ -5,6 +5,10 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 import DOMPurify from 'dompurify'
 import PropTypes from 'prop-types'
+import taskLists from 'markdown-it-task-lists'
+import anchor from 'markdown-it-anchor'
+import tocDoneRight from 'markdown-it-toc-done-right'
+
 const md = new MarkdownIt({
   html: true,
   linkify: true,
@@ -17,7 +21,9 @@ const md = new MarkdownIt({
     }
     return '' // use external default escaping
   }
-})
+}).use(taskLists)
+  .use(anchor, { permalink: true, permalinkBefore: true, permalinkSymbol: '§' })
+  .use(tocDoneRight)
 
 const NotePreview = ({ content }) => {
   const viewMode = useSelector(state => state.note.viewMode)
