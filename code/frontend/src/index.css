@@ -121,3 +121,24 @@ th, td {
 .dark .prose ul ul ul > li::marker {
   color: white !important;
 }
+
+.header-anchor {
+  visibility: hidden;
+  opacity: 0;
+  text-decoration: none !important;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  transition: visibility 0.2s, opacity 0.2s;
+  color: white !important;
+}
+
+h1:hover .header-anchor,
+h2:hover .header-anchor,
+h3:hover .header-anchor,
+h4:hover .header-anchor,
+h5:hover .header-anchor,
+h6:hover .header-anchor {
+  visibility: visible;
+  opacity: 1;
+}
