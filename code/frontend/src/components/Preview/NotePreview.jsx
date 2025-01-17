@@ -37,7 +37,12 @@ const md = new MarkdownIt({
     return '' // use external default escaping
   }
 }).use(taskLists)
-  .use(anchor, { permalink: true, permalinkBefore: true, permalinkSymbol: '§' })
+  .use(anchor, {
+    permalink: anchor.permalink.linkInsideHeader({
+      symbol: '#',
+      placement: 'before'
+    })
+  })
   .use(tocDoneRight, { listType: 'ul' })
   .use(sub)
   .use(sup)
