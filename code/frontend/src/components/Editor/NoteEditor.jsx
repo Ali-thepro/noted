@@ -22,6 +22,8 @@ import { xml } from '@codemirror/lang-xml'
 import { css } from '@codemirror/lang-css'
 import { yaml } from '@codemirror/lang-yaml'
 import { go } from '@codemirror/lang-go'
+import { useRef } from 'react'
+import Toolbar from './Toolbar'
 
 const editorTheme = EditorView.theme({
   '&': {
@@ -57,6 +59,54 @@ const NoteEditor = ({ content, onChange }) => {
     }
   }
 
+  const editorRef = useRef(null)
+
+  const handleToolbarAction = useCallback((actionObj) => {
+    const view = editorRef.current?.view
+    if (!view) return
+
+    const { state } = view
+    const { from, to } = state.selection.main
+    const selectedText = state.sliceDoc(from, to)
+
+    if (actionObj.action === 'header' || actionObj.action === 'quote' ||
+        actionObj.action === 'ul' || actionObj.action === 'ol' ||
+        actionObj.action === 'checklist' || actionObj.action === 'table' ||
+        actionObj.action === 'line') {
+
+      const line = state.doc.lineAt(from)
+      const transaction = state.update({
+        changes: {
+          from: line.from,
+          to: line.from,
+          insert: actionObj.prefix
+        }
+      })
+      view.dispatch(transaction)
+    } else if (actionObj.action === 'image' || actionObj.action === 'link') {
+
+      const transaction = state.update({
+        changes: {
+          from,
+          to,
+          insert: actionObj.prefix + (selectedText || 'description') + '](' +
+                 (actionObj.action === 'image' ? 'https://' : 'https://') + ')'
+        }
+      })
+      view.dispatch(transaction)
+    } else {
+      const transaction = state.update({
+        changes: {
+          from,
+          to,
+          insert: actionObj.prefix + (selectedText || 'Your text here') + actionObj.suffix
+        }
+      })
+      view.dispatch(transaction)
+    }
+  }, [])
+
+
   const handleConfigChange = (newConfig) => {
     dispatch(updateConfig(newConfig))
   }
@@ -84,7 +134,9 @@ const NoteEditor = ({ content, onChange }) => {
 
   return (
     <div className="h-full flex flex-col">
+      <Toolbar onAction={handleToolbarAction} />
       <CodeMirror
+        ref={editorRef}
         value={content}
         height="100%"
         basicSetup={{ defaultKeymap: false }}
