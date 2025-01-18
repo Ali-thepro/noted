@@ -60,7 +60,7 @@ export const initializeNotes = (query = '') => {
       dispatch(setNotes(notes))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }
@@ -76,7 +76,7 @@ export const createNote = (noteData) => {
       return newNote
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
       return null
     }
@@ -91,7 +91,7 @@ export const fetchNote = (id) => {
       dispatch(setActiveNote(note))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }
@@ -106,7 +106,7 @@ export const editNote = (id, noteData) => {
       dispatch(setNotification('Note saved successfully', 'success'))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }
@@ -121,7 +121,7 @@ export const deleteNote = (id) => {
       dispatch(setNotification('Note deleted successfully', 'success'))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }

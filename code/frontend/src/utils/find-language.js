@@ -1,5 +1,4 @@
 export const findLanguageByCodeBlockName = (languages, inputLanguageName) => {
-  console.log('+', inputLanguageName)
   if (!inputLanguageName) {
     return null
   }

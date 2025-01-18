@@ -1,17 +1,22 @@
 import { Navbar, Button, ButtonGroup } from 'flowbite-react'
-import { Link, useLocation } from 'react-router-dom'
-import { FaMoon, FaSun, FaColumns, FaPen, FaEye } from 'react-icons/fa'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { FaMoon, FaSun, FaColumns, FaPen, FaEye, FaPlus } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTheme } from '../redux/reducers/themeReducer'
 import { setViewMode } from '../redux/reducers/noteReducer'
 import { signOutUser } from '../redux/reducers/authReducer'
+import CreateNoteModal from './Notes/CreateNoteModal'
+import { useState } from 'react'
+
 const Header = () => {
   const dispatch = useDispatch()
   const location = useLocation()
+  const navigate = useNavigate()
   const theme = useSelector(state => state.theme)
   const user = useSelector(state => state.auth.user)
   const viewMode = useSelector(state => state.note.viewMode)
-  const isNotePage = location.pathname.startsWith('/demo')
+  const isNotePage = location.pathname.startsWith('/notes/')
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   const changeTheme = () => {
     dispatch(setTheme())
@@ -71,12 +76,25 @@ const Header = () => {
 
       <div className="flex items-center gap-2">
         <Button
+          className="focus:ring-0"
+          color="gray"
+          size="sm"
+          pill
+          onClick={() => {
+            user ? setShowCreateModal(true) : navigate('/signin')
+          }}
+        >
+          <FaPlus className="mr-2 mt-1" />
+          New Note
+        </Button>
+
+        <Button
           className="w-13 h-10 focus:ring-0"
-          color='gray'
+          color="gray"
           pill
           onClick={changeTheme}
         >
-          {theme === 'light' ? <FaMoon size='15'/> : <FaSun size='15'/>}
+          {theme === 'light' ? <FaMoon size="15"/> : <FaSun size="15"/>}
         </Button>
 
         {user ? (
@@ -95,6 +113,11 @@ const Header = () => {
           </Link>
         )}
       </div>
+
+      <CreateNoteModal
+        show={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+      />
     </Navbar>
   )
 }
