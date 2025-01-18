@@ -98,8 +98,7 @@ const NoteEditor = ({ content, onChange }) => {
   const baseExtensions = useMemo(() => [
     markdown({
       base: markdownLanguage,
-      codeLanguages: (input) => findLanguageByCodeBlockName(languages, input),
-      addKeymap: true
+      codeLanguages: (input) => findLanguageByCodeBlockName(languages, input)
     }),
     hyperLink,
     EditorView.lineWrapping,
