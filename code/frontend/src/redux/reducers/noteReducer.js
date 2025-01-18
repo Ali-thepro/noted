@@ -6,7 +6,7 @@ const initialState = {
   notes: [],
   activeNote: null,
   loading: false,
-  viewMode: 'preview' // 'preview', 'edit', 'split'
+  viewMode: 'split' // 'preview', 'edit', 'split'
 }
 
 const noteSlice = createSlice({
