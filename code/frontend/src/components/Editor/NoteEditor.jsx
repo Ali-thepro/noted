@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useRef } from 'react'
 import EditorStatusBar from './EditorStatusBar'
 import { updateConfig } from '../../redux/reducers/editorConfigReducer'
 import PropTypes from 'prop-types'
@@ -22,7 +22,6 @@ import { xml } from '@codemirror/lang-xml'
 import { css } from '@codemirror/lang-css'
 import { yaml } from '@codemirror/lang-yaml'
 import { go } from '@codemirror/lang-go'
-import { useRef } from 'react'
 import Toolbar from './Toolbar'
 
 const editorTheme = EditorView.theme({
@@ -43,6 +42,7 @@ const NoteEditor = ({ content, onChange }) => {
   const theme = useSelector(state => state.theme)
   const [position, setPosition] = useState({ line: 1, column: 1 })
   const config = useSelector(state => state.editorConfig)
+  const editorRef = useRef(null)
 
   const getKeymapExtension = (type) => {
     switch (type) {
@@ -58,8 +58,6 @@ const NoteEditor = ({ content, onChange }) => {
       return []
     }
   }
-
-  const editorRef = useRef(null)
 
   const handleToolbarAction = useCallback((actionObj) => {
     const view = editorRef.current?.view
@@ -83,14 +81,13 @@ const NoteEditor = ({ content, onChange }) => {
         }
       })
       view.dispatch(transaction)
-    } else if (actionObj.action === 'image' || actionObj.action === 'link') {
+    } else if (actionObj.action === 'link') {
 
       const transaction = state.update({
         changes: {
           from,
           to,
-          insert: actionObj.prefix + (selectedText || 'description') + '](' +
-                 (actionObj.action === 'image' ? 'https://' : 'https://') + ')'
+          insert: actionObj.prefix + (selectedText || 'description') + '](https://)'
         }
       })
       view.dispatch(transaction)
@@ -99,7 +96,13 @@ const NoteEditor = ({ content, onChange }) => {
         changes: {
           from,
           to,
-          insert: actionObj.prefix + (selectedText || 'Your text here') + actionObj.suffix
+          insert: `${actionObj.prefix}${
+            selectedText
+              ? selectedText
+              : actionObj.action === 'image'
+                ? 'alt text here'
+                : 'your text here'
+          }${actionObj.suffix}`
         }
       })
       view.dispatch(transaction)
@@ -107,9 +110,9 @@ const NoteEditor = ({ content, onChange }) => {
   }, [])
 
 
-  const handleConfigChange = (newConfig) => {
+  const handleConfigChange = useCallback((newConfig) => {
     dispatch(updateConfig(newConfig))
-  }
+  }, [dispatch])
 
   const tabKeymap = keymapView.of([{
     key: 'Tab',

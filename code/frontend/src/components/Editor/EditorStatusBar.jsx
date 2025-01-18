@@ -49,7 +49,6 @@ const EditorStatusBar = ({
         </div>
       </div>
 
-      {/* Cursor position */}
       <div className="text-gray-500">
         Line {position.line}, Column {position.column}
       </div>
