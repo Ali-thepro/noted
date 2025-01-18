@@ -62,6 +62,23 @@ th, td {
   padding: 12px;
 }
 
+.form-select, .form-select option {
+  width: 100%;
+  height: 25px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: black; /* Set the text color to black */
+  background-color: white;
+
+}
+
+
+.dark .form-select, .dark .form-select option {
+  color: white;
+  background-color: #374151;
+  border: none;
+}
+
 
 .prose img {
   margin-left: auto;

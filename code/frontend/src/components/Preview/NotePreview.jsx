@@ -73,9 +73,10 @@ const NotePreview = ({ content }) => {
 
   return (
     <div
-      className={`${viewMode === 'preview' ? 'text-center' : ''} prose prose-slate dark:prose-invert max-w-none h-full overflow-auto p-4 `}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+      className={`${viewMode === 'preview' ? 'flex justify-center' : ''} prose prose-slate dark:prose-invert max-w-none h-full overflow-auto p-4`}
+    >
+      <div className={`${viewMode === 'preview' ? 'max-w-3xl w-full' : 'w-full'}`} dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
   )
 }
 
