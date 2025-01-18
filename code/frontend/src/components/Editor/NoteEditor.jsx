@@ -13,7 +13,6 @@ import { vscodeKeymap } from '@replit/codemirror-vscode-keymap'
 import { indentWithTab } from '@codemirror/commands'
 import { keymap as keymapView } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
-import { oneDark } from '@codemirror/theme-one-dark'
 import { useSelector, useDispatch } from 'react-redux'
 import { python } from '@codemirror/lang-python'
 import { javascript } from '@codemirror/lang-javascript'
@@ -23,23 +22,10 @@ import { css } from '@codemirror/lang-css'
 import { yaml } from '@codemirror/lang-yaml'
 import { go } from '@codemirror/lang-go'
 import Toolbar from './Toolbar'
-
-const editorTheme = EditorView.theme({
-  '&': {
-    fontSize: '16px',
-    fontFamily: '"Fira Code", monospace'
-  },
-  '.cm-content': {
-    fontFamily: '"Fira Code", monospace'
-  },
-  '.cm-line': {
-    padding: '0 4px'
-  }
-})
+import { editorThemes } from '../../utils/themes'
 
 const NoteEditor = ({ content, onChange }) => {
   const dispatch = useDispatch()
-  const theme = useSelector(state => state.theme)
   const [position, setPosition] = useState({ line: 1, column: 1 })
   const config = useSelector(state => state.editorConfig)
   const editorRef = useRef(null)
@@ -135,6 +121,19 @@ const NoteEditor = ({ content, onChange }) => {
     })
   }, [onChange])
 
+  const editorTheme = EditorView.theme({
+    '&': {
+      fontSize: `${config.fontSize}px`,
+      fontFamily: `"${config.fontFamily}", monospace`
+    },
+    '.cm-content': {
+      fontFamily: `"${config.fontFamily}", monospace`
+    },
+    '.cm-line': {
+      padding: '0 4px'
+    }
+  })
+
   return (
     <div className="h-full flex flex-col">
       <Toolbar onAction={handleToolbarAction} />
@@ -157,7 +156,7 @@ const NoteEditor = ({ content, onChange }) => {
           EditorView.lineWrapping,
           ...indentationExtensions
         ]}
-        theme={theme === 'dark' ? oneDark : undefined}
+        theme={editorThemes[config.theme]}
         onChange={handleChange}
         className="flex-1 overflow-auto"
       />
