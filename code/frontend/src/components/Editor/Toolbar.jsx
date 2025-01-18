@@ -5,26 +5,31 @@ import {
   FaBold, FaItalic, FaLink, FaImage,
   FaListUl, FaListOl, FaCode, FaQuoteLeft,
   FaStrikethrough, FaHeading, FaCheckSquare,
-  FaTable, FaMinus, FaComment, FaUpload
+  FaTable, FaMinus, FaComment, FaUpload, FaUnderline,
+  FaSubscript, FaSuperscript, FaHighlighter
 } from 'react-icons/fa'
 import PropTypes from 'prop-types'
 
 const toolbarItems = [
-  { action: 'header', icon: <FaHeading />, tooltip: 'Add Heading', id: 'header-button', prefix: '# ', suffix: '' },
-  { action: 'bold', icon: <FaBold />, tooltip: 'Bold Text', id: 'bold-button', prefix: '**', suffix: '**' },
-  { action: 'italic', icon: <FaItalic />, tooltip: 'Italic Text', id: 'italic-button', prefix: '_', suffix: '_' },
-  { action: 'strikethrough', icon: <FaStrikethrough />, tooltip: 'Strikethrough Text', id: 'strikethrough-button', prefix: '~~', suffix: '~~' },
-  { action: 'link', icon: <FaLink />, tooltip: 'Insert Link', id: 'link-button', prefix: '[', suffix: '](url)' },
-  { action: 'image', icon: <FaImage />, tooltip: 'Upload Image', id: 'image-button', prefix: '![', suffix: '](url)' },
-  { action: 'upload', icon: <FaUpload />, tooltip: 'Upload File', id: 'upload-button' },
-  { action: 'ul', icon: <FaListUl />, tooltip: 'Unordered List', id: 'ul-button', prefix: '- ', suffix: '' },
-  { action: 'ol', icon: <FaListOl />, tooltip: 'Ordered List', id: 'ol-button', prefix: '1. ', suffix: '' },
-  { action: 'checklist', icon: <FaCheckSquare />, tooltip: 'Checklist', id: 'checklist-button', prefix: '- [ ] ', suffix: '' },
-  { action: 'code', icon: <FaCode />, tooltip: 'Code Block', id: 'code-button', prefix: '```\n', suffix: '\n```' },
-  { action: 'quote', icon: <FaQuoteLeft />, tooltip: 'Quote Block', id: 'quote-button', prefix: '> ', suffix: '' },
-  { action: 'table', icon: <FaTable />, tooltip: 'Insert Table', id: 'table-button', prefix: '| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |', suffix: '' },
-  { action: 'line', icon: <FaMinus />, tooltip: 'Horizontal Line', id: 'line-button', prefix: '\n---\n', suffix: '' },
-  { action: 'comment', icon: <FaComment />, tooltip: 'Add Comment', id: 'comment-button', prefix: '<!-- ', suffix: ' -->' }
+  { action: 'header', icon: <FaHeading />, tooltip: 'Add Heading', prefix: '# ', suffix: '' },
+  { action: 'bold', icon: <FaBold />, tooltip: 'Bold', prefix: '**', suffix: '**' },
+  { action: 'italic', icon: <FaItalic />, tooltip: 'Italic', prefix: '*', suffix: '*' },
+  { action: 'strikethrough', icon: <FaStrikethrough />, tooltip: 'Strikethrough', prefix: '~~', suffix: '~~' },
+  { action: 'underline', icon: <FaUnderline />, tooltip: 'Underline', prefix: '++', suffix: '++' },
+  { action: 'subscript', icon: <FaSubscript />, tooltip: 'Subscript', prefix: '<sub>', suffix: '</sub>' },
+  { action: 'superscript', icon: <FaSuperscript />, tooltip: 'Superscript', prefix: '<sup>', suffix: '</sup>' },
+  { action: 'highlight', icon: <FaHighlighter />, tooltip: 'Highlight', prefix: '==', suffix: '==' },
+  { action: 'link', icon: <FaLink />, tooltip: 'Insert Link', prefix: '[', suffix: '](url)' },
+  { action: 'image', icon: <FaImage />, tooltip: 'Upload Image', prefix: '![', suffix: '](url)' },
+  { action: 'upload', icon: <FaUpload />, tooltip: 'Upload File' },
+  { action: 'ul', icon: <FaListUl />, tooltip: 'Unordered List', prefix: '- ', suffix: '' },
+  { action: 'ol', icon: <FaListOl />, tooltip: 'Ordered List', prefix: '1. ', suffix: '' },
+  { action: 'checklist', icon: <FaCheckSquare />, tooltip: 'Checklist', prefix: '- [ ] ', suffix: '' },
+  { action: 'code', icon: <FaCode />, tooltip: 'Code', prefix: '```', suffix: '```' },
+  { action: 'quote', icon: <FaQuoteLeft />, tooltip: 'Quote', prefix: '> ', suffix: '' },
+  { action: 'table', icon: <FaTable />, tooltip: 'Insert Table', prefix: '| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |', suffix: '' },
+  { action: 'line', icon: <FaMinus />, tooltip: 'Line Break', prefix: '\n---\n', suffix: '' },
+  { action: 'comment', icon: <FaComment />, tooltip: 'Comment', prefix: '<!-- ', suffix: ' -->' }
 ]
 
 const Toolbar = ({ onAction }) => {
@@ -36,7 +41,7 @@ const Toolbar = ({ onAction }) => {
       return
     }
 
-    onAction({ prefix: item.prefix, suffix: item.suffix })
+    onAction(item)
   }
 
   const handleImageUpload = (response) => {
@@ -66,7 +71,6 @@ const Toolbar = ({ onAction }) => {
                   ${index !== 0 && index !== toolbarItems.length - 1 ? 'rounded-none' : ''}
                   ${index !== 0 ? '-ml-px' : ''}
                 `}
-                id={item.id}
               >
                 {item.icon}
               </Button>

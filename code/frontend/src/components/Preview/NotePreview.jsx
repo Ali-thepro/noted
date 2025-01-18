@@ -20,6 +20,7 @@ import plantuml from 'markdown-it-plantuml'
 import abbr from 'markdown-it-abbr'
 import { imgSize } from '@mdit/plugin-img-size'
 import linkifyit from 'linkify-it'
+import { icon } from '../../utils/chainIcon'
 
 linkifyit()
 
@@ -39,7 +40,7 @@ const md = new MarkdownIt({
 }).use(taskLists)
   .use(anchor, {
     permalink: anchor.permalink.linkInsideHeader({
-      symbol: '#',
+      symbol: icon,
       placement: 'before'
     })
   })
@@ -55,6 +56,11 @@ const md = new MarkdownIt({
   .use(plantuml)
   .use(abbr)
   .use(imgSize)
+
+md.renderer.rules.code_inline = function(tokens, idx, options, env, slf) { // eslint-disable-line no-unused-vars
+  const token = tokens[idx]
+  return `<code class="inline-code">${md.utils.escapeHtml(token.content)}</code>`
+}
 
 const NotePreview = ({ content }) => {
   const viewMode = useSelector(state => state.note.viewMode)

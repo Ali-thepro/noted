@@ -142,3 +142,23 @@ h6:hover .header-anchor {
   visibility: visible;
   opacity: 1;
 }
+
+
+.prose code.inline-code {
+  color: var(--tw-prose-pre-code);
+  background-color: var(--tw-prose-pre-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-weight: 400;
+  font-size: 0.875em;
+}
+
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: "" !important;
+}
+
+.prose :where(p > code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(p > code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: "" !important;
+}
