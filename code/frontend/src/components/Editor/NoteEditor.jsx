@@ -1,8 +1,9 @@
-import { useCallback, useState, useRef } from 'react'
+import { useCallback, useState, useRef, useMemo, useEffect } from 'react'
 import EditorStatusBar from './EditorStatusBar'
 import { updateConfig } from '../../redux/reducers/editorConfigReducer'
 import PropTypes from 'prop-types'
 import CodeMirror from '@uiw/react-codemirror'
+import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { EditorView } from '@codemirror/view'
@@ -17,20 +18,19 @@ import { useSelector, useDispatch } from 'react-redux'
 import { python } from '@codemirror/lang-python'
 import { javascript } from '@codemirror/lang-javascript'
 import { sql } from '@codemirror/lang-sql'
-import { xml } from '@codemirror/lang-xml'
-import { css } from '@codemirror/lang-css'
-import { yaml } from '@codemirror/lang-yaml'
 import { go } from '@codemirror/lang-go'
 import Toolbar from './Toolbar'
 import { editorThemes } from '../../utils/themes'
+import { findLanguageByCodeBlockName } from '../../utils/find-language'
 
 const NoteEditor = ({ content, onChange }) => {
   const dispatch = useDispatch()
   const [position, setPosition] = useState({ line: 1, column: 1 })
   const config = useSelector(state => state.editorConfig)
   const editorRef = useRef(null)
+  const [extensions, setExtensions] = useState([])
 
-  const getKeymapExtension = (type) => {
+  const getKeymapExtension = useCallback((type) => {
     switch (type) {
     case 'vim':
       return [vim()]
@@ -43,7 +43,7 @@ const NoteEditor = ({ content, onChange }) => {
     default:
       return []
     }
-  }
+  }, [])
 
   const handleToolbarAction = useCallback((actionObj) => {
     const view = editorRef.current?.view
@@ -95,44 +95,58 @@ const NoteEditor = ({ content, onChange }) => {
     }
   }, [])
 
-
-  const handleConfigChange = useCallback((newConfig) => {
-    dispatch(updateConfig(newConfig))
-  }, [dispatch])
-
-  const tabKeymap = keymapView.of([{
-    key: 'Tab',
-    run: indentWithTab
-  }])
-
-  const indentationExtensions = [
+  const baseExtensions = useMemo(() => [
+    markdown({
+      base: markdownLanguage,
+      codeLanguages: (input) => findLanguageByCodeBlockName(languages, input)
+    }),
+    hyperLink,
+    EditorView.lineWrapping,
     indentUnit.of(' '.repeat(config.indentSize)),
-    tabKeymap
-  ]
+    keymapView.of([{
+      key: 'Tab',
+      run: indentWithTab
+    }])
+  ], [config.indentSize])
+
+  useEffect(() => {
+    setExtensions([
+      ...baseExtensions,
+      ...getKeymapExtension(config.mapping),
+      python(),
+      javascript(),
+      sql(),
+      go(),
+      EditorView.theme({
+        '&': {
+          fontSize: `${config.fontSize}px`,
+          fontFamily: `"${config.fontFamily}", monospace`
+        },
+        '.cm-content': {
+          fontFamily: `"${config.fontFamily}", monospace`
+        },
+        '.cm-line': {
+          padding: '0 4px'
+        }
+      })
+    ])
+  }, [baseExtensions, config.mapping, config.fontSize, config.fontFamily, getKeymapExtension])
 
   const handleChange = useCallback((value, viewUpdate) => {
     onChange(value)
-
+    // Update cursor position immediately
     const pos = viewUpdate.state.selection.main.head
     const line = viewUpdate.state.doc.lineAt(pos)
     setPosition({
       line: line.number,
       column: pos - line.from + 1
     })
+
   }, [onChange])
 
-  const editorTheme = EditorView.theme({
-    '&': {
-      fontSize: `${config.fontSize}px`,
-      fontFamily: `"${config.fontFamily}", monospace`
-    },
-    '.cm-content': {
-      fontFamily: `"${config.fontFamily}", monospace`
-    },
-    '.cm-line': {
-      padding: '0 4px'
-    }
-  })
+  const handleConfigChange = useCallback((newConfig) => {
+    dispatch(updateConfig(newConfig))
+  }, [dispatch])
 
   return (
     <div className="h-full flex flex-col">
@@ -142,20 +156,7 @@ const NoteEditor = ({ content, onChange }) => {
         value={content}
         height="100%"
         basicSetup={{ defaultKeymap: false }}
-        extensions={[
-          markdown({ base: markdownLanguage, codeLanguages: languages }),
-          editorTheme,
-          python(),
-          javascript(),
-          sql(),
-          xml(),
-          css(),
-          yaml(),
-          go(),
-          getKeymapExtension(config.mapping),
-          EditorView.lineWrapping,
-          ...indentationExtensions
-        ]}
+        extensions={extensions}
         theme={editorThemes[config.theme]}
         onChange={handleChange}
         className="flex-1 overflow-auto"
