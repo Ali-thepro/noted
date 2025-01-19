@@ -33,6 +33,11 @@ export const githubAuth = (mode, redirect) => {
   window.location.href = url
 }
 
+export const signOutUserFromDB = async () => {
+  const response = await axios.post(`${BASE_URL}/signout`)
+  return response.data
+}
+
 export const me = async () => {
   const response = await axios.get(`${BASE_URL}/me`)
   return response.data

@@ -9,7 +9,6 @@ const config = require('./utils/config')
 const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 const authRouter = require('./routes/authRouter')
-const userRouter = require('./routes/userRouter')
 const imageRouter = require('./routes/imageRouter')
 const noteRouter = require('./routes/noteRouter')
 
@@ -39,7 +38,6 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 app.use(middleware.tokenExtractor)
 
 app.use('/api/auth', authRouter)
-app.use('/api/user', userRouter)
 app.use('/api/image', imageRouter)
 app.use('/api/note', noteRouter)
 

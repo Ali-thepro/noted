@@ -308,6 +308,13 @@ const github = async (request, response, next) => {
   }
 }
 
+const signOut = async (request, response) => {
+  response
+    .clearCookie('token')
+    .status(200)
+    .send('User signed out successfully')
+}
+
 const me = async (request, response, next) => {
   try {
     const user = request.user
@@ -327,5 +334,6 @@ module.exports = {
   googleOauth,
   github,
   githubOauth,
+  signOut,
   me
 }

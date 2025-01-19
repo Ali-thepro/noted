@@ -1,8 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
-import { signin, googleAuth, githubAuth } from '../../services/auth'
+import { signin, googleAuth, githubAuth, signOutUserFromDB } from '../../services/auth'
 import { toast } from 'react-toastify'
-import { signOutUserFromDB } from '../../services/user'
 
 
 const initialState = {
