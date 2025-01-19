@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import PrivateRoute from './components/PrivateRoute'
 import Home from './pages/Home'
 import ScrollToTop from './components/ScrollToTop'
 import NotFound from './pages/NotFound'
@@ -11,6 +12,7 @@ import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
 import OAuthCallback from './pages/OAuthCallback'
 import DemoPage from './pages/DemoPage'
+import NotePage from './pages/NotePage'
 
 
 const App = () => {
@@ -39,6 +41,9 @@ const App = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route path="/demo" element={<DemoPage />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/notes/:id" element={<NotePage />} />
+        </Route>
       </Routes>
     </Router>
   )

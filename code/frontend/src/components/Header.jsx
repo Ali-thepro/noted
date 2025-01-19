@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setTheme } from '../redux/reducers/themeReducer'
 import { setViewMode } from '../redux/reducers/noteReducer'
 import { signOutUser } from '../redux/reducers/authReducer'
-import CreateNoteModal from './Notes/CreateNoteModal'
+import NoteModal from './Notes/NoteModal'
 import { useState } from 'react'
 
 const Header = () => {
@@ -16,7 +16,9 @@ const Header = () => {
   const user = useSelector(state => state.auth.user)
   const viewMode = useSelector(state => state.note.viewMode)
   const isNotePage = location.pathname.startsWith('/notes/')
+  const path = location.pathname
   const [showCreateModal, setShowCreateModal] = useState(false)
+
 
   const changeTheme = () => {
     dispatch(setTheme())
@@ -74,7 +76,18 @@ const Header = () => {
         )}
       </div>
 
+      <Navbar.Collapse>
+        <Navbar.Link active={path === '/'} as={Link} to='/'>
+          Home
+        </Navbar.Link>
+        <Navbar.Link active={path === '/about'} as={Link} to='/about'>
+          About
+        </Navbar.Link>
+      </Navbar.Collapse>
+
+
       <div className="flex items-center gap-2">
+        
         <Button
           className="focus:ring-0"
           color="gray"
@@ -114,7 +127,8 @@ const Header = () => {
         )}
       </div>
 
-      <CreateNoteModal
+
+      <NoteModal
         show={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />

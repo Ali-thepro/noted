@@ -1,8 +1,8 @@
 import axios from 'axios'
-const BASE_URL = '/api/notes'
+const BASE_URL = '/api/note'
 
 export const getNotes = async (query = '') => {
-  const response = await axios.get(`${BASE_URL}/get${query}`)
+  const response = await axios.get(`${BASE_URL}/get?${query}`)
   return response.data
 }
 
