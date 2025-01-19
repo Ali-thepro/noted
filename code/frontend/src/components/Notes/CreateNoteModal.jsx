@@ -28,6 +28,8 @@ const CreateNoteModal = ({ show, onClose }) => {
       const newNote = await dispatch(createNote(noteData))
       if (newNote) {
         onClose()
+        setTitle('')
+        setTags('')
         navigate(`/notes/${newNote.id}`)
       }
     } finally {
