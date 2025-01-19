@@ -28,7 +28,7 @@ const HomePage = () => {
   //   if (debouncedKeyword) params.push(`search=${encodeURIComponent(debouncedKeyword)}`)
   //   if (debouncedTag) params.push(`tag=${encodeURIComponent(debouncedTag)}`)
   //   const query = params.length > 0 ? params.join('&') + '&' : ''
-    
+
   //   dispatch(initializeNotes(query))
   // }, [dispatch, debouncedKeyword, debouncedTag])
 
@@ -99,11 +99,11 @@ const HomePage = () => {
           {/* Search and Sort Controls */}
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
-              <SearchBar 
-                keyword={keyword} 
-                onKeywordChange={handleKeywordChange} 
-                tag={tag} 
-                onTagChange={handleTagChange} 
+              <SearchBar
+                keyword={keyword}
+                onKeywordChange={handleKeywordChange}
+                tag={tag}
+                onTagChange={handleTagChange}
               />
             </div>
             <SortControls
