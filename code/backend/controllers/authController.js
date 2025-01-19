@@ -5,6 +5,21 @@ const jwt = require('jsonwebtoken')
 const config = require('../utils/config')
 const axios = require('axios')
 
+const createAccessToken = (user) => {
+  return jwt.sign(
+    { id: user._id, email: user.email },
+    config.ACCESS_SECRET,
+    { expiresIn: '15m' }
+  )
+}
+
+const createRefreshToken = (user) => {
+  return jwt.sign(
+    { id: user._id, email: user.email },
+    config.REFRESH_SECRET,
+    { expiresIn: '7d' }
+  )
+}
 
 const signup = async (request, response, next) => {
   const { username, email, password, confirmPassword } = request.body
@@ -78,22 +93,70 @@ const signin = async (request, response, next) => {
   }
 
   if ( mode && redirect && mode === 'cli') {
-    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '30d' })
+    const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '30d' })
     return response.status(200).json({
       redirectUrl: `${redirect}?token=${token}`
     })
   } else {
-    const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
+    const accessToken = createAccessToken(user)
+    const refreshToken = createRefreshToken(user)
+
     response
       .status(200)
-      .cookie('token', token, {
+      .cookie('accessToken', accessToken, {
         httpOnly: true,
         sameSite: 'strict',
         secure: true,
+        maxAge: 15 * 60 * 1000
+      })
+      .cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000
       })
       .json(user)
   }
 }
+
+const refreshToken = async (request, response, next) => {
+  const refreshToken = request.cookies.refreshToken
+
+  if (!refreshToken) {
+    return next(createError('Refresh token not provided', 401))
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, config.REFRESH_SECRET)
+    const user = await User.findById(decoded.id)
+
+    if (!user) {
+      return next(createError('User not found', 404))
+    }
+
+    const newAccessToken = createAccessToken(user)
+    const newRefreshToken = createRefreshToken(user)
+
+    response
+      .cookie('accessToken', newAccessToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        maxAge: 15 * 60 * 1000,
+      })
+      .cookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .json({ message: 'Token refreshed successfully' })
+  } catch (error) {
+    console.error('Error during token refresh:', error)
+    return next(createError('Invalid refresh token', 403))
+  }
+}
+
 
 function getGoogleAuthURL(mode, redirect) {
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -186,11 +249,25 @@ const google = async (request, response, next) => {
 
 
     if (mode === 'cli') {
-      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '10d' })
+      const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
       response.redirect(`${redirect}?token=${token}`)
     } else {
-      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-      response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
+      const accessToken = createAccessToken(user)
+      const refreshToken = createRefreshToken(user)
+
+      response
+        .cookie('accessToken', accessToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 15 * 60 * 1000
+        })
+        .cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        })
       response.redirect(`${config.UI_URI}/oauth/callback`)
     }
 
@@ -294,11 +371,25 @@ const github = async (request, response, next) => {
 
 
     if (mode === 'cli') {
-      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: '10d' })
+      const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
       return response.redirect(`${redirect}?token=${token}`)
     } else {
-      const token = jwt.sign(userForToken, config.SECRET, { expiresIn: 7200 })
-      response.cookie('token', token, { httpOnly: true, sameSite: 'strict', secure: true })
+      const accessToken = createAccessToken(user)
+      const refreshToken = createRefreshToken(user)
+
+      response
+        .cookie('accessToken', accessToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 15 * 60 * 1000
+        })
+        .cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        })
       response.redirect(`${config.UI_URI}/oauth/callback`)
     }
 
@@ -310,7 +401,8 @@ const github = async (request, response, next) => {
 
 const signOut = async (request, response) => {
   response
-    .clearCookie('token')
+    .clearCookie('accesstoken')
+    .clearCookie('refreshToken')
     .status(200)
     .send('User signed out successfully')
 }
@@ -319,7 +411,7 @@ const me = async (request, response, next) => {
   try {
     const user = request.user
     if (!user) {
-      return next(createError('Unauthorised', 401)) // User not authenticated
+      return next(createError('Unauthorised', 401))
     }
     response.json(user)
   } catch (error) {
@@ -330,6 +422,7 @@ const me = async (request, response, next) => {
 module.exports = {
   signup,
   signin,
+  refreshToken,
   google,
   googleOauth,
   github,
