@@ -44,7 +44,7 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           navigate(`/notes/${newNote.id}`)
         }
       }
-      
+
       setTitle('')
       setTags('')
       onClose()

@@ -12,7 +12,7 @@ const HomePage = () => {
   const navigate = useNavigate()
   const { notes, loading } = useSelector(state => state.note)
   const user = useSelector(state => state.auth.user)
-  
+
   const [searchText, setSearchText] = useState('')
   const [sortBy, setSortBy] = useState('date')
   const [sortOrder, setSortOrder] = useState('desc')
@@ -32,16 +32,16 @@ const HomePage = () => {
   }
 
   const filteredNotes = searchText
-    ? notes.filter(note => 
-        note.title.toLowerCase().includes(searchText) ||
+    ? notes.filter(note =>
+      note.title.toLowerCase().includes(searchText) ||
         note.content.toLowerCase().includes(searchText) ||
         (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchText)))
-      )
+    )
     : notes
 
   const sortedNotes = [...filteredNotes].sort((a, b) => {
     if (sortBy === 'date') {
-      return sortOrder === 'desc' 
+      return sortOrder === 'desc'
         ? new Date(b.updatedAt) - new Date(a.updatedAt)
         : new Date(a.updatedAt) - new Date(b.updatedAt)
     }

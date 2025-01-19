@@ -25,7 +25,7 @@ const NoteCard = ({ note, onClick }) => {
 
   return (
     <>
-      <Card 
+      <Card
         className="relative hover:shadow-lg transition-shadow duration-200 cursor-pointer"
         onClick={onClick}
       >
@@ -99,4 +99,4 @@ NoteCard.propTypes = {
   onClick: PropTypes.func.isRequired
 }
 
-export default NoteCard 
+export default NoteCard
