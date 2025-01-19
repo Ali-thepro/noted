@@ -20,7 +20,7 @@ const persistConfig = {
   key: 'root',
   storage,
   version: 1,
-  blacklist: ['notification'],
+  blacklist: ['notification', 'note'],
   transforms: [
     expireReducer('auth', {
       expireSeconds: 7200,

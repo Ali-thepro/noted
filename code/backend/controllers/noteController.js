@@ -2,26 +2,34 @@ const Note = require('../models/note')
 const createError = require('../utils/error')
 
 const getNotes = async (request, response, next) => {
-  const user = request.user
-  const { tag, search } = request.query
+  const { tag, search } = request.query;
 
   try {
-    let query = { user: user.id }
+    const filter = {
+      ...(tag
+        ? {
+            tags: {
+              $regex: tag,
+              $options: 'i',
+            },
+          }
+        : {}),
+      ...(search
+        ? {
+            $or: [
+              { title: { $regex: search, $options: 'i' } },
+              { content: { $regex: search, $options: 'i' } },
+            ],
+          }
+        : {}),
+    };
 
-    if (tag) {
-      query.tags = tag
-    }
-
-    if (search) {
-      query.$text = { $search: search }
-    }
-
-    const notes = await Note.find(query).sort({ updatedAt: -1 })
-    response.json(notes)
+    const notes = await Note.find(filter).sort({ updatedAt: -1 });
+    response.json(notes);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 const getNote = async (request, response, next) => {
   const { id } = request.params

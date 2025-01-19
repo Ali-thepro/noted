@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { initializeNotes } from '../redux/reducers/noteReducer'
@@ -6,6 +6,8 @@ import NoteCard from '../components/Notes/NoteCard'
 import SearchBar from '../components/Notes/SearchBar'
 import SortControls from '../components/Notes/SortControls'
 import { Spinner } from 'flowbite-react'
+import debounce from 'lodash.debounce'
+// import useDebounce from '../hooks/useDebounce'
 
 const HomePage = () => {
   const dispatch = useDispatch()
@@ -13,33 +15,62 @@ const HomePage = () => {
   const { notes, loading } = useSelector(state => state.note)
   const user = useSelector(state => state.auth.user)
 
-  const [searchText, setSearchText] = useState('')
+  const [keyword, setKeyword] = useState('')
+  const [tag, setTag] = useState('')
   const [sortBy, setSortBy] = useState('date')
   const [sortOrder, setSortOrder] = useState('desc')
 
-  useEffect(() => {
-    dispatch(initializeNotes())
-  }, [dispatch])
+  // const debouncedKeyword = useDebounce(keyword, 500)
+  // const debouncedTag = useDebounce(tag, 500)
 
-  const handleSearch = (query) => {
+  // useEffect(() => {
+  //   const params = []
+  //   if (debouncedKeyword) params.push(`search=${encodeURIComponent(debouncedKeyword)}`)
+  //   if (debouncedTag) params.push(`tag=${encodeURIComponent(debouncedTag)}`)
+  //   const query = params.length > 0 ? params.join('&') + '&' : ''
+    
+  //   dispatch(initializeNotes(query))
+  // }, [dispatch, debouncedKeyword, debouncedTag])
+
+  const debouncedInitializeNotes = useMemo(
+    () =>
+      debounce((query) => {
+        dispatch(initializeNotes(query))
+      }, 500),
+    [dispatch]
+  )
+
+
+  useEffect(() => {
+    const params = []
+    if (keyword) params.push(`search=${encodeURIComponent(keyword)}`)
+    if (tag) params.push(`tag=${encodeURIComponent(tag)}`)
+    const query = params.length > 0 ? params.join('&') + '&' : ''
+
+    debouncedInitializeNotes(query)
+
+    return () => {
+      debouncedInitializeNotes.cancel()
+    }
+  }, [debouncedInitializeNotes, keyword, tag])
+
+  const handleKeywordChange = (value) => {
     setSortBy('date')
     setSortOrder('desc')
-    setSearchText(query.toLowerCase())
+    setKeyword(value)
+  }
+
+  const handleTagChange = (value) => {
+    setSortBy('date')
+    setSortOrder('desc')
+    setTag(value)
   }
 
   const handleNoteClick = (noteId) => {
     navigate(`/notes/${noteId}`)
   }
 
-  const filteredNotes = searchText
-    ? notes.filter(note =>
-      note.title.toLowerCase().includes(searchText) ||
-        note.content.toLowerCase().includes(searchText) ||
-        (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchText)))
-    )
-    : notes
-
-  const sortedNotes = [...filteredNotes].sort((a, b) => {
+  const sortedNotes = [...notes].sort((a, b) => {
     if (sortBy === 'date') {
       return sortOrder === 'desc'
         ? new Date(b.updatedAt) - new Date(a.updatedAt)
@@ -48,6 +79,7 @@ const HomePage = () => {
     return sortOrder === 'desc'
       ? b.title.localeCompare(a.title)
       : a.title.localeCompare(b.title)
+
   })
 
   if (!user) {
@@ -60,21 +92,19 @@ const HomePage = () => {
     )
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="xl" />
-      </div>
-    )
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col gap-6">
+          {/* Search and Sort Controls */}
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
-              <SearchBar value={searchText} onSearch={handleSearch} />
+              <SearchBar 
+                keyword={keyword} 
+                onKeywordChange={handleKeywordChange} 
+                tag={tag} 
+                onTagChange={handleTagChange} 
+              />
             </div>
             <SortControls
               sortBy={sortBy}
@@ -84,20 +114,28 @@ const HomePage = () => {
             />
           </div>
 
-          {sortedNotes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedNotes.map(note => (
-                <NoteCard
-                  key={note.id}
-                  note={note}
-                  onClick={() => handleNoteClick(note.id)}
-                />
-              ))}
+          {loading && (
+            <div className="flex items-center justify-center mt-20">
+              <Spinner size="xl" />
             </div>
-          ) : (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              {searchText ? 'No notes found matching your search.' : 'No notes found. Create a new note to get started!'}
-            </div>
+          )}
+
+          {!loading && (
+            sortedNotes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sortedNotes.map(note => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    onClick={() => handleNoteClick(note.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                {(keyword || tag) ? 'No notes found matching your search.' : 'No notes found. Create a new note to get started!'}
+              </div>
+            )
           )}
         </div>
       </div>
