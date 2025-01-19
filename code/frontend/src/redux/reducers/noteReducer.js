@@ -27,12 +27,12 @@ const noteSlice = createSlice({
     },
     updateNote(state, action) {
       const updatedNote = action.payload
-      state.notes = state.notes.map(note =>
-        note.id === updatedNote.id ? updatedNote : note
-      )
       if (state.activeNote?.id === updatedNote.id) {
         state.activeNote = updatedNote
       }
+      state.notes = state.notes.map(note =>
+        note.id === updatedNote.id ? updatedNote : note
+      )
       state.loading = false
     },
     removeNote(state, action) {

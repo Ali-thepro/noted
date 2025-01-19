@@ -3,15 +3,6 @@ import { FaSearch, FaTags } from 'react-icons/fa'
 import PropTypes from 'prop-types'
 
 const SearchBar = ({ keyword, onKeywordChange, tag, onTagChange }) => {
-  const handleKeywordChange = (e) => {
-    const value = e.target.value
-    onKeywordChange(value)
-  }
-
-  const handleTagChange = (e) => {
-    const value = e.target.value
-    onTagChange(value)
-  }
 
   return (
     <div className="flex flex-col sm:flex-row gap-4">
@@ -19,7 +10,7 @@ const SearchBar = ({ keyword, onKeywordChange, tag, onTagChange }) => {
         type="text"
         icon={FaSearch}
         value={keyword}
-        onChange={handleKeywordChange}
+        onChange={(e) => onKeywordChange(e.target.value)}
         placeholder="Search by keyword..."
         className="w-full"
       />
@@ -27,7 +18,7 @@ const SearchBar = ({ keyword, onKeywordChange, tag, onTagChange }) => {
         type="text"
         icon={FaTags}
         value={tag}
-        onChange={handleTagChange}
+        onChange={(e) => onTagChange(e.target.value)}
         placeholder="Filter by tag..."
         className="w-full"
       />
