@@ -6,7 +6,7 @@ import CodeMirror from '@uiw/react-codemirror'
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
-import { EditorView } from '@codemirror/view'
+import { EditorView, scrollPastEnd } from '@codemirror/view'
 import { indentUnit } from '@codemirror/language'
 import { vim } from '@replit/codemirror-vim'
 import { emacs } from '@replit/codemirror-emacs'
@@ -53,11 +53,7 @@ const NoteEditor = ({ content, onChange }) => {
     const { from, to } = state.selection.main
     const selectedText = state.sliceDoc(from, to)
 
-    if (actionObj.action === 'header' || actionObj.action === 'quote' ||
-        actionObj.action === 'ul' || actionObj.action === 'ol' ||
-        actionObj.action === 'checklist' || actionObj.action === 'table' ||
-        actionObj.action === 'line') {
-
+    if (['header', 'quote', 'ul', 'ol', 'checklist', 'table', 'line'].includes(actionObj.action)) {
       const line = state.doc.lineAt(from)
       const transaction = state.update({
         changes: {
@@ -68,7 +64,6 @@ const NoteEditor = ({ content, onChange }) => {
       })
       view.dispatch(transaction)
     } else if (actionObj.action === 'link') {
-
       const transaction = state.update({
         changes: {
           from,
@@ -101,6 +96,7 @@ const NoteEditor = ({ content, onChange }) => {
       codeLanguages: (input) => findLanguageByCodeBlockName(languages, input)
     }),
     hyperLink,
+    scrollPastEnd(),
     EditorView.lineWrapping,
     indentUnit.of(' '.repeat(config.indentSize)),
     keymapView.of([{
@@ -134,14 +130,13 @@ const NoteEditor = ({ content, onChange }) => {
 
   const handleChange = useCallback((value, viewUpdate) => {
     onChange(value)
-    // Update cursor position immediately
+
     const pos = viewUpdate.state.selection.main.head
     const line = viewUpdate.state.doc.lineAt(pos)
     setPosition({
       line: line.number,
       column: pos - line.from + 1
     })
-
   }, [onChange])
 
   const handleConfigChange = useCallback((newConfig) => {
@@ -149,23 +144,28 @@ const NoteEditor = ({ content, onChange }) => {
   }, [dispatch])
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col h-full">
       <Toolbar onAction={handleToolbarAction} />
-      <CodeMirror
-        ref={editorRef}
-        value={content}
-        height="100%"
-        basicSetup={{ defaultKeymap: false }}
-        extensions={extensions}
-        theme={editorThemes[config.theme]}
-        onChange={handleChange}
-        className="flex-1 overflow-auto"
-      />
-      <EditorStatusBar
-        position={position}
-        config={config}
-        onConfigChange={handleConfigChange}
-      />
+      <div className="flex flex-col flex-1 overflow-hidden">
+
+        <CodeMirror
+          ref={editorRef}
+          value={content}
+          height="100%"
+          basicSetup={{ defaultKeymap: false }}
+          extensions={extensions}
+          theme={editorThemes[config.theme]}
+          onChange={handleChange}
+          className="flex-1 overflow-auto"
+        />
+
+        <EditorStatusBar
+          position={position}
+          config={config}
+          onConfigChange={handleConfigChange}
+          className="flex-shrink-0"
+        />
+      </div>
     </div>
   )
 }

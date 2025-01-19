@@ -6,7 +6,7 @@ const initialState = {
   notes: [],
   activeNote: null,
   loading: false,
-  viewMode: 'preview' // 'preview', 'edit', 'split'
+  viewMode: 'split' // 'preview', 'edit', 'split'
 }
 
 const noteSlice = createSlice({
@@ -24,15 +24,16 @@ const noteSlice = createSlice({
     appendNote(state, action) {
       state.notes.push(action.payload)
       state.loading = false
+      state.activeNote = action.payload
     },
     updateNote(state, action) {
       const updatedNote = action.payload
-      state.notes = state.notes.map(note =>
-        note.id === updatedNote.id ? updatedNote : note
-      )
       if (state.activeNote?.id === updatedNote.id) {
         state.activeNote = updatedNote
       }
+      state.notes = state.notes.map(note =>
+        note.id === updatedNote.id ? updatedNote : note
+      )
       state.loading = false
     },
     removeNote(state, action) {
@@ -40,7 +41,6 @@ const noteSlice = createSlice({
       if (state.activeNote?.id === action.payload) {
         state.activeNote = null
       }
-      state.loading = false
     },
     setViewMode(state, action) {
       state.viewMode = action.payload
@@ -60,7 +60,7 @@ export const initializeNotes = (query = '') => {
       dispatch(setNotes(notes))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }
@@ -76,7 +76,7 @@ export const createNote = (noteData) => {
       return newNote
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
       return null
     }
@@ -91,7 +91,7 @@ export const fetchNote = (id) => {
       dispatch(setActiveNote(note))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }
@@ -106,7 +106,7 @@ export const editNote = (id, noteData) => {
       dispatch(setNotification('Note saved successfully', 'success'))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }
@@ -114,14 +114,13 @@ export const editNote = (id, noteData) => {
 
 export const deleteNote = (id) => {
   return async dispatch => {
-    dispatch(setLoading(true))
     try {
       await noteService.deleteNote(id)
       dispatch(removeNote(id))
       dispatch(setNotification('Note deleted successfully', 'success'))
     } catch (error) {
       const message = error.response?.data?.error || error.message
-      dispatch(setNotification(message, 'error'))
+      dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
     }
   }

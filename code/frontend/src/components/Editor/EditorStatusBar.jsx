@@ -58,11 +58,7 @@ const EDITOR_OPTIONS = [
 ]
 
 
-const EditorStatusBar = ({
-  position,
-  config,
-  onConfigChange
-}) => {
+const EditorStatusBar = ({ position, config, onConfigChange }) => {
   const handleChange = (key) => (e) => {
     const value = ['indentSize', 'fontSize'].includes(key)
       ? Number(e.target.value)
@@ -92,7 +88,7 @@ const EditorStatusBar = ({
                 <select
                   value={String(config[key])}
                   onChange={handleChange(key)}
-                  className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs outline-none form-select"
+                  className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs form-select"
                 >
                   {options.map(({ value, label }) => (
                     <option key={value} value={value}>

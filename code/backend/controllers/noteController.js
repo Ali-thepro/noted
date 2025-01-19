@@ -2,21 +2,29 @@ const Note = require('../models/note')
 const createError = require('../utils/error')
 
 const getNotes = async (request, response, next) => {
-  const user = request.user
   const { tag, search } = request.query
 
   try {
-    let query = { user: user.id }
-
-    if (tag) {
-      query.tags = tag
+    const filter = {
+      ...(tag
+        ? {
+          tags: {
+            $regex: tag,
+            $options: 'i',
+          },
+        }
+        : {}),
+      ...(search
+        ? {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { content: { $regex: search, $options: 'i' } },
+          ],
+        }
+        : {}),
     }
 
-    if (search) {
-      query.$text = { $search: search }
-    }
-
-    const notes = await Note.find(query).sort({ updatedAt: -1 })
+    const notes = await Note.find(filter).sort({ updatedAt: -1 })
     response.json(notes)
   } catch (error) {
     next(error)
@@ -58,34 +66,36 @@ const createNote = async (request, response, next) => {
   }
 }
 
+// const updateNote = async (request, response, next) => {
+//   const { id } = request.params
+//   const user = request.user
+//   const { title, content, tags } = request.body
+
+//   try {
+//     const note = await Note.findOne({ _id: id, user: user.id })
+//     if (!note) {
+//       return next(createError('Note not found or unauthorized', 404))
+//     }
+
+//     note.title = title
+//     note.content = content
+//     note.tags = tags || []
+
+//     const updatedNote = await note.save()
+//     response.json(updatedNote)
+//   } catch (error) {
+//     next(error)
+//   }
+// }
+
+
 const updateNote = async (request, response, next) => {
   const { id } = request.params
   const user = request.user
-  const { title, content, tags } = request.body
 
-  try {
-    const note = await Note.findOne({ _id: id, user: user.id })
-    if (!note) {
-      return next(createError('Note not found or unauthorized', 404))
-    }
-
-    note.title = title
-    note.content = content
-    note.tags = tags || []
-
-    const updatedNote = await note.save()
-    response.json(updatedNote)
-  } catch (error) {
-    next(error)
-  }
-}
-
-/*
-
-const updateNote = async (request, response, next) => {
-  const { id } = request.params
-  const user = request.user
-  const { title, content, tags } = request.body
+  const title = request.body.title
+  const content = request.body.content
+  const tags = request.body.tags
 
   try {
     const updatedNote = await Note.findOneAndUpdate(
@@ -103,7 +113,6 @@ const updateNote = async (request, response, next) => {
     next(error)
   }
 }
-*/
 
 
 const deleteNote = async (request, response, next) => {

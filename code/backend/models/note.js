@@ -9,12 +9,11 @@ const noteSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: [true, 'Content is required']
     },
     tags: [{
       type: String,
       trim: true,
-      lowercase: true
+      lowercase: true,
     }],
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +24,10 @@ const noteSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-noteSchema.index({ content: 'text', title: 'text', tags: 'text' })
+noteSchema.path('tags').validate(function (value) {
+  const uniqueTags = new Set(value)
+  return value.length === uniqueTags.size
+}, 'Tags must be unique')
 
 noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
