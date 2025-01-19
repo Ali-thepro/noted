@@ -24,6 +24,7 @@ const noteSlice = createSlice({
     appendNote(state, action) {
       state.notes.push(action.payload)
       state.loading = false
+      state.activeNote = action.payload
     },
     updateNote(state, action) {
       const updatedNote = action.payload
@@ -40,7 +41,6 @@ const noteSlice = createSlice({
       if (state.activeNote?.id === action.payload) {
         state.activeNote = null
       }
-      state.loading = false
     },
     setViewMode(state, action) {
       state.viewMode = action.payload
@@ -114,7 +114,6 @@ export const editNote = (id, noteData) => {
 
 export const deleteNote = (id) => {
   return async dispatch => {
-    dispatch(setLoading(true))
     try {
       await noteService.deleteNote(id)
       dispatch(removeNote(id))

@@ -9,13 +9,11 @@ const noteSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: [true, 'Content is required']
     },
     tags: [{
       type: String,
       trim: true,
       lowercase: true,
-      unique: [true, 'Tags must be unique']
     }],
     user: {
       type: mongoose.Schema.Types.ObjectId,

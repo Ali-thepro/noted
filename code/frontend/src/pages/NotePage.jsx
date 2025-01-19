@@ -6,7 +6,7 @@ import NoteEditor from '../components/Editor/NoteEditor'
 import NotePreview from '../components/Preview/NotePreview'
 import debounce from 'lodash.debounce'
 
-const AUTOSAVE_DELAY = 1000
+const AUTOSAVE_DELAY = 700
 
 function NotePage() {
   const { id } = useParams()
@@ -14,6 +14,7 @@ function NotePage() {
   const navigate = useNavigate()
   const { activeNote, viewMode } = useSelector(state => state.note)
   const user = useSelector(state => state.auth.user)
+  console.log(activeNote)
 
   const [content, setContent] = useState(activeNote?.content || '')
 
@@ -45,7 +46,6 @@ function NotePage() {
       debouncedSave(content)
     }
     return () => {
-      debouncedSave.flush()
       debouncedSave.cancel()
     }
   }, [content, debouncedSave, activeNote?.content])
@@ -53,7 +53,6 @@ function NotePage() {
   const handleChange = (newContent) => {
     setContent(newContent)
   }
-
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
