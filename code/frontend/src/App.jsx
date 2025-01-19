@@ -12,7 +12,6 @@ import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
 import OAuthCallback from './pages/OAuthCallback'
 import DemoPage from './pages/DemoPage'
-import NotePage from './pages/NotePage'
 
 
 const App = () => {
@@ -41,9 +40,7 @@ const App = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route path="/demo" element={<DemoPage />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/notes/:id" element={<NotePage />} />
-        </Route>
+
       </Routes>
     </Router>
   )
