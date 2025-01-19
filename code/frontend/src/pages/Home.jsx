@@ -1,10 +1,23 @@
-const Home = () => {
+import { useSelector } from 'react-redux'
+
+
+const HomePage = () => {
+  const user = useSelector(state => state.auth.user)
+
+  if (!user) {
+    return (
+      <div>
+        <h1>Please sign in to view your notes</h1>
+      </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className='text-3xl'>Welcome to the Home Page</h1>
+    <div>
+      <h1>Home</h1>
     </div>
   )
+
 }
 
-export default Home
+export default HomePage
