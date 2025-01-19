@@ -7,7 +7,7 @@ import { deleteNote } from '../../redux/reducers/noteReducer'
 import { useState } from 'react'
 import NoteModal from './NoteModal'
 
-const NoteCard = ({ note, onClick }) => {
+const NoteCard = ({ note, onClick, onTagClick }) => {
   const dispatch = useDispatch()
   const [showEditModal, setShowEditModal] = useState(false)
 
@@ -21,6 +21,11 @@ const NoteCard = ({ note, onClick }) => {
   const handleEdit = (e) => {
     e.stopPropagation()
     setShowEditModal(true)
+  }
+
+  const handleTagClick = (e, tag) => {
+    e.stopPropagation()  // This prevents the note card click
+    onTagClick(tag)
   }
 
   return (
@@ -70,6 +75,7 @@ const NoteCard = ({ note, onClick }) => {
               <span
                 key={note.id + tag}
                 className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full"
+                onClick={(e) => handleTagClick(e, tag)}
               >
                 {tag}
               </span>
@@ -96,7 +102,8 @@ NoteCard.propTypes = {
     lastVisited: PropTypes.string,
     updatedAt: PropTypes.string.isRequired
   }).isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  onTagClick: PropTypes.func.isRequired
 }
 
 export default NoteCard
