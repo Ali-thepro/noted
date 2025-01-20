@@ -7,6 +7,8 @@ import { toast } from 'react-toastify'
 const initialState = {
   user: null,
   loading: false,
+  _timestamp: null
+  // tokenExpiry: null
 }
 const authSlice = createSlice({
   name: 'auth',
@@ -28,8 +30,11 @@ const authSlice = createSlice({
       return { ...state, loading: false }
     },
     updateTokenExpiry(state) {
-      return { ...state, tokenExpiry: Date.now() + (15 * 60 * 1000) }
-    }
+      return { ...state, _timestamp: Date.now() }
+    },
+    // updateTokenExpiry(state) {
+    //   return { ...state, tokenExpiry: Date.now() + 15 * 60 * 1000 }
+    // }
   }
 })
 
@@ -43,6 +48,7 @@ export const login = (credentials, mode, redirect) => {
         return { success: true, redirectUrl: response.redirectUrl }
       }
       dispatch(setUser(response))
+      dispatch(updateTokenExpiry())
       toast.success('Logged in')
       return { success: true }
     } catch (error) {

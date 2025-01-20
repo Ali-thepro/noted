@@ -40,12 +40,6 @@ const HomePage = () => {
     [dispatch]
   )
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/signin')
-    }
-  }, [user, navigate])
-
 
   useEffect(() => {
     const params = []

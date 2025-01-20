@@ -14,7 +14,6 @@ function NotePage() {
   const navigate = useNavigate()
   const { activeNote, viewMode } = useSelector(state => state.note)
   const user = useSelector(state => state.auth.user)
-  console.log(activeNote)
 
   const [content, setContent] = useState(activeNote?.content || '')
 

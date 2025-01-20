@@ -35,10 +35,13 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status !== 401 || originalRequest.url?.includes('/refresh-token') || originalRequest._retry) {
+    if (originalRequest.url?.includes('/refresh-token')) {
       // window.location.href = '/signin'
       toast.error('Session expired. Please sign in again.')
       dispatchFunction(signOut())
+    }
+
+    if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error)
     }
 
