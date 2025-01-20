@@ -5,7 +5,7 @@ import { fetchNote, editNote } from '../redux/reducers/noteReducer'
 import NoteEditor from '../components/Editor/NoteEditor'
 import NotePreview from '../components/Preview/NotePreview'
 import debounce from 'lodash.debounce'
-
+import extractTitle from '../utils/extractTitle'
 const AUTOSAVE_DELAY = 700
 
 function NotePage() {
@@ -36,7 +36,8 @@ function NotePage() {
 
   const debouncedSave = useMemo(() => debounce((newContent) => {
     if (activeNote?.id) {
-      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent }))
+      const title = extractTitle(newContent, activeNote.title)
+      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent, title }))
     }
   }, AUTOSAVE_DELAY), [dispatch, activeNote])
 
