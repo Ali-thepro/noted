@@ -2,7 +2,8 @@ require('dotenv').config()
 
 const MONGODB_URI = process.env.MONGODB_URI
 const PORT = process.env.PORT
-const SECRET = process.env.SECRET
+const ACCESS_SECRET = process.env.ACCESS_SECRET
+const REFRESH_SECRET = process.env.REFRESH_SECRET
 const UI_URI = process.env.UI_URI
 const SERVER_URI = process.env.SERVER_URI
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
@@ -19,7 +20,8 @@ const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY
 module.exports = {
   MONGODB_URI,
   PORT,
-  SECRET,
+  ACCESS_SECRET,
+  REFRESH_SECRET,
   UI_URI,
   SERVER_URI,
   GOOGLE_CLIENT_ID,

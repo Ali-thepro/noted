@@ -37,8 +37,8 @@ const tokenExtractor = (request, response, next) => {
   const authorization = request.get('authorization')
   if (authorization && authorization.startsWith('Bearer ')) {
     request.token = authorization.replace('Bearer ', '')
-  } else if (request.cookies.token) {
-    request.token = request.cookies.token
+  } else if (request.cookies.accessToken) {
+    request.token = request.cookies.accessToken
   } else {
     request.token = null
   }
@@ -53,7 +53,7 @@ const verifyUser = async (request, response, next) => {
       return next(createError('Unauthorised - No token, please re-authenticate', 401))
     }
 
-    const decodedToken = jwt.verify(token, config.SECRET)
+    const decodedToken = jwt.verify(token, config.ACCESS_SECRET)
     if (!decodedToken.id) {
       return next(createError('Unauthorised - Invalid token', 401))
     }
