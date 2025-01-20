@@ -1,8 +1,6 @@
 import axios from 'axios'
 import { refreshToken, signOut } from '../redux/reducers/authReducer'
 import { toast } from 'react-toastify'
-import { setNotification } from '../redux/reducers/notificationReducer'
-
 
 let dispatchFunction = null
 
@@ -39,6 +37,7 @@ axiosInstance.interceptors.response.use(
       // window.location.href = '/signin'
       toast.error('Session expired. Please sign in again.')
       dispatchFunction(signOut())
+      return Promise.reject(error)
     }
 
     if (error.response?.status !== 401 || originalRequest._retry) {
@@ -64,7 +63,6 @@ axiosInstance.interceptors.response.use(
       const refreshed = await dispatchFunction(refreshToken())
 
       if (!refreshed) {
-        dispatchFunction(setNotification('Session expired. Please sign in again.', 'failure'))
         return Promise.reject(error)
       }
       processQueue(null)
