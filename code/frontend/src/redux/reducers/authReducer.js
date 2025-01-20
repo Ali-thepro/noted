@@ -7,8 +7,8 @@ import { toast } from 'react-toastify'
 const initialState = {
   user: null,
   loading: false,
-  _timestamp: null
-  // tokenExpiry: null
+  tokenExpiry: null
+  // _timestamp: null
 }
 const authSlice = createSlice({
   name: 'auth',
@@ -24,17 +24,17 @@ const authSlice = createSlice({
       return { ...state,  loading: false }
     },
     signOut() {
-      return { user: null, loading: false }
+      return { user: null, loading: false, tokenExpiry: null }
     },
     clearLoading(state) {
       return { ...state, loading: false }
     },
     updateTokenExpiry(state) {
-      return { ...state, _timestamp: Date.now() }
+      return { ...state, tokenExpiry: Date.now() + 15 * 60 * 1000 }
     },
     // updateTokenExpiry(state) {
-    //   return { ...state, tokenExpiry: Date.now() + 15 * 60 * 1000 }
-    // }
+    //   return { ...state, _timestamp: Date.now() }
+    // },
   }
 })
 
