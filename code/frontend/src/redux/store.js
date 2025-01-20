@@ -1,6 +1,5 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import { persistStore, persistReducer } from 'redux-persist'
-import expireReducer from 'redux-persist-expire'
 import storage from 'redux-persist/lib/storage'
 import notificationReducer from './reducers/notificationReducer'
 import themeReducer from './reducers/themeReducer'
@@ -9,6 +8,7 @@ import noteReducer from './reducers/noteReducer'
 import editorConfigReducer from './reducers/editorConfigReducer'
 import { setDispatch } from '../services/axiosConfig'
 import { createTransform } from 'redux-persist'
+// import expireReducer from 'redux-persist-expire'
 
 const AuthTransform = createTransform(
   (inboundState) => {
