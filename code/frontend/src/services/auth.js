@@ -1,19 +1,23 @@
-import axios from 'axios'
+import axiosInstance from './axiosConfig'
 const BASE_URL = '/api/auth'
 
 export const signup = async (credentials) => {
-  const response = await axios.post(`${BASE_URL}/signup`, credentials)
+  const response = await axiosInstance.post(`${BASE_URL}/signup`, credentials)
   return response
 }
 
 export const signin = async (credentials, mode, redirect) => {
-  console.log(mode, redirect)
   let url = `${BASE_URL}/signin`
   if (mode && redirect) {
     url += `?mode=${mode}&redirect=${redirect}`
   }
 
-  const response = await axios.post(url, credentials)
+  const response = await axiosInstance.post(url, credentials)
+  return response.data
+}
+
+export const refreshUserToken = async () => {
+  const response = await axiosInstance.post(`${BASE_URL}/refresh-token`)
   return response.data
 }
 
@@ -34,11 +38,11 @@ export const githubAuth = (mode, redirect) => {
 }
 
 export const signOutUserFromDB = async () => {
-  const response = await axios.post(`${BASE_URL}/signout`)
+  const response = await axiosInstance.post(`${BASE_URL}/signout`)
   return response.data
 }
 
 export const me = async () => {
-  const response = await axios.get(`${BASE_URL}/me`)
+  const response = await axiosInstance.get(`${BASE_URL}/me`)
   return response.data
 }

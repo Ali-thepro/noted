@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
-import { signin, googleAuth, githubAuth, signOutUserFromDB } from '../../services/auth'
+import { signin, googleAuth, githubAuth, signOutUserFromDB, refreshUserToken } from '../../services/auth'
 import { toast } from 'react-toastify'
 
 
@@ -27,6 +27,9 @@ const authSlice = createSlice({
     clearLoading(state) {
       return { ...state, loading: false }
     },
+    updateTokenExpiry(state) {
+      return { ...state, tokenExpiry: Date.now() + (15 * 60 * 1000) }
+    }
   }
 })
 
@@ -42,6 +45,21 @@ export const login = (credentials, mode, redirect) => {
       dispatch(setUser(response))
       toast.success('Logged in')
       return { success: true }
+    } catch (error) {
+      const message = error.response?.data?.error || error.message
+      dispatch(setNotification(message, 'failure'))
+      dispatch(setError())
+      return false
+    }
+  }
+}
+
+export const refreshToken = () => {
+  return async dispatch => {
+    try {
+      await refreshUserToken()
+      dispatch(updateTokenExpiry())
+      return true
     } catch (error) {
       const message = error.response?.data?.error || error.message
       dispatch(setNotification(message, 'failure'))
@@ -96,5 +114,5 @@ export const githubLogin = (mode, redirect) => {
   }
 }
 
-export const { setUser, initial, setError, signOut, clearLoading } = authSlice.actions
+export const { setUser, initial, setError, signOut, clearLoading, updateTokenExpiry } = authSlice.actions
 export default authSlice.reducer

@@ -401,7 +401,7 @@ const github = async (request, response, next) => {
 
 const signOut = async (request, response) => {
   response
-    .clearCookie('accesstoken')
+    .clearCookie('accessToken')
     .clearCookie('refreshToken')
     .status(200)
     .send('User signed out successfully')

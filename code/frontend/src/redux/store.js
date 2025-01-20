@@ -7,6 +7,8 @@ import themeReducer from './reducers/themeReducer'
 import authReducer from './reducers/authReducer'
 import noteReducer from './reducers/noteReducer'
 import editorConfigReducer from './reducers/editorConfigReducer'
+import { setDispatch } from '../services/axiosConfig' // Import setDispatch
+
 
 const rootReducer = combineReducers({
   notification: notificationReducer,
@@ -23,8 +25,8 @@ const persistConfig = {
   blacklist: ['notification', 'note'],
   transforms: [
     expireReducer('auth', {
-      expireSeconds: 7200,
-      expiredState: {},
+      expireSeconds: 15 * 60,
+      expiredState: { user: null, loading: false },
       autoExpire: true,
     })
   ],
@@ -38,5 +40,8 @@ export const store = configureStore({
     serializableCheck: false,
   }),
 })
+
+setDispatch(store.dispatch)
+
 
 export const persistor = persistStore(store)
