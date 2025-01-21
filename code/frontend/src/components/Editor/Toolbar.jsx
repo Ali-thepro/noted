@@ -52,7 +52,7 @@ const Toolbar = ({ onAction }) => {
   }
 
   return (
-    <div className="p-2 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div className="p-2 border-b dark:border-gray-700 bg-white dark:bg-[rgb(30,33,34)]">
       <div className="overflow-x-auto">
         <div className="inline-flex min-w-max">
           {toolbarItems.map((item, index) => (

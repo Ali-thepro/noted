@@ -71,7 +71,7 @@ const EditorStatusBar = ({ position, config, onConfigChange }) => {
   }
 
   return (
-    <div className="flex items-center justify-between px-3 py-2 text-sm border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky bottom-0">
+    <div className="flex items-center justify-between px-3 py-2 text-sm border-t dark:border-gray-700 bg-gray-50 dark:bg-[rgb(30,33,34)] sticky bottom-0">
       <div className="flex items-center gap-2 overflow-x-auto">
         {EDITOR_OPTIONS.map(({ key, label, options }) => (
           <div key={key} className="flex items-center gap-1 shrink-0">
