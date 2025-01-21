@@ -9,17 +9,17 @@ const getNotes = async (request, response, next) => {
     const filter = {
       user: user.id,
       ...(tag ? {
-          tags: {
-            $regex: tag,
-            $options: 'i',
-          },
-        } : {}),
+        tags: {
+          $regex: tag,
+          $options: 'i',
+        },
+      } : {}),
       ...(search ? {
-          $or: [
-            { title: { $regex: search, $options: 'i' } },
-            { content: { $regex: search, $options: 'i' } },
-          ],
-        } : {}),
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { content: { $regex: search, $options: 'i' } },
+        ],
+      } : {}),
     }
 
     const startIndex = parseInt(request.query.startIndex) || 0
