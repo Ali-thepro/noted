@@ -24,14 +24,15 @@ const getNotes = async (request, response, next) => {
 
     const startIndex = parseInt(request.query.startIndex) || 0
     const limit = parseInt(request.query.limit) || 9
-    const sortBy = request.query.sortBy === 'asc' ? 1 : -1
-    const sortOrder = request.query.sortOrder || 'updatedAt'
+    const sortBy = request.query.sortBy || 'updatedAt'
+    const sortOrder = request.query.sortOrder === 'asc' ? 1 : -1
 
+    const total = await Note.countDocuments(filter)
     const notes = await Note.find(filter)
-      .sort({ [sortOrder]: sortBy })
+      .sort({ [sortBy]: sortOrder })
       .skip(startIndex)
       .limit(limit)
-    response.json(notes)
+    response.json({ notes, total })
   } catch (error) {
     next(error)
   }
