@@ -24,7 +24,7 @@ const NoteCard = ({ note, onClick, onTagClick }) => {
   }
 
   const handleTagClick = (e, tag) => {
-    e.stopPropagation()  // This prevents the note card click
+    e.stopPropagation()
     onTagClick(tag)
   }
 

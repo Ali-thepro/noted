@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
 import * as noteService from '../../services/note'
+import { toast } from 'react-toastify'
 
 const initialState = {
   notes: [],
   activeNote: null,
+  total: 0,
   loading: false,
   viewMode: 'split' // 'preview', 'edit', 'split'
 }
@@ -14,7 +16,8 @@ const noteSlice = createSlice({
   initialState,
   reducers: {
     setNotes(state, action) {
-      state.notes = action.payload
+      state.notes = action.payload.notes
+      state.total = action.payload.total
       state.loading = false
     },
     setActiveNote(state, action) {
@@ -56,8 +59,8 @@ export const initializeNotes = (query = '') => {
   return async dispatch => {
     dispatch(setLoading(true))
     try {
-      const notes = await noteService.getNotes(query)
-      dispatch(setNotes(notes))
+      const response = await noteService.getNotes(query)
+      dispatch(setNotes(response))
     } catch (error) {
       const message = error.response?.data?.error || error.message
       dispatch(setNotification(message, 'failure'))
@@ -72,7 +75,7 @@ export const createNote = (noteData) => {
     try {
       const newNote = await noteService.createNote(noteData)
       dispatch(appendNote(newNote))
-      dispatch(setNotification('Note created successfully', 'success'))
+      toast.success('Note created successfully')
       return newNote
     } catch (error) {
       const message = error.response?.data?.error || error.message
