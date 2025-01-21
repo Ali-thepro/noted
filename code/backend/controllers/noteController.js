@@ -8,25 +8,29 @@ const getNotes = async (request, response, next) => {
   try {
     const filter = {
       user: user.id,
-      ...(tag
-        ? {
+      ...(tag ? {
           tags: {
             $regex: tag,
             $options: 'i',
           },
-        }
-        : {}),
-      ...(search
-        ? {
+        } : {}),
+      ...(search ? {
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { content: { $regex: search, $options: 'i' } },
           ],
-        }
-        : {}),
+        } : {}),
     }
 
-    const notes = await Note.find(filter).sort({ updatedAt: -1 })
+    const startIndex = parseInt(request.query.startIndex) || 0
+    const limit = parseInt(request.query.limit) || 9
+    const sortBy = request.query.sortBy === 'asc' ? 1 : -1
+    const sortOrder = request.query.sortOrder || 'updatedAt'
+
+    const notes = await Note.find(filter)
+      .sort({ [sortOrder]: sortBy })
+      .skip(startIndex)
+      .limit(limit)
     response.json(notes)
   } catch (error) {
     next(error)
