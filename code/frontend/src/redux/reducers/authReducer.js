@@ -63,7 +63,8 @@ export const login = (credentials, mode, redirect) => {
 export const refreshToken = () => {
   return async dispatch => {
     try {
-      await refreshUserToken()
+      const response = await refreshUserToken()
+      dispatch(setUser(response))
       dispatch(updateTokenExpiry())
       return true
     } catch (error) {

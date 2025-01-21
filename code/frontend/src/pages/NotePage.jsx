@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchNote, editNote } from '../redux/reducers/noteReducer'
@@ -6,7 +6,9 @@ import NoteEditor from '../components/Editor/NoteEditor'
 import NotePreview from '../components/Preview/NotePreview'
 import debounce from 'lodash.debounce'
 import extractTitle from '../utils/extractTitle'
+
 const AUTOSAVE_DELAY = 700
+const SETCONTENT_DELAY = 100
 
 function NotePage() {
   const { id } = useParams()
@@ -16,10 +18,12 @@ function NotePage() {
   const user = useSelector(state => state.auth.user)
 
   const [content, setContent] = useState(activeNote?.content || '')
+  const [previewContent, setPreviewContent] = useState(activeNote?.content || '')
 
   useEffect(() => {
     if (activeNote) {
       setContent(activeNote.content)
+      setPreviewContent(activeNote.content)
     }
   }, [activeNote])
 
@@ -41,18 +45,25 @@ function NotePage() {
     }
   }, AUTOSAVE_DELAY), [dispatch, activeNote])
 
+  const debouncedSetContent = useMemo(() => debounce((newContent) => {
+    setContent(newContent)
+    setPreviewContent(newContent)
+  }, SETCONTENT_DELAY, {
+    trailing: true,
+    leading: true
+  }), [])
+
   useEffect(() => {
-    if (content !== activeNote?.content) {
-      debouncedSave(content)
-    }
     return () => {
       debouncedSave.cancel()
+      debouncedSetContent.cancel()
     }
-  }, [content, debouncedSave, activeNote?.content])
+  }, [debouncedSave, debouncedSetContent])
 
-  const handleChange = (newContent) => {
-    setContent(newContent)
-  }
+  const handleChange = useCallback((newContent) => {
+    debouncedSetContent(newContent)
+    debouncedSave(newContent)
+  }, [debouncedSetContent, debouncedSave])
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
@@ -67,8 +78,8 @@ function NotePage() {
         )}
 
         {(viewMode === 'preview' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'w-1/2' : 'w-full'} h-full overflow-auto border-l dark:border-gray-700`}>
-            <NotePreview content={content} />
+          <div className={`${viewMode === 'split' ? 'w-1/2' : 'w-full'} h-full overflow-auto border-l dark:border-gray-700 break-words`}>
+            <NotePreview content={previewContent} />
           </div>
         )}
       </div>

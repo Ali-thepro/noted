@@ -33,7 +33,7 @@ const Header = () => {
   }
 
   return (
-    <Navbar className="border-b-2">
+    <Navbar className="border-b-2 dark:bg-[rgb(30,33,34)]">
       <div className="flex items-center gap-4">
         <Navbar.Brand as={'div'}>
           <Link to="/" className="text-sm sm:text-xl font-semibold self-center whitespace-nowrap dark:text-white">

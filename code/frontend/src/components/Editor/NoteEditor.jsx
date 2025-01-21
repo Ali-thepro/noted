@@ -32,16 +32,10 @@ const NoteEditor = ({ content, onChange }) => {
 
   const getKeymapExtension = useCallback((type) => {
     switch (type) {
-    case 'vim':
-      return [vim()]
-    case 'emacs':
-      return [emacs()]
-    case 'vscode':
-      return [keymapView.of(vscodeKeymap)]
-    case 'default':
-      return [keymapView.of(defaultKeymap)]
-    default:
-      return []
+    case 'vim':     return [vim()]
+    case 'emacs':   return [emacs()]
+    case 'vscode':  return [keymapView.of(vscodeKeymap)]
+    default:        return [keymapView.of(defaultKeymap)]
     }
   }, [])
 
