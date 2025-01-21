@@ -3,9 +3,11 @@ const createError = require('../utils/error')
 
 const getNotes = async (request, response, next) => {
   const { tag, search } = request.query
+  const user = request.user
 
   try {
     const filter = {
+      user: user.id,
       ...(tag
         ? {
           tags: {

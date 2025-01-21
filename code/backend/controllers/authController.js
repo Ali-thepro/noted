@@ -150,7 +150,7 @@ const refreshToken = async (request, response, next) => {
         secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json({ message: 'Token refreshed successfully' })
+      .json(user)
   } catch (error) {
     console.error('Error during token refresh:', error)
     return next(createError('Invalid refresh token', 403))
