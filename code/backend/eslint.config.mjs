@@ -2,8 +2,6 @@ import js from '@eslint/js'
 import globals from 'globals'
 import stylisticJs from '@stylistic/eslint-plugin-js'
 
-const platform = process.platform === 'win32' ? 'windows' : 'unix'
-
 export default [
   {
     files: ['**/*.{js,mjs}'],
@@ -19,7 +17,7 @@ export default [
     },
     rules: {
       '@stylistic/js/indent': ['error', 2],
-      '@stylistic/js/linebreak-style': ['error', platform],
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
       '@stylistic/js/quotes': ['error', 'single'],
       '@stylistic/js/semi': ['error', 'never'],
       'no-unused-vars': 'error',

@@ -5,8 +5,6 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import stylisticJs from '@stylistic/eslint-plugin-js'
 
-const platform = process.platform === 'win32' ? 'windows' : 'unix'
-
 export default [
   { ignores: ['dist', 'tailwind.config.js'] },
   {
@@ -29,7 +27,7 @@ export default [
     },
     rules: {
       '@stylistic/js/indent': ['error', 2],
-      '@stylistic/js/linebreak-style': ['error', platform],
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
       '@stylistic/js/quotes': ['error', 'single'],
       '@stylistic/js/semi': ['error', 'never'],
       'no-unused-vars': 'error',
