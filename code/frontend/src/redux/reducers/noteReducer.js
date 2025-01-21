@@ -75,7 +75,7 @@ export const createNote = (noteData) => {
     try {
       const newNote = await noteService.createNote(noteData)
       dispatch(appendNote(newNote))
-      toast.success('Note created successfully')  
+      toast.success('Note created successfully')
       return newNote
     } catch (error) {
       const message = error.response?.data?.error || error.message
