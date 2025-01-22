@@ -16,3 +16,12 @@ build-windows:
 
 clean:
 	rm -f $(BINARY_NAME) $(BINARY_NAME)-linux $(BINARY_NAME)-darwin $(BINARY_NAME).exe
+
+lint:
+	golangci-lint run
+
+fmt:
+	go fmt ./...
+
+vet:
+	go vet ./...
