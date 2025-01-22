@@ -110,6 +110,14 @@ const HomePage = () => {
             </div>
           )}
 
+          {notes.length === 0 && !loading && (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              {(keyword || tag)
+                ? 'No notes found matching your search.'
+                : 'No notes found. Create a new note to get started!'}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {notes.map(note => (
               <NoteCard
@@ -121,13 +129,6 @@ const HomePage = () => {
             ))}
           </div>
 
-          {notes.length === 0 && !loading && (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              {(keyword || tag)
-                ? 'No notes found matching your search.'
-                : 'No notes found. Create a new note to get started!'}
-            </div>
-          )}
 
           {totalPages > 1 && (
             <div className="flex justify-center mt-8">
