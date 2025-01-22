@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"noted/internal/metadata"
 )
 
 type Note struct {
@@ -39,10 +38,14 @@ func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {
 		return nil, err
 	}
 
-	_, err = metadata.AddNote(note.ID, note.Title, note.Tags)
+	return &note, nil
+}
+
+func (c *Client) DeleteNote(id string) error {
+	resp, err := c.doRequest("DELETE", fmt.Sprintf("/note/delete/%s", id), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to save note metadata: %w", err)
+		return err
 	}
 
-	return &note, nil
+	return c.handleResponse(resp, nil)
 }

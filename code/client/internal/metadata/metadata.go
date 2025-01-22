@@ -7,6 +7,7 @@ import (
 	"noted/utils"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
@@ -72,7 +73,7 @@ func SaveIndex(index *Index) error {
 	return nil
 }
 
-func AddNote(id, title string, tags []string) (*Note, error) {
+func AddNote(id, title string, tags []string, content string) (*Note, error) {
 	index, err := LoadIndex()
 	if err != nil {
 		return nil, err
@@ -93,12 +94,56 @@ func AddNote(id, title string, tags []string) (*Note, error) {
 		UpdatedAt: now,
 	}
 
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	notePath := filepath.Join(dir, filename)
+	if err := os.WriteFile(notePath, []byte(content), 0600); err != nil {
+		return nil, fmt.Errorf("failed to write note file: %w", err)
+	}
+
 	index.Notes = append(index.Notes, note)
 	if err := SaveIndex(index); err != nil {
 		return nil, err
 	}
 
 	return &note, nil
+}
+
+func SelectNote(title string) (*Note, error) {
+	matches, err := FindNotes(title)
+	if err != nil {
+		return nil, err
+	}
+
+	switch len(matches) {
+	case 0:
+		return nil, fmt.Errorf("no note found with title: %s", title)
+	case 1:
+		return &matches[0], nil
+	default:
+		fmt.Printf("Multiple notes found with title \"%s\":\n", title)
+		for i, note := range matches {
+			fmt.Printf("[%d] %s %s  (created: %s, updated: %s)\n",
+				i+1,
+				note.ShortID,
+				note.Title,
+				note.CreatedAt.Format("2006-01-02 15:04:05"),
+				note.UpdatedAt.Format("2006-01-02 15:04:05"),
+			)
+		}
+
+		var choice int
+		fmt.Print("Choose a number: ")
+		_, err := fmt.Scanf("%d", &choice)
+		if err != nil || choice < 1 || choice > len(matches) {
+			return nil, fmt.Errorf("invalid selection")
+		}
+
+		return &matches[choice-1], nil
+	}
 }
 
 func FindNotes(title string) ([]Note, error) {
@@ -115,6 +160,10 @@ func FindNotes(title string) ([]Note, error) {
 			matches = append(matches, note)
 		}
 	}
+
+	sort.Slice(matches, func(i, j int) bool {
+		return matches[i].UpdatedAt.After(matches[j].UpdatedAt)
+	})
 
 	return matches, nil
 }
