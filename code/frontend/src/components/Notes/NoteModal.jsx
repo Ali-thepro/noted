@@ -29,11 +29,16 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
       const processedTags = tags.split(',').map(tag => tag.trim()).filter(Boolean)
 
       if (isEditing) {
-        await dispatch(editNote(noteData.id, {
+        const updatedNote = await dispatch(editNote(noteData.id, {
           ...noteData,
           title: title.trim(),
           tags: processedTags
         }))
+        if (updatedNote) {
+          setTitle('')
+          setTags('')
+          onClose()
+        }
       } else {
         const newNote = await dispatch(createNote({
           title: title.trim(),
@@ -41,13 +46,12 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           tags: processedTags
         }))
         if (newNote) {
+          setTitle('')
+          setTags('')
+          onClose()
           navigate(`/notes/${newNote.id}`)
         }
       }
-
-      setTitle('')
-      setTags('')
-      onClose()
     } finally {
       setIsSubmitting(false)
     }
@@ -114,10 +118,13 @@ NoteModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   isEditing: PropTypes.bool,
   noteData: PropTypes.shape({
-    id: PropTypes.string,
-    title: PropTypes.string,
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string),
-    content: PropTypes.string
+    user: PropTypes.string,
+    content: PropTypes.string,
+    lastVisited: PropTypes.string,
+    updatedAt: PropTypes.string.isRequired,
   })
 }
 

@@ -85,7 +85,7 @@ const HomePage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-[1070px] mx-auto">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
@@ -110,38 +110,35 @@ const HomePage = () => {
             </div>
           )}
 
-          {!loading && (
-            <>
-              {notes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {notes.map(note => (
-                    <NoteCard
-                      key={note.id}
-                      note={note}
-                      onClick={() => handleNoteClick(note.id)}
-                      onTagClick={handleTagChange}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  {(keyword || tag)
-                    ? 'No notes found matching your search.'
-                    : 'No notes found. Create a new note to get started!'}
-                </div>
-              )}
+          {notes.length === 0 && !loading && (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              {(keyword || tag)
+                ? 'No notes found matching your search.'
+                : 'No notes found. Create a new note to get started!'}
+            </div>
+          )}
 
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-8">
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                    showIcons
-                  />
-                </div>
-              )}
-            </>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {notes.map(note => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                onClick={() => handleNoteClick(note.id)}
+                onTagClick={handleTagChange}
+              />
+            ))}
+          </div>
+
+
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                showIcons
+              />
+            </div>
           )}
         </div>
       </div>
