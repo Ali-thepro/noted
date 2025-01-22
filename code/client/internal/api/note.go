@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"noted/internal/metadata"
 )
 
 type Note struct {
@@ -36,6 +37,11 @@ func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {
 	var note Note
 	if err := c.handleResponse(resp, &note); err != nil {
 		return nil, err
+	}
+
+	_, err = metadata.AddNote(note.ID, note.Title, note.Tags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to save note metadata: %w", err)
 	}
 
 	return &note, nil

@@ -11,7 +11,7 @@ type Token struct {
 }
 
 func Save(token string) error {
-	configDir, err := getConfigDir()
+	configDir, err := GetConfigDir()
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func Save(token string) error {
 }
 
 func Load() (string, error) {
-	configDir, err := getConfigDir()
+	configDir, err := GetConfigDir()
 	if err != nil {
 		return "", err
 	}
@@ -45,7 +45,7 @@ func Load() (string, error) {
 }
 
 func Remove() error {
-	configDir, err := getConfigDir()
+	configDir, err := GetConfigDir()
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func Remove() error {
 	return os.Remove(filepath.Join(configDir, "token.json"))
 }
 
-func getConfigDir() (string, error) {
+func GetConfigDir() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
