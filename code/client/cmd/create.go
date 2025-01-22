@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
-	"noted/internal/metadata"
+	"noted/internal/storage"
 	"strings"
 )
 
@@ -44,9 +44,9 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
-		_, err = metadata.AddNote(note.ID, note.Title, note.Tags, note.Content)
+		_, err = storage.AddNote(note.ID, note.Title, note.Tags, note.Content)
 		if err != nil {
-			return fmt.Errorf("failed to save note metadata: %w", err)
+			return fmt.Errorf("failed to save note storage: %w", err)
 		}
 
 		fmt.Printf("Note created successfully!\n")

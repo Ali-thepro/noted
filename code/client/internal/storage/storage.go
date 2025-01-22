@@ -1,10 +1,10 @@
-package metadata
+package storage
 
 import (
 	"encoding/json"
 	"fmt"
 	"noted/internal/token"
-	"noted/utils"
+	"noted/internal/utils"
 	"os"
 	"path/filepath"
 	"sort"
@@ -166,4 +166,66 @@ func FindNotes(title string) ([]Note, error) {
 	})
 
 	return matches, nil
+}
+
+func GetNoteByID(id string) (*Note, error) {
+	index, err := LoadIndex()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, note := range index.Notes {
+		if note.ID == id {
+			return &note, nil
+		}
+	}
+
+	for _, note := range index.Notes {
+		if note.ShortID == id {
+			return &note, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no note found with ID: %s", id)
+}
+
+func DeleteNote(id string) error {
+	index, err := LoadIndex()
+	if err != nil {
+		return err
+	}
+
+	var found bool
+	var filename string
+	var newNotes []Note
+
+	for _, note := range index.Notes {
+		if note.ID == id || note.ShortID == id {
+			found = true
+			filename = note.Filename
+		} else {
+			newNotes = append(newNotes, note)
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("no note found with ID: %s", id)
+	}
+
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	notePath := filepath.Join(dir, filename)
+	if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to delete note file: %w", err)
+	}
+
+	index.Notes = newNotes
+	if err := SaveIndex(index); err != nil {
+		return fmt.Errorf("failed to update index: %w", err)
+	}
+
+	return nil
 }
