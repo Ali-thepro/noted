@@ -29,6 +29,10 @@ noteSchema.path('tags').validate(function (value) {
   return value.length === uniqueTags.size
 }, 'Tags must be unique')
 
+noteSchema.path('tags').validate(function (value) {
+  return value.every(tag => tag.length <= 20)
+}, 'Tags cannot be more than 20 characters')
+
 noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()

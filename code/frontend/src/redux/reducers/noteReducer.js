@@ -107,10 +107,12 @@ export const editNote = (id, noteData) => {
       const updatedNote = await noteService.updateNote(id, noteData)
       dispatch(updateNote(updatedNote))
       dispatch(setNotification('Note saved successfully', 'success'))
+      return updatedNote
     } catch (error) {
       const message = error.response?.data?.error || error.message
       dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
+      return null
     }
   }
 }
@@ -120,7 +122,7 @@ export const deleteNote = (id) => {
     try {
       await noteService.deleteNote(id)
       dispatch(removeNote(id))
-      dispatch(setNotification('Note deleted successfully', 'success'))
+      toast.success('Note deleted successfully')
     } catch (error) {
       const message = error.response?.data?.error || error.message
       dispatch(setNotification(message, 'failure'))

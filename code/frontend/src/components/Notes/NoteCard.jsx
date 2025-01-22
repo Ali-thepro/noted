@@ -142,6 +142,8 @@ NoteCard.propTypes = {
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string),
+    user: PropTypes.string,
+    content: PropTypes.string,
     lastVisited: PropTypes.string,
     updatedAt: PropTypes.string.isRequired,
   }).isRequired,
