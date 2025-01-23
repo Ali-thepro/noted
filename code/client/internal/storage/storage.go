@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"noted/internal/api"
 	"noted/internal/token"
 	"noted/internal/utils"
 	"os"
@@ -73,25 +74,34 @@ func SaveIndex(index *Index) error {
 	return nil
 }
 
-func AddNote(id, title string, tags []string, content string) (*Note, error) {
+func AddNote(note *api.Note) (*Note, error) {
 	index, err := LoadIndex()
 	if err != nil {
 		return nil, err
 	}
 
-	shortID := id[:shortIDLen]
-	sanitizedTitle := utils.SanitiseTitle(title)
+	shortID := note.ID[:shortIDLen]
+	sanitizedTitle := utils.SanitiseTitle(note.Title)
 	filename := fmt.Sprintf("%s-%s.md", shortID, sanitizedTitle)
-	now := time.Now().UTC()
 
-	note := Note{
-		ID:        id,
+	createdAt, err := time.Parse(time.RFC3339, note.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("invalid CreatedAt format: %w", err)
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("invalid UpdatedAt format: %w", err)
+	}
+
+	newNote := Note{
+		ID:        note.ID,
 		ShortID:   shortID,
-		Title:     title,
+		Title:     note.Title,
 		Filename:  filename,
-		Tags:      tags,
-		CreatedAt: now,
-		UpdatedAt: now,
+		Tags:      note.Tags,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}
 
 	dir, err := token.GetConfigDir()
@@ -100,16 +110,16 @@ func AddNote(id, title string, tags []string, content string) (*Note, error) {
 	}
 
 	notePath := filepath.Join(dir, filename)
-	if err := os.WriteFile(notePath, []byte(content), 0600); err != nil {
+	if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
 		return nil, fmt.Errorf("failed to write note file: %w", err)
 	}
 
-	index.Notes = append(index.Notes, note)
+	index.Notes = append(index.Notes, newNote)
 	if err := SaveIndex(index); err != nil {
 		return nil, err
 	}
 
-	return &note, nil
+	return &newNote, nil
 }
 
 func SelectNote(title string) (*Note, error) {

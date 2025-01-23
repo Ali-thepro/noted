@@ -44,7 +44,7 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
-		_, err = storage.AddNote(note.ID, note.Title, note.Tags, note.Content)
+		_, err = storage.AddNote(note)
 		if err != nil {
 			return fmt.Errorf("failed to save note storage: %w", err)
 		}
