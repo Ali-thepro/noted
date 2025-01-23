@@ -5,12 +5,13 @@ import (
 	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
+	"strings"
 )
 
 var pushCmd = &cobra.Command{
 	Use:   "push [id]",
 	Short: "Push note changes to server",
-	Long: `Push local note changes to the server. 
+	Long: `Push note changes to the server. 
 You can specify either the note ID/shortID as an argument or use --title flag.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToPush *storage.Note
@@ -56,6 +57,9 @@ You can specify either the note ID/shortID as an argument or use --title flag.`,
 
 		if err := storage.UpdateNote(note); err != nil {
 			return fmt.Errorf("failed to update local note data: %w", err)
+		}
+		if len(note.Tags) > 0 {
+			fmt.Printf("Tags: %v\n", strings.Join(note.Tags, ", "))
 		}
 
 		fmt.Printf("Note \"%s\" pushed successfully\n", noteToPush.Title)

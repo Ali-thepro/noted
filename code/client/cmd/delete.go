@@ -11,8 +11,7 @@ var deleteCmd = &cobra.Command{
 	Use:   "delete [id]",
 	Short: "Delete a note",
 	Long: `Delete a note using either its ID/shortID or title. 
-If an ID is provided as an argument, it will be deleted directly. 
-Otherwise, it will prompt for title selection if multiple notes exist.`,
+You can specify either the note ID/shortID as an argument or use --title flag .`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToDelete *storage.Note
 		var err error

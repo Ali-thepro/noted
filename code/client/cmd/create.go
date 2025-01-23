@@ -53,7 +53,7 @@ var createCmd = &cobra.Command{
 		fmt.Printf("ID: %s\n", note.ID)
 		fmt.Printf("Title: %s\n", note.Title)
 		if len(note.Tags) > 0 {
-			fmt.Printf("Tags: %v\n", note.Tags)
+			fmt.Printf("Tags: %v\n", strings.Join(note.Tags, ", "))
 		}
 
 		return nil

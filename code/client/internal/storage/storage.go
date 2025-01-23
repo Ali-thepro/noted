@@ -283,3 +283,54 @@ func ReadNoteContent(filename string) (string, error) {
 
 	return string(content), nil
 }
+
+func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
+	index, err := LoadIndex()
+	if err != nil {
+		return err
+	}
+
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	shortID := newNote.ID[:shortIDLen]
+	sanitizedTitle := utils.SanitiseTitle(newNote.Title)
+	newFilename := fmt.Sprintf("%s-%s.md", shortID, sanitizedTitle)
+
+	if oldNote.Filename != newFilename {
+		oldPath := filepath.Join(dir, oldNote.Filename)
+		newPath := filepath.Join(dir, newFilename)
+		if err := os.Rename(oldPath, newPath); err != nil {
+			return fmt.Errorf("failed to rename note file: %w", err)
+		}
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, newNote.UpdatedAt)
+	if err != nil {
+		return fmt.Errorf("invalid UpdatedAt format: %w", err)
+	}
+
+	found := false
+	for i := range index.Notes {
+		if index.Notes[i].ID == newNote.ID {
+			index.Notes[i].Title = newNote.Title
+			index.Notes[i].Tags = newNote.Tags
+			index.Notes[i].Filename = newFilename
+			index.Notes[i].UpdatedAt = updatedAt
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("note not found in local storage")
+	}
+
+	if err := SaveIndex(index); err != nil {
+		return fmt.Errorf("failed to update index: %w", err)
+	}
+
+	return nil
+}
