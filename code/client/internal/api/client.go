@@ -73,7 +73,7 @@ func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 		return fmt.Errorf("%s", errResp.Error)
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
 		var errResp ErrorResponse
 		if err := json.Unmarshal(body, &errResp); err != nil {
 			return fmt.Errorf("unexpected status code %d and failed to parse error message: %w", resp.StatusCode, err)
