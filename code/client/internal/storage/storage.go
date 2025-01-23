@@ -239,3 +239,47 @@ func DeleteNote(id string) error {
 
 	return nil
 }
+
+func UpdateNote(note *api.Note) error {
+	index, err := LoadIndex()
+	if err != nil {
+		return err
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for i := range index.Notes {
+		if index.Notes[i].ID == note.ID {
+			index.Notes[i].UpdatedAt = updatedAt
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("note note found in local storage")
+	}
+
+	if err := SaveIndex(index); err != nil {
+		return fmt.Errorf("failed to update index: %w", err)
+	}
+
+	return nil
+}
+
+func ReadNoteContent(filename string) (string, error) {
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get config directory: %w", err)
+	}
+	content, err := os.ReadFile(filepath.Join(dir, filename))
+	if err != nil {
+		return "", fmt.Errorf("failed to read note file: %w", err)
+	}
+
+	return string(content), nil
+}

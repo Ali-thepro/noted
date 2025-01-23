@@ -22,6 +22,10 @@ type CreateNoteRequest struct {
 	Tags    []string `json:"tags"`
 }
 
+type UpdateNoteRequest struct {
+	Content string `json:"content"`
+}
+
 func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -48,4 +52,23 @@ func (c *Client) DeleteNote(id string) error {
 	}
 
 	return c.handleResponse(resp, nil)
+}
+
+func (c *Client) UpdateNote(id string, req UpdateNoteRequest) (*Note, error) {
+	data, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	resp, err := c.doRequest("PUT", fmt.Sprintf("/note/update/%s", id), bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+
+	var note Note
+	if err := c.handleResponse(resp, &note); err != nil {
+		return nil, err
+	}
+
+	return &note, err
 }
