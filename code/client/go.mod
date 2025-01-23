@@ -2,13 +2,15 @@ module noted
 
 go 1.23.1
 
-require github.com/spf13/cobra v1.8.1
+require (
+	github.com/charmbracelet/glamour v0.8.0
+	github.com/spf13/cobra v1.8.1
+)
 
 require (
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/charmbracelet/glamour v0.8.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
 	github.com/charmbracelet/x/ansi v0.7.0 // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
