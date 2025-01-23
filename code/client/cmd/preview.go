@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/charmbracelet/glamour"
 	"github.com/spf13/cobra"
+	"noted/internal/config"
 	"noted/internal/storage"
 )
 
@@ -42,7 +43,13 @@ You can specify either the note ID/shortID as an argument or use --title flag.`,
 		}
 
 		renderer, err := glamour.NewTermRenderer(
-			glamour.WithAutoStyle(),
+			func() glamour.TermRendererOption {
+				cfg := config.NewConfig()
+				if cfg.Theme == "auto" {
+					return glamour.WithAutoStyle()
+				}
+				return glamour.WithStylePath(cfg.Theme)
+			}(),
 			glamour.WithWordWrap(80),
 		)
 		if err != nil {

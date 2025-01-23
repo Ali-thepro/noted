@@ -58,11 +58,11 @@ You can specify either the note ID/shortID as an argument or use --title flag.`,
 		if err := storage.UpdateNote(note); err != nil {
 			return fmt.Errorf("failed to update local note data: %w", err)
 		}
+
+		fmt.Printf("Note \"%s\" pushed successfully\n", noteToPush.Title)
 		if len(note.Tags) > 0 {
 			fmt.Printf("Tags: %v\n", strings.Join(note.Tags, ", "))
 		}
-
-		fmt.Printf("Note \"%s\" pushed successfully\n", noteToPush.Title)
 		return nil
 	},
 }
