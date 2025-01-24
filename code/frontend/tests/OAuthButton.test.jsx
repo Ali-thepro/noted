@@ -22,7 +22,7 @@ test('renders Google and GitHub OAuth buttons', () => {
       <OAuth />
     </MemoryRouter>
   )
-  
+
   expect(screen.getByText('Sign in with Google')).toBeInTheDocument()
   expect(screen.getByText('Sign in with GitHub')).toBeInTheDocument()
 })
@@ -30,17 +30,17 @@ test('renders Google and GitHub OAuth buttons', () => {
 test('clicking Google button dispatches googleLogin', async () => {
   const mockDispatch = vi.fn()
   useDispatch.mockReturnValue(mockDispatch)
-  
+
   render(
     <MemoryRouter>
       <OAuth />
     </MemoryRouter>
   )
-  
+
   const user = userEvent.setup()
   const googleButton = screen.getByText('Sign in with Google')
   await user.click(googleButton)
-  
+
   expect(googleLogin).toHaveBeenCalledWith(null, null)
   expect(mockDispatch).toHaveBeenCalledWith(googleLogin(null, null))
 })
@@ -48,17 +48,17 @@ test('clicking Google button dispatches googleLogin', async () => {
 test('clicking GitHub button dispatches githubLogin', async () => {
   const mockDispatch = vi.fn()
   useDispatch.mockReturnValue(mockDispatch)
-  
+
   render(
     <MemoryRouter>
       <OAuth />
     </MemoryRouter>
   )
-  
+
   const user = userEvent.setup()
   const githubButton = screen.getByText('Sign in with GitHub')
   await user.click(githubButton)
-  
+
   expect(githubLogin).toHaveBeenCalledWith(null, null)
   expect(mockDispatch).toHaveBeenCalledWith(githubLogin(null, null))
 })

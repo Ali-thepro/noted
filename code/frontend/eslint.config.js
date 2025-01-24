@@ -49,4 +49,26 @@ export default [
       ]
     },
   },
+
+  {
+    files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', 'tests/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        test: 'readonly',
+        expect: 'readonly',
+        describe: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        vi: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        it: 'readonly',
+        // Add any other Vitest globals if needed
+      },
+    },
+    rules: {
+      // You can add or override rules specifically for test files here
+      // For example, ensure 'no-unused-vars' is still active
+    },
+  },
 ]
