@@ -120,6 +120,7 @@ export const deleteNote = (id) => {
     try {
       await noteService.deleteNote(id)
       dispatch(removeNote(id))
+      toast.success('Note deleted successfully')
       dispatch(setNotification('Note deleted successfully', 'success'))
     } catch (error) {
       const message = error.response?.data?.error || error.message
