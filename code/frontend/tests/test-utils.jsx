@@ -42,7 +42,7 @@ export function renderWithProviders(
 ) {
   const testLocation = {}
 
-  function Wrapper({ children }) {
+  function Wrapper({ children }) { // eslint-disable-line
     return (
       <Provider store={store}>
         <MemoryRouter initialEntries={[path]}>
@@ -65,11 +65,11 @@ export function renderWithProviders(
   }
 }
 
-function LocationDisplay({ location }) {
+function LocationDisplay({ location }) { // eslint-disable-line
   const currentLocation = useLocation()
-  location.pathname = currentLocation.pathname
-  location.search = currentLocation.search
-  location.hash = currentLocation.hash
+  location.pathname = currentLocation.pathname // eslint-disable-line
+  location.search = currentLocation.search // eslint-disable-line
+  location.hash = currentLocation.hash // eslint-disable-line
   return null
 }
 
