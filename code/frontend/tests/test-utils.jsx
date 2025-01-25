@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import ThemeProvider from '../src/components/ThemeProvider'
 import notificationReducer from '../src/redux/reducers/notificationReducer'
 import themeReducer from '../src/redux/reducers/themeReducer'
@@ -40,14 +40,17 @@ export function renderWithProviders(
     ...renderOptions
   } = {}
 ) {
-  function Wrapper({ children }) { // eslint-disable-line
+  const testLocation = {}
+
+  function Wrapper({ children }) {
     return (
       <Provider store={store}>
         <MemoryRouter initialEntries={[path]}>
           <ThemeProvider>
+            <LocationDisplay location={testLocation} />
             <Routes>
               {createRoutesConfig(routeConfig)}
-              <Route path={path} element={children} />
+              <Route path="*" element={children} />
             </Routes>
           </ThemeProvider>
         </MemoryRouter>
@@ -57,8 +60,17 @@ export function renderWithProviders(
 
   return {
     store,
+    location: testLocation,
     ...render(ui, { wrapper: Wrapper, ...renderOptions }),
   }
+}
+
+function LocationDisplay({ location }) {
+  const currentLocation = useLocation()
+  location.pathname = currentLocation.pathname
+  location.search = currentLocation.search
+  location.hash = currentLocation.hash
+  return null
 }
 
 export * from '@testing-library/react' // eslint-disable-line

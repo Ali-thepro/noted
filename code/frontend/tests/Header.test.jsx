@@ -40,7 +40,7 @@ describe('Header Component', () => {
 
   describe('Navigation', () => {
     it('navigates to correct routes when clicking nav links', async () => {
-      render(<Header />, {
+      const { location } = render(<Header />, {
         path: '/',
         routeConfig: [
           { path: '/about', element: <div>About Page</div> },
@@ -51,7 +51,21 @@ describe('Header Component', () => {
       const aboutLink = screen.getByRole('link', { name: /about/i })
       await userEvent.click(aboutLink)
 
+      expect(location.pathname).toBe('/about')
       expect(screen.getByText('About Page')).toBeInTheDocument()
+    })
+
+    it('handles URL parameters correctly', async () => {
+      const { location } = render(<Header />, {
+        path: '/notes/123?view=preview',
+        routeConfig: [
+          { path: '/notes/:id', element: <div>Note Page</div> }
+        ]
+      })
+
+      expect(location.pathname).toBe('/notes/123')
+      const searchParams = new URLSearchParams(location.search)
+      expect(searchParams.get('view')).toBe('preview')
     })
   })
 
@@ -112,7 +126,7 @@ describe('Header Component', () => {
     })
 
     it('redirects to signin when unauthenticated user clicks new note', async () => {
-      render(<Header />, {
+      const { location } = render(<Header />, {
         path: '/',
         routeConfig: [
           { path: '/signin', element: <div>Sign In Page</div> }
@@ -128,6 +142,7 @@ describe('Header Component', () => {
       await userEvent.click(newNoteButton)
 
       expect(screen.getByText('Sign In Page')).toBeInTheDocument()
+      expect(location.pathname).toBe('/signin')
     })
   })
 
