@@ -54,7 +54,7 @@ export default [
   },
 
   {
-    files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', 'tests/**/*.{js,jsx}'],
+    files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', 'tests/**/*.{js,jsx}', 'testSetup.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
