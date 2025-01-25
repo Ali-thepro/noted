@@ -19,7 +19,6 @@ const Header = () => {
   const path = location.pathname
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-
   const changeTheme = () => {
     dispatch(setTheme())
   }
@@ -46,6 +45,7 @@ const Header = () => {
         {isNotePage && (
           <ButtonGroup>
             <Button
+              aria-label="Edit View"
               color="gray"
               size="sm"
               className="focus:ring-0"
@@ -55,6 +55,7 @@ const Header = () => {
               <FaPen />
             </Button>
             <Button
+              aria-label="Split View"
               color="gray"
               size="sm"
               className="focus:ring-0"
@@ -64,6 +65,7 @@ const Header = () => {
               <FaColumns />
             </Button>
             <Button
+              aria-label="Preview View"
               color="gray"
               size="sm"
               className="focus:ring-0"
@@ -85,10 +87,9 @@ const Header = () => {
         </Navbar.Link>
       </Navbar.Collapse>
 
-
       <div className="flex items-center gap-2">
-
         <Button
+          aria-label="New Note"
           className="focus:ring-0"
           color="gray"
           size="sm"
@@ -102,6 +103,7 @@ const Header = () => {
         </Button>
 
         <Button
+          aria-label="Toggle Theme"
           className="w-13 h-10 focus:ring-0"
           color="gray"
           pill
@@ -112,6 +114,7 @@ const Header = () => {
 
         {user ? (
           <Button
+            aria-label="Logout"
             className="focus:ring-0 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 rounded-lg"
             outline
             onClick={handleSignOut}
@@ -120,13 +123,12 @@ const Header = () => {
           </Button>
         ) : (
           <Link to="/signin">
-            <Button className="focus:ring-0 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 rounded-lg" outline>
+            <Button aria-label="Sign In" className="focus:ring-0 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 rounded-lg" outline>
               Sign In
             </Button>
           </Link>
         )}
       </div>
-
 
       <NoteModal
         show={showCreateModal}

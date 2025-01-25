@@ -2,12 +2,12 @@ import { render } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import ThemeProvider from '../components/ThemeProvider'
-import notificationReducer from '../redux/reducers/notificationReducer'
-import themeReducer from '../redux/reducers/themeReducer'
-import authReducer from '../redux/reducers/authReducer'
-import noteReducer from '../redux/reducers/noteReducer'
-import editorConfigReducer from '../redux/reducers/editorConfigReducer'
+import ThemeProvider from '../src/components/ThemeProvider'
+import notificationReducer from '../src/redux/reducers/notificationReducer'
+import themeReducer from '../src/redux/reducers/themeReducer'
+import authReducer from '../src/redux/reducers/authReducer'
+import noteReducer from '../src/redux/reducers/noteReducer'
+import editorConfigReducer from '../src/redux/reducers/editorConfigReducer'
 
 export function setupStore(preloadedState = {}) {
   return configureStore({
