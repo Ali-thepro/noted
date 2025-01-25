@@ -79,7 +79,5 @@ export default [
     },
     ...configs['flat/recommended'],
     ...testingLibrary.configs['react/recommended'],
-    ...testingLibrary.configs['dom/recommended'],
-
   },
 ]

@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { useDispatch } from 'react-redux'
 import { googleLogin, githubLogin } from '../src/redux/reducers/authReducer'
 import OAuth from '../src/components/OAuth'
-import { vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 
 vi.mock('react-redux', () => ({

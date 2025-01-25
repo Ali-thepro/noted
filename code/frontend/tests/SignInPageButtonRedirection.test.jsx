@@ -6,7 +6,6 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import Header from '../src/components/Header'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // Mock component to display current path
 const CurrentPath = () => {

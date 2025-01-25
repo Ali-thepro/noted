@@ -107,7 +107,7 @@ const Header = () => {
           pill
           onClick={changeTheme}
         >
-          {theme === 'light' ? <FaMoon size="15"/> : <FaSun size="15"/>}
+          {theme === 'light' ? <FaMoon size="15" data-testid="theme-icon-moon"/> : <FaSun size="15" data-testid="theme-icon-sun"/>}
         </Button>
 
         {user ? (
