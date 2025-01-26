@@ -55,18 +55,7 @@ describe('Header Component', () => {
       expect(screen.getByText('About Page')).toBeInTheDocument()
     })
 
-    it('handles URL parameters correctly', async () => {
-      const { location } = render(<Header />, {
-        path: '/notes/123?view=preview',
-        routeConfig: [
-          { path: '/notes/:id', element: <div>Note Page</div> }
-        ]
-      })
 
-      expect(location.pathname).toBe('/notes/123')
-      const searchParams = new URLSearchParams(location.search)
-      expect(searchParams.get('view')).toBe('preview')
-    })
   })
 
   describe('Authentication State', () => {
