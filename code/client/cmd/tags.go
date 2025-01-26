@@ -11,7 +11,7 @@ var tagsCmd = &cobra.Command{
 	Use:   "tags [id]",
 	Short: "Display tags for a note",
 	Long: `Display tags for a note.
-You can specify either the note ID/shortID as an argument or use --title flag.`,
+You can specify either the note ID as an argument or use --title flag.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToShow *storage.Note
 		var err error
@@ -37,6 +37,7 @@ You can specify either the note ID/shortID as an argument or use --title flag.`,
 		}
 
 		fmt.Printf("Title: %s\n", noteToShow.Title)
+		fmt.Printf("ID: %s\n", noteToShow.ID)
 		if len(noteToShow.Tags) > 0 {
 			fmt.Printf("Tags: %s\n", strings.Join(noteToShow.Tags, ", "))
 		} else {

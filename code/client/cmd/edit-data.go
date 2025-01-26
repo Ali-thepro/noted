@@ -12,7 +12,7 @@ var editDataCmd = &cobra.Command{
 	Use:   "edit-data [id]",
 	Short: "Edit note metadata",
 	Long: `Edit note title and tags. 
-You can specify either the note ID/shortID as an argument or use --title flag.
+You can specify either the note ID as an argument or use --title flag.
 By default, new tags are appended to existing ones. Use --replace-tags to overwrite instead.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToEdit *storage.Note

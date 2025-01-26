@@ -15,7 +15,6 @@ import (
 
 type Note struct {
 	ID        string    `json:"id"`
-	ShortID   string    `json:"shortId"`
 	Title     string    `json:"title"`
 	Filename  string    `json:"filename"`
 	Tags      []string  `json:"tags"`
@@ -24,12 +23,12 @@ type Note struct {
 }
 
 type Index struct {
-	Notes []Note `json:"notes"`
+	Notes    []Note    `json:"notes"`
+	LastSync time.Time `json:"lastSync"`
 }
 
 const (
-	indexFile  = "index.json"
-	shortIDLen = 6
+	indexFile = "index.json"
 )
 
 func LoadIndex() (*Index, error) {
@@ -74,15 +73,21 @@ func SaveIndex(index *Index) error {
 	return nil
 }
 
-func AddNote(note *api.Note) (*Note, error) {
-	index, err := LoadIndex()
-	if err != nil {
-		return nil, err
+func AddNote(note *api.Note, existingIndex ...*Index) (*Note, error) {
+	var index *Index
+	var err error
+
+	if len(existingIndex) > 0 && existingIndex[0] != nil {
+		index = existingIndex[0]
+	} else {
+		index, err = LoadIndex()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	shortID := note.ID[:shortIDLen]
 	sanitizedTitle := utils.SanitiseTitle(note.Title)
-	filename := fmt.Sprintf("%s-%s.md", shortID, sanitizedTitle)
+	filename := fmt.Sprintf("%s-%s.md", note.ID, sanitizedTitle)
 
 	createdAt, err := time.Parse(time.RFC3339, note.CreatedAt)
 	if err != nil {
@@ -96,7 +101,6 @@ func AddNote(note *api.Note) (*Note, error) {
 
 	newNote := Note{
 		ID:        note.ID,
-		ShortID:   shortID,
 		Title:     note.Title,
 		Filename:  filename,
 		Tags:      note.Tags,
@@ -109,15 +113,33 @@ func AddNote(note *api.Note) (*Note, error) {
 		return nil, fmt.Errorf("failed to get config directory: %w", err)
 	}
 
+	found := false
+	for i := range index.Notes {
+		if index.Notes[i].ID == note.ID {
+			if index.Notes[i].Filename != filename {
+				oldPath := filepath.Join(dir, index.Notes[i].Filename)
+				if err := os.Remove(oldPath); err != nil && !os.IsNotExist(err) {
+					return nil, fmt.Errorf("failed to remove old note file: %w", err)
+				}
+			}
+			index.Notes[i] = newNote
+			found = true
+			break
+		}
+	}
+
 	notePath := filepath.Join(dir, filename)
 	if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
 		return nil, fmt.Errorf("failed to write note file: %w", err)
 	}
 
-	index.Notes = append(index.Notes, newNote)
-	if err := SaveIndex(index); err != nil {
-		return nil, err
+	if !found {
+		index.Notes = append(index.Notes, newNote)
 	}
+
+    if err := SaveIndex(index); err != nil {
+        return nil, fmt.Errorf("failed to update index: %w", err)
+    }
 
 	return &newNote, nil
 }
@@ -138,7 +160,7 @@ func SelectNote(title string) (*Note, error) {
 		for i, note := range matches {
 			fmt.Printf("[%d] %s %s  (created: %s, updated: %s)\n",
 				i+1,
-				note.ShortID,
+				note.ID,
 				note.Title,
 				note.CreatedAt.Format("2006-01-02 15:04:05"),
 				note.UpdatedAt.Format("2006-01-02 15:04:05"),
@@ -190,12 +212,6 @@ func GetNoteByID(id string) (*Note, error) {
 		}
 	}
 
-	for _, note := range index.Notes {
-		if note.ShortID == id {
-			return &note, nil
-		}
-	}
-
 	return nil, fmt.Errorf("no note found with ID: %s", id)
 }
 
@@ -210,7 +226,7 @@ func DeleteNote(id string) error {
 	var newNotes []Note
 
 	for _, note := range index.Notes {
-		if note.ID == id || note.ShortID == id {
+		if note.ID == id {
 			found = true
 			filename = note.Filename
 		} else {
@@ -295,9 +311,8 @@ func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
 		return fmt.Errorf("failed to get config directory: %w", err)
 	}
 
-	shortID := newNote.ID[:shortIDLen]
 	sanitizedTitle := utils.SanitiseTitle(newNote.Title)
-	newFilename := fmt.Sprintf("%s-%s.md", shortID, sanitizedTitle)
+	newFilename := fmt.Sprintf("%s-%s.md", newNote.ID, sanitizedTitle)
 
 	if oldNote.Filename != newFilename {
 		oldPath := filepath.Join(dir, oldNote.Filename)
