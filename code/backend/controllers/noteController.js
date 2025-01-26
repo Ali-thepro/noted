@@ -139,10 +139,53 @@ const deleteNote = async (request, response, next) => {
   }
 }
 
+const getNoteMetadata = async (request, response, next) => {
+  const user = request.user
+  const { since } = request.query
+
+  try {
+    const filter = {
+      user: user.id,
+      ...(since ? {
+        updatedAt: { $gte: since }
+      } : {})
+    }
+
+    const notes = await Note.find(filter)
+      .select('id title tags updatedAt createdAt')
+      .sort({ updatedAt: -1 })
+
+    response.json(notes)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getBulkNotes = async (request, response, next) => {
+  const user = request.user
+  const { ids } = request.body
+
+  if (!Array.isArray(ids)) {
+    return next(createError('Invalid request : ids must be an array', 400))
+  }
+
+  try {
+    const notes = await Note.find({
+      _id: { $in: ids },
+      user: user.id
+    })
+    response.json(notes)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   getNotes,
   getNote,
   createNote,
   updateNote,
-  deleteNote
+  deleteNote,
+  getNoteMetadata,
+  getBulkNotes
 }
