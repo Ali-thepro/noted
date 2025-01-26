@@ -50,16 +50,21 @@ You can specify either the note ID as an argument or use --title flag.`,
 		note, err := client.UpdateNote(noteToPush.ID, api.UpdateNoteRequest{
 			Content: content,
 		})
-
 		if err != nil {
-			return fmt.Errorf("failed to update note on server: %w", err)
-		}
+            if err.Error() == "note has already been deleted from the server" {
+                if err := storage.DeleteNote(noteToPush.ID); err != nil {
+                    return fmt.Errorf("failed to delete local note after server deletion: %w", err)
+                }
+            }
+            return fmt.Errorf("failed to update note on server: %w", err)
+        }
 
 		if err := storage.UpdateNote(note); err != nil {
 			return fmt.Errorf("failed to update local note data: %w", err)
 		}
 
 		fmt.Printf("Note \"%s\" pushed successfully\n", noteToPush.Title)
+		fmt.Printf("ID: %s\n", note.ID)
 		if len(note.Tags) > 0 {
 			fmt.Printf("Tags: %v\n", strings.Join(note.Tags, ", "))
 		}
