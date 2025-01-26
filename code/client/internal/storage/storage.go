@@ -137,9 +137,9 @@ func AddNote(note *api.Note, existingIndex ...*Index) (*Note, error) {
 		index.Notes = append(index.Notes, newNote)
 	}
 
-    if err := SaveIndex(index); err != nil {
-        return nil, fmt.Errorf("failed to update index: %w", err)
-    }
+	if err := SaveIndex(index); err != nil {
+		return nil, fmt.Errorf("failed to update index: %w", err)
+	}
 
 	return &newNote, nil
 }

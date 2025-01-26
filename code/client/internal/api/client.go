@@ -87,7 +87,6 @@ func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 		return fmt.Errorf("server returned status %d: %s", resp.StatusCode, errResp.Error)
 	}
 
-
 	if result != nil {
 		if err := json.Unmarshal(body, result); err != nil {
 			return fmt.Errorf("failed to decode response body: %w", err)
