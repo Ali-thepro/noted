@@ -42,21 +42,21 @@ describe('SignUp Component', () => {
   describe('Rendering', () => {
     it('renders all form elements correctly', () => {
       render(<SignUp />)
-      expect(screen.getByPlaceholderText('Username')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Username')).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/name@company.com/i)).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Confirm password')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Confirm password')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument
     })
 
     it('includes OAuth component', () => {
-        render(<SignUp />)
-  
-        expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /sign in with github/i })).toBeInTheDocument()
-        expect(screen.getByText(/already have an account\?/i)).toBeInTheDocument()
-        expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument()
-      })
+      render(<SignUp />)
+
+      expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /sign in with github/i })).toBeInTheDocument()
+      expect(screen.getByText(/already have an account\?/i)).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument()
+    })
   })
   describe('Navigation', () => {
     it('redirects to /signin after successful signup', async () => {
@@ -93,5 +93,5 @@ describe('SignUp Component', () => {
         expect(screen.getByText('Sign In Page')).toBeInTheDocument()
       })
     })
-    })
+  })
 })
