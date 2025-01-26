@@ -23,6 +23,8 @@ const createRefreshToken = (user) => {
 
 const signup = async (request, response, next) => {
   const { username, email, password, confirmPassword } = request.body
+  const mode = request.query.mode
+  const redirect = request.query.redirect
 
   if (
     !username ||
@@ -55,21 +57,54 @@ const signup = async (request, response, next) => {
     return next(createError('An account with this email already exists', 400))
   }
 
-  const saltRounds = 10
-  const passwordHash = await bcrypt.hash(password, saltRounds)
+  try {
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(password, saltRounds)
 
-  const user = new User({
-    username,
-    email,
-    passwordHash,
-    provider: 'local',
-  })
+    const user = new User({
+      username,
+      email,
+      passwordHash,
+      provider: 'local',
+    })
 
-  const savedUser = await user.save()
-  response.status(201).json(savedUser)
+    const savedUser = await user.save()
+
+    const userForToken = {
+      email: savedUser.email,
+      id: savedUser._id,
+    }
+
+    if (mode === 'cli' && redirect) {
+      const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '30d' })
+      return response.status(201).json({
+        user: savedUser,
+        redirectUrl: `${redirect}?token=${token}`
+      })
+    } else {
+      const accessToken = createAccessToken(savedUser)
+      const refreshToken = createRefreshToken(savedUser)
+
+      response
+        .status(201)
+        .cookie('accessToken', accessToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 15 * 60 * 1000
+        })
+        .cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+        .json(savedUser)
+    }
+  } catch (error) {
+    next(error)
+  }
 }
-
-
 
 const signin = async (request, response, next) => {
   const { email, password } = request.body
@@ -157,7 +192,6 @@ const refreshToken = async (request, response, next) => {
   }
 }
 
-
 function getGoogleAuthURL(mode, redirect) {
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
   const options = {
@@ -179,7 +213,6 @@ function getGoogleAuthURL(mode, redirect) {
   const queryOptions = new URLSearchParams(options).toString()
 
   return `${rootUrl}?${queryOptions}`
-
 }
 
 const googleOauth = (request, response) => {
@@ -189,7 +222,6 @@ const googleOauth = (request, response) => {
   const googleAuthURL = getGoogleAuthURL(mode, redirect)
   response.redirect(googleAuthURL)
 }
-
 
 const google = async (request, response, next) => {
   const code = request.query.code
@@ -247,7 +279,6 @@ const google = async (request, response, next) => {
       id: user._id,
     }
 
-
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
       response.redirect(`${redirect}?token=${token}`)
@@ -276,7 +307,6 @@ const google = async (request, response, next) => {
     return next(createError('Error during Google OAuth callback', 500))
   }
 }
-
 
 function getGitHubAuthURL(mode,redirect) {
   const rootUrl = 'https://github.com/login/oauth/authorize'
@@ -348,7 +378,6 @@ const github = async (request, response, next) => {
       },
     })
 
-
     const primaryEmail = userEmail.find(email => email.primary).email
 
     const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
@@ -368,7 +397,6 @@ const github = async (request, response, next) => {
       email: user.email,
       id: user._id,
     }
-
 
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
