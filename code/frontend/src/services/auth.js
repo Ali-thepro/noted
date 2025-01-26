@@ -1,9 +1,13 @@
 import axiosInstance from './axiosConfig'
 const BASE_URL = '/api/auth'
 
-export const signup = async (credentials) => {
-  const response = await axiosInstance.post(`${BASE_URL}/signup`, credentials)
-  return response
+export const signup = async (credentials, mode, redirect) => {
+  let url = `${BASE_URL}/signup`
+  if (mode && redirect) {
+    url += `?mode=${mode}&redirect=${redirect}`
+  }
+  const response = await axiosInstance.post(url, credentials)
+  return response.data
 }
 
 export const signin = async (credentials, mode, redirect) => {

@@ -42,12 +42,14 @@ const HomePage = () => {
     params.push(`limit=${encodeURIComponent(limit)}`)
     const query = params.length > 0 ? params.join('&') : ''
 
-    debouncedInitializeNotes(query)
+    if (user) {
+      debouncedInitializeNotes(query)
+    }
 
     return () => {
       debouncedInitializeNotes.cancel()
     }
-  }, [debouncedInitializeNotes, keyword, tag, sortBy, sortOrder, currentPage])
+  }, [debouncedInitializeNotes, keyword, tag, sortBy, sortOrder, currentPage, user])
 
   const handleKeywordChange = (value) => {
     setSortBy('date')
