@@ -49,7 +49,7 @@ describe('SignIn Component', () => {
   })
 
   describe('Navigation', () => {
-    it('redirects to home when user is already authenticated', () => {
+    it('redirects to home when user is already authenticated', async () => {
       const { location } = render(<SignIn />, {
         preloadedState: {
           auth: {
@@ -57,11 +57,17 @@ describe('SignIn Component', () => {
             loading: false
           }
         },
+        path: '/signin',
         routeConfig: [
+          { path: '/signin', element: <SignIn /> },
           { path: '/', element: <div>Home Page</div> }
         ]
       })
-      expect(location.pathname).toBe('/')
+      
+      await waitFor(() => {
+        expect(location.pathname).toBe('/')
+        expect(screen.getByText('Home Page')).toBeInTheDocument()
+      })
     })
 
     it('redirects to signup page with CLI parameters', async () => {
@@ -111,11 +117,19 @@ describe('SignIn Component', () => {
     })
 
     it('handles successful login and redirects to home', async () => {
-      const { store, location } = render(<SignIn />)
+      const { store, location } = render(<SignIn />, {
+        path: '/signin',
+        routeConfig: [
+          { path: '/signin', element: <SignIn /> },
+          { path: '/', element: <div>Home Page</div> }
+        ]
+      })
 
       const emailInput = screen.getByPlaceholderText(/name@company.com/i)
       const passwordInput = screen.getByPlaceholderText(/password/i)
       const submitButton = screen.getByRole('button', { name: /^sign in$/i })
+
+      expect(location.pathname).toBe('/signin')
 
       await userEvent.type(emailInput, 'test@test.com')
       await userEvent.type(passwordInput, 'password123')
@@ -129,9 +143,9 @@ describe('SignIn Component', () => {
           oauth: false,
           provider: 'local'
         })
+        expect(location.pathname).toBe('/')
+        expect(screen.getByText('Home Page')).toBeInTheDocument()
       })
-
-      expect(location.pathname).toBe('/')
     })
 
     it('handles CLI mode login correctly', async () => {
