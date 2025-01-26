@@ -141,14 +141,20 @@ const deleteNote = async (request, response, next) => {
 
 const getNoteMetadata = async (request, response, next) => {
   const user = request.user
-  const { since } = request.query
+  const { since, tag } = request.query
 
   try {
     const filter = {
       user: user.id,
       ...(since ? {
         updatedAt: { $gte: since }
-      } : {})
+      } : {}),
+      ...(tag ? {
+        tags: {
+          $regex: tag,
+          $options: 'i',
+        },
+      } : {}),
     }
 
     const notes = await Note.find(filter)
