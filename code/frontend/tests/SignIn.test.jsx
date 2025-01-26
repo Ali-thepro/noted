@@ -63,7 +63,7 @@ describe('SignIn Component', () => {
           { path: '/', element: <div>Home Page</div> }
         ]
       })
-      
+
       await waitFor(() => {
         expect(location.pathname).toBe('/')
         expect(screen.getByText('Home Page')).toBeInTheDocument()
