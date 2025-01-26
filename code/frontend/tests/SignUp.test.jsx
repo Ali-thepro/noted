@@ -36,7 +36,7 @@ describe('SignUp Component', () => {
   describe('Rendering', () => {
     it('renders all form elements correctly', () => {
       render(<SignUp />)
-      
+
       expect(screen.getByPlaceholderText('Username')).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/name@company.com/i)).toBeInTheDocument()
       expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
