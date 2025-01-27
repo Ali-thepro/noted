@@ -11,6 +11,11 @@ const deletedNoteSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
+    tags: [{
+      type: String,
+      trim: true,
+      lowercase: true,
+    }],
     deletedAt: {
       type: Date,
       default: Date.now
@@ -18,7 +23,7 @@ const deletedNoteSchema = new mongoose.Schema(
   }
 )
 
-deletedNoteSchema.index({ user: 1, deletedAt: 1 })
+deletedNoteSchema.index({ user: 1, deletedAt: 1, tags: 1 })
 
 deletedNoteSchema.set('toJSON', {
   transform: (document, returnedObject) => {

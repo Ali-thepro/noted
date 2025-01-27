@@ -24,6 +24,11 @@ const noteSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+noteSchema.index({ user: 1, updatedAt: -1 })
+noteSchema.index({ user: 1, tags: 1 })
+noteSchema.index({ user: 1, title: 1, content: 1 })
+noteSchema.index({ user: 1, tags: 1, title: 1, content: 1 })
+
 noteSchema.path('tags').validate(function (value) {
   const uniqueTags = new Set(value)
   return value.length === uniqueTags.size

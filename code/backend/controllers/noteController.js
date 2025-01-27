@@ -135,6 +135,7 @@ const deleteNote = async (request, response, next) => {
 
     const deletedNote = new DeletedNote({
       noteId: id,
+      tags: note.tags,
       user: user.id
     })
 
@@ -195,13 +196,19 @@ const getBulkNotes = async (request, response, next) => {
 
 const getDeletedNotes = async (request, response, next) => {
   const user = request.user
-  const { since } = request.query
+  const { since, tag } = request.query
 
   try {
     const filter = {
       user: user.id,
       ...(since ? {
         deletedAt: { $gte: since }
+      } : {}),
+      ...(tag ? {
+        tags: {
+          $regex: tag,
+          $options: 'i',
+        },
       } : {}),
     }
 
