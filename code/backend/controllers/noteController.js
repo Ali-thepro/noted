@@ -1,4 +1,5 @@
 const Note = require('../models/note')
+const DeletedNote = require('../models/deletedNote')
 const createError = require('../utils/error')
 
 const getNotes = async (request, response, next) => {
@@ -132,6 +133,12 @@ const deleteNote = async (request, response, next) => {
       return next(createError('Note not found or unauthorized', 404))
     }
 
+    const deletedNote = new DeletedNote({
+      noteId: id,
+      user: user.id
+    })
+
+    await deletedNote.save()
     await Note.findByIdAndDelete(id)
     response.status(204).end()
   } catch (error) {
