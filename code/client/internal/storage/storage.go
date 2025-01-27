@@ -23,9 +23,9 @@ type Note struct {
 }
 
 type Index struct {
-	Notes    []Note         `json:"notes"`
-	LastSync time.Time      `json:"lastSync"`
-	UserID   string         `json:"userId"`
+	Notes    []Note    `json:"notes"`
+	LastSync time.Time `json:"lastSync"`
+	UserID   string    `json:"userId"`
 }
 
 const (
@@ -33,28 +33,28 @@ const (
 )
 
 func LoadIndex() (*Index, error) {
-    dir, err := token.GetConfigDir()
-    if err != nil {
-        return nil, fmt.Errorf("failed to get config directory: %w", err)
-    }
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get config directory: %w", err)
+	}
 
-    path := filepath.Join(dir, indexFile)
-    data, err := os.ReadFile(path)
-    if os.IsNotExist(err) {
-        return &Index{
-            Notes: []Note{},
-        }, nil
-    }
-    if err != nil {
-        return nil, fmt.Errorf("failed to read index: %w", err)
-    }
+	path := filepath.Join(dir, indexFile)
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return &Index{
+			Notes: []Note{},
+		}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to read index: %w", err)
+	}
 
-    var index Index
-    if err := json.Unmarshal(data, &index); err != nil {
-        return nil, fmt.Errorf("failed to parse index: %w", err)
-    }
+	var index Index
+	if err := json.Unmarshal(data, &index); err != nil {
+		return nil, fmt.Errorf("failed to parse index: %w", err)
+	}
 
-    return &index, nil
+	return &index, nil
 }
 
 func SaveIndex(index *Index) error {
@@ -136,51 +136,51 @@ func VerifyUser() error {
 }
 
 func AddNote(note *api.Note) (*Note, error) {
-    index, err := LoadIndex()
-    if err != nil {
-        return nil, err
-    }
+	index, err := LoadIndex()
+	if err != nil {
+		return nil, err
+	}
 
-    sanitizedTitle := utils.SanitiseTitle(note.Title)
-    filename := fmt.Sprintf("%s-%s.md", note.ID, sanitizedTitle)
+	sanitizedTitle := utils.SanitiseTitle(note.Title)
+	filename := fmt.Sprintf("%s-%s.md", note.ID, sanitizedTitle)
 
-    createdAt, err := time.Parse(time.RFC3339, note.CreatedAt)
-    if err != nil {
-        return nil, fmt.Errorf("invalid CreatedAt format: %w", err)
-    }
+	createdAt, err := time.Parse(time.RFC3339, note.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("invalid CreatedAt format: %w", err)
+	}
 
-    updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
-    if err != nil {
-        return nil, fmt.Errorf("invalid UpdatedAt format: %w", err)
-    }
+	updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("invalid UpdatedAt format: %w", err)
+	}
 
-    newNote := Note{
-        ID:        note.ID,
-        Title:     note.Title,
-        Filename:  filename,
-        Tags:      note.Tags,
-        CreatedAt: createdAt,
-        UpdatedAt: updatedAt,
-    }
+	newNote := Note{
+		ID:        note.ID,
+		Title:     note.Title,
+		Filename:  filename,
+		Tags:      note.Tags,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+	}
 
-    dir, err := token.GetConfigDir()
-    if err != nil {
-        return nil, fmt.Errorf("failed to get config directory: %w", err)
-    }
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get config directory: %w", err)
+	}
 
-    // Simply append the new note
-    index.Notes = append(index.Notes, newNote)
+	// Simply append the new note
+	index.Notes = append(index.Notes, newNote)
 
-    notePath := filepath.Join(dir, filename)
-    if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
-        return nil, fmt.Errorf("failed to write note file: %w", err)
-    }
+	notePath := filepath.Join(dir, filename)
+	if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
+		return nil, fmt.Errorf("failed to write note file: %w", err)
+	}
 
-    if err := SaveIndex(index); err != nil {
-        return nil, fmt.Errorf("failed to update index: %w", err)
-    }
+	if err := SaveIndex(index); err != nil {
+		return nil, fmt.Errorf("failed to update index: %w", err)
+	}
 
-    return &newNote, nil
+	return &newNote, nil
 }
 
 func SelectNote(title string) (*Note, error) {
@@ -240,50 +240,50 @@ func FindNotes(title string) ([]Note, error) {
 }
 
 func GetNoteByID(id string) (*Note, error) {
-    index, err := LoadIndex()
-    if err != nil {
-        return nil, err
-    }
+	index, err := LoadIndex()
+	if err != nil {
+		return nil, err
+	}
 
-    for _, note := range index.Notes {
-        if note.ID == id {
-            return &note, nil
-        }
-    }
+	for _, note := range index.Notes {
+		if note.ID == id {
+			return &note, nil
+		}
+	}
 
-    return nil, fmt.Errorf("no note found with ID: %s", id)
+	return nil, fmt.Errorf("no note found with ID: %s", id)
 }
 
 func DeleteNote(id string) error {
-    index, err := LoadIndex()
-    if err != nil {
-        return err
-    }
+	index, err := LoadIndex()
+	if err != nil {
+		return err
+	}
 
-    for i, note := range index.Notes {
-        if note.ID == id {
-            filename := note.Filename
-            index.Notes = append(index.Notes[:i], index.Notes[i+1:]...)
+	for i, note := range index.Notes {
+		if note.ID == id {
+			filename := note.Filename
+			index.Notes = append(index.Notes[:i], index.Notes[i+1:]...)
 
-            dir, err := token.GetConfigDir()
-            if err != nil {
-                return fmt.Errorf("failed to get config directory: %w", err)
-            }
+			dir, err := token.GetConfigDir()
+			if err != nil {
+				return fmt.Errorf("failed to get config directory: %w", err)
+			}
 
-            notePath := filepath.Join(dir, filename)
-            if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
-                return fmt.Errorf("failed to delete note file: %w", err)
-            }
+			notePath := filepath.Join(dir, filename)
+			if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
+				return fmt.Errorf("failed to delete note file: %w", err)
+			}
 
-            if err := SaveIndex(index); err != nil {
-                return fmt.Errorf("failed to update index: %w", err)
-            }
+			if err := SaveIndex(index); err != nil {
+				return fmt.Errorf("failed to update index: %w", err)
+			}
 
-            return nil
-        }
-    }
+			return nil
+		}
+	}
 
-    return fmt.Errorf("no note found with ID: %s", id)
+	return fmt.Errorf("no note found with ID: %s", id)
 }
 
 func UpdateNote(note *api.Note) error {
@@ -316,7 +316,6 @@ func UpdateNote(note *api.Note) error {
 
 	return nil
 }
-
 
 func ReadNoteContent(filename string) (string, error) {
 	dir, err := token.GetConfigDir()

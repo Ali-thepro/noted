@@ -42,8 +42,8 @@ type NoteMetadata struct {
 }
 
 type DeletedNote struct {
-    ID        string    `json:"noteId"`
-    DeletedAt time.Time `json:"deletedAt"`
+	ID        string    `json:"noteId"`
+	DeletedAt time.Time `json:"deletedAt"`
 }
 
 func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {
@@ -160,26 +160,29 @@ func (c *Client) GetBulkNotes(ids []string) ([]*Note, error) {
 	return notes, nil
 }
 
-func (c *Client) GetDeletedNotes(since time.Time) ([]*DeletedNote, error) {
+func (c *Client) GetDeletedNotes(since time.Time, tag string) ([]*DeletedNote, error) {
 	query := make(url.Values)
 	if !since.IsZero() {
 		query.Set("since", since.Format(time.RFC3339))
+	}
+	if tag != "" {
+		query.Set("tag", tag)
 	}
 
 	url := "/note/deleted"
 	if len(query) > 0 {
 		url += "?" + query.Encode()
-    }
+	}
 
-    resp, err := c.doRequest("GET", url, nil)
-    if err != nil {
-        return nil, err
-    }
+	resp, err := c.doRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
 
-    var deletedNotes []*DeletedNote
-    if err := c.handleResponse(resp, &deletedNotes); err != nil {
-        return nil, err
-    }
+	var deletedNotes []*DeletedNote
+	if err := c.handleResponse(resp, &deletedNotes); err != nil {
+		return nil, err
+	}
 
-    return deletedNotes, nil
+	return deletedNotes, nil
 }
