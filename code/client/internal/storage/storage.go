@@ -25,6 +25,7 @@ type Note struct {
 type Index struct {
 	Notes    []Note         `json:"notes"`
 	LastSync time.Time      `json:"lastSync"`
+	UserID   string         `json:"userId"`
 	idMap    map[string]int `json:"-"`
 }
 
@@ -77,6 +78,66 @@ func SaveIndex(index *Index) error {
 	path := filepath.Join(dir, indexFile)
 	if err := os.WriteFile(path, data, 0600); err != nil {
 		return fmt.Errorf("failed to write index: %w", err)
+	}
+
+	return nil
+}
+
+func ClearUserData() error {
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	indexPath := filepath.Join(dir, indexFile)
+	if err := os.Remove(indexPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove index file: %w", err)
+	}
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".md") {
+			if err := os.Remove(filepath.Join(dir, file.Name())); err != nil {
+				return fmt.Errorf("failed to remove note file %s: %w", file.Name(), err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func VerifyUser() error {
+	index, loadErr := LoadIndex()
+
+	if loadErr != nil && !os.IsNotExist(loadErr) {
+		return fmt.Errorf("failed to load index: %w", loadErr)
+	}
+	client, err := api.NewClient()
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	user, err := client.GetMe()
+	if err != nil {
+		return fmt.Errorf("failed to get user info: %w", err)
+	}
+
+	if os.IsNotExist(loadErr) || index.UserID != user.ID {
+		if err := ClearUserData(); err != nil {
+			return fmt.Errorf("failed to clear old user data: %w", err)
+		}
+		index = &Index{
+			Notes:  []Note{},
+			UserID: user.ID,
+			idMap:  make(map[string]int),
+		}
+		if err := SaveIndex(index); err != nil {
+			return fmt.Errorf("failed to save new index: %w", err)
+		}
 	}
 
 	return nil
