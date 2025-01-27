@@ -23,8 +23,9 @@ type Note struct {
 }
 
 type Index struct {
-	Notes    []Note    `json:"notes"`
-	LastSync time.Time `json:"lastSync"`
+	Notes    []Note         `json:"notes"`
+	LastSync time.Time      `json:"lastSync"`
+	idMap    map[string]int `json:"-"`
 }
 
 const (
@@ -40,7 +41,10 @@ func LoadIndex() (*Index, error) {
 	path := filepath.Join(dir, indexFile)
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
-		return &Index{Notes: []Note{}}, nil
+		return &Index{
+			Notes: []Note{},
+			idMap: make(map[string]int),
+		}, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to read index: %w", err)
@@ -49,6 +53,11 @@ func LoadIndex() (*Index, error) {
 	var index Index
 	if err := json.Unmarshal(data, &index); err != nil {
 		return nil, fmt.Errorf("failed to parse index: %w", err)
+	}
+
+	index.idMap = make(map[string]int, len(index.Notes))
+	for i, note := range index.Notes {
+		index.idMap[note.ID] = i
 	}
 
 	return &index, nil
