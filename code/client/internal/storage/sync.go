@@ -33,15 +33,10 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
 	}
 
 	stats := &SyncStats{}
-
 	var notesToFetch []string
-	localNoteMap := make(map[string]Note)
-	for _, note := range index.Notes {
-		localNoteMap[note.ID] = note
-	}
 
 	for _, serverNote := range *serverNotes {
-		localNote, exists := localNoteMap[serverNote.ID]
+		idx, exists := index.idMap[serverNote.ID]
 
 		serverTime, err := time.Parse(time.RFC3339, serverNote.UpdatedAt)
 		if err != nil {
@@ -54,6 +49,7 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
 			continue
 		}
 
+		localNote := index.Notes[idx]
 		if serverTime.After(localNote.UpdatedAt) {
 			notesToFetch = append(notesToFetch, serverNote.ID)
 			stats.UpdatedNotes++

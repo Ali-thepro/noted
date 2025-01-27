@@ -122,28 +122,22 @@ func AddNote(note *api.Note, existingIndex ...*Index) (*Note, error) {
 		return nil, fmt.Errorf("failed to get config directory: %w", err)
 	}
 
-	found := false
-	for i := range index.Notes {
-		if index.Notes[i].ID == note.ID {
-			if index.Notes[i].Filename != filename {
-				oldPath := filepath.Join(dir, index.Notes[i].Filename)
-				if err := os.Remove(oldPath); err != nil && !os.IsNotExist(err) {
-					return nil, fmt.Errorf("failed to remove old note file: %w", err)
-				}
+	if idx, exists := index.idMap[note.ID]; exists {
+		if index.Notes[idx].Filename != filename {
+			oldPath := filepath.Join(dir, index.Notes[idx].Filename)
+			if err := os.Remove(oldPath); err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("failed to remove old note file: %w", err)
 			}
-			index.Notes[i] = newNote
-			found = true
-			break
 		}
+		index.Notes[idx] = newNote
+	} else {
+		index.Notes = append(index.Notes, newNote)
+		index.idMap[note.ID] = len(index.Notes) - 1
 	}
 
 	notePath := filepath.Join(dir, filename)
 	if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
 		return nil, fmt.Errorf("failed to write note file: %w", err)
-	}
-
-	if !found {
-		index.Notes = append(index.Notes, newNote)
 	}
 
 	if err := SaveIndex(index); err != nil {
@@ -215,13 +209,13 @@ func GetNoteByID(id string) (*Note, error) {
 		return nil, err
 	}
 
-	for _, note := range index.Notes {
-		if note.ID == id {
-			return &note, nil
-		}
+	idx, exists := index.idMap[id]
+	if !exists {
+		return nil, fmt.Errorf("no note found with ID: %s", id)
 	}
 
-	return nil, fmt.Errorf("no note found with ID: %s", id)
+	note := index.Notes[idx]
+	return &note, nil
 }
 
 func DeleteNote(id string) error {
@@ -230,22 +224,15 @@ func DeleteNote(id string) error {
 		return err
 	}
 
-	var found bool
-	var filename string
-	var newNotes []Note
-
-	for _, note := range index.Notes {
-		if note.ID == id {
-			found = true
-			filename = note.Filename
-		} else {
-			newNotes = append(newNotes, note)
-		}
-	}
-
-	if !found {
+	idx, exists := index.idMap[id]
+	if !exists {
 		return fmt.Errorf("no note found with ID: %s", id)
 	}
+
+	filename := index.Notes[idx].Filename
+
+	index.Notes = append(index.Notes[:idx], index.Notes[idx+1:]...)
+	delete(index.idMap, id)
 
 	dir, err := token.GetConfigDir()
 	if err != nil {
@@ -257,7 +244,6 @@ func DeleteNote(id string) error {
 		return fmt.Errorf("failed to delete note file: %w", err)
 	}
 
-	index.Notes = newNotes
 	if err := SaveIndex(index); err != nil {
 		return fmt.Errorf("failed to update index: %w", err)
 	}
@@ -271,23 +257,17 @@ func UpdateNote(note *api.Note) error {
 		return err
 	}
 
+	idx, exists := index.idMap[note.ID]
+	if !exists {
+		return fmt.Errorf("note not found in local storage")
+	}
+
 	updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
 	if err != nil {
 		return err
 	}
 
-	found := false
-	for i := range index.Notes {
-		if index.Notes[i].ID == note.ID {
-			index.Notes[i].UpdatedAt = updatedAt
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return fmt.Errorf("note note found in local storage")
-	}
+	index.Notes[idx].UpdatedAt = updatedAt
 
 	if err := SaveIndex(index); err != nil {
 		return fmt.Errorf("failed to update index: %w", err)
@@ -336,21 +316,15 @@ func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
 		return fmt.Errorf("invalid UpdatedAt format: %w", err)
 	}
 
-	found := false
-	for i := range index.Notes {
-		if index.Notes[i].ID == newNote.ID {
-			index.Notes[i].Title = newNote.Title
-			index.Notes[i].Tags = newNote.Tags
-			index.Notes[i].Filename = newFilename
-			index.Notes[i].UpdatedAt = updatedAt
-			found = true
-			break
-		}
-	}
-
-	if !found {
+	idx, exists := index.idMap[newNote.ID]
+	if !exists {
 		return fmt.Errorf("note not found in local storage")
 	}
+
+	index.Notes[idx].Title = newNote.Title
+	index.Notes[idx].Tags = newNote.Tags
+	index.Notes[idx].Filename = newFilename
+	index.Notes[idx].UpdatedAt = updatedAt
 
 	if err := SaveIndex(index); err != nil {
 		return fmt.Errorf("failed to update index: %w", err)
