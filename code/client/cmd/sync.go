@@ -25,12 +25,20 @@ This will download new notes and update existing ones.`,
 			return fmt.Errorf("sync failed: %w", err)
 		}
 
+		if stats.TotalNotes == 0 {
+			fmt.Println("Everything up to date!")
+			return nil
+		}
+
 		if verbose {
 			if stats.NewNotes > 0 {
 				fmt.Printf("✓ Downloaded %d new notes\n", stats.NewNotes)
 			}
 			if stats.UpdatedNotes > 0 {
 				fmt.Printf("✓ Updated %d existing notes\n", stats.UpdatedNotes)
+			}
+			if stats.DeletedNotes > 0 {
+				fmt.Printf("✓ Deleted %d notes\n", stats.DeletedNotes)
 			}
 			fmt.Printf("Total notes: %d\n", stats.TotalNotes)
 		} else {

@@ -33,12 +33,17 @@ type UpdateNoteMetadataRequest struct {
 	Tags  []string `json:"tags"`
 }
 
-type NoteMetadata []struct {
+type NoteMetadata struct {
 	ID        string   `json:"id"`
 	Title     string   `json:"title"`
 	Tags      []string `json:"tags"`
 	UpdatedAt string   `json:"updatedAt"`
 	CreatedAt string   `json:"createdAt"`
+}
+
+type DeletedNote struct {
+    ID        string    `json:"noteId"`
+    DeletedAt time.Time `json:"deletedAt"`
 }
 
 func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {
@@ -107,7 +112,7 @@ func (c *Client) UpdateNoteMetadata(id string, req UpdateNoteMetadataRequest) (*
 	return &note, nil
 }
 
-func (c *Client) GetNoteMetadata(since time.Time, tag string) (*NoteMetadata, error) {
+func (c *Client) GetNoteMetadata(since time.Time, tag string) ([]*NoteMetadata, error) {
 	query := make(url.Values)
 	if !since.IsZero() {
 		query.Set("since", since.Format(time.RFC3339))
@@ -126,12 +131,12 @@ func (c *Client) GetNoteMetadata(since time.Time, tag string) (*NoteMetadata, er
 		return nil, err
 	}
 
-	var metadata NoteMetadata
+	var metadata []*NoteMetadata
 	if err := c.handleResponse(resp, &metadata); err != nil {
 		return nil, err
 	}
 
-	return &metadata, nil
+	return metadata, nil
 }
 
 func (c *Client) GetBulkNotes(ids []string) ([]*Note, error) {
@@ -153,4 +158,28 @@ func (c *Client) GetBulkNotes(ids []string) ([]*Note, error) {
 	}
 
 	return notes, nil
+}
+
+func (c *Client) GetDeletedNotes(since time.Time) ([]*DeletedNote, error) {
+	query := make(url.Values)
+	if !since.IsZero() {
+		query.Set("since", since.Format(time.RFC3339))
+	}
+
+	url := "/note/deleted"
+	if len(query) > 0 {
+		url += "?" + query.Encode()
+    }
+
+    resp, err := c.doRequest("GET", url, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    var deletedNotes []*DeletedNote
+    if err := c.handleResponse(resp, &deletedNotes); err != nil {
+        return nil, err
+    }
+
+    return deletedNotes, nil
 }

@@ -14,6 +14,7 @@ type SyncStats struct {
 	NewNotes     int
 	UpdatedNotes int
 	TotalNotes   int
+	DeletedNotes int
 }
 
 type SyncOptions struct {
@@ -42,9 +43,22 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
     }
 
     stats := &SyncStats{}
+
+    deletedNotes, err := client.GetDeletedNotes(index.LastSync)
+    if err != nil {
+        return nil, fmt.Errorf("failed to fetch deleted notes: %w", err)
+    }
+
+    for _, deletedNote := range deletedNotes {
+        if err := DeleteNoteForSync(deletedNote.ID, index, idMap); err != nil {
+            return nil, fmt.Errorf("failed to delete note %s: %w", deletedNote.ID, err)
+        }
+        stats.DeletedNotes++
+    }
+
     var notesToFetch []string
 
-    for _, serverNote := range *serverNotes {
+    for _, serverNote := range serverNotes {
         idx, exists := idMap[serverNote.ID]
 
         serverTime, err := time.Parse(time.RFC3339, serverNote.UpdatedAt)
@@ -83,7 +97,7 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
         return nil, fmt.Errorf("failed to update sync time: %w", err)
     }
 
-	stats.TotalNotes = len(notesToFetch)
+	stats.TotalNotes = stats.NewNotes + stats.UpdatedNotes + stats.DeletedNotes
 	return stats, nil
 }
 
@@ -138,4 +152,27 @@ func AddNoteForSync(note *api.Note, index *Index, idMap map[string]int) (*Note, 
     }
 
     return &newNote, nil
+}
+
+func DeleteNoteForSync(id string, index *Index, idMap map[string]int) error {
+    if idx, exists := idMap[id]; exists {
+        dir, err := token.GetConfigDir()
+        if err != nil {
+            return fmt.Errorf("failed to get config directory: %w", err)
+        }
+
+        filename := index.Notes[idx].Filename
+
+        notePath := filepath.Join(dir, filename)
+        if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
+            return fmt.Errorf("failed to remove note file: %w", err)
+        }
+
+        index.Notes = append(index.Notes[:idx], index.Notes[idx+1:]...)
+        delete(idMap, id)
+
+        // No need to save index here as sync will do it
+        return nil
+    }
+    return nil
 }
