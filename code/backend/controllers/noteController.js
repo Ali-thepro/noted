@@ -193,6 +193,28 @@ const getBulkNotes = async (request, response, next) => {
   }
 }
 
+const getDeletedNotes = async (request, response, next) => {
+  const user = request.user
+  const { since } = request.query
+
+  try {
+    const filter = {
+      user: user.id,
+      ...(since ? {
+        deletedAt: { $gte: since }
+      } : {}),
+    }
+
+    const deletedNotes = await DeletedNote.find(filter)
+      .select('noteId deletedAt')
+      .sort({ deletedAt: -1 })
+
+    response.json(deletedNotes)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   getNotes,
   getNote,
@@ -200,5 +222,6 @@ module.exports = {
   updateNote,
   deleteNote,
   getNoteMetadata,
-  getBulkNotes
+  getBulkNotes,
+  getDeletedNotes
 }
