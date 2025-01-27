@@ -26,7 +26,6 @@ type Index struct {
 	Notes    []Note         `json:"notes"`
 	LastSync time.Time      `json:"lastSync"`
 	UserID   string         `json:"userId"`
-	idMap    map[string]int `json:"-"`
 }
 
 const (
@@ -34,34 +33,28 @@ const (
 )
 
 func LoadIndex() (*Index, error) {
-	dir, err := token.GetConfigDir()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get config directory: %w", err)
-	}
+    dir, err := token.GetConfigDir()
+    if err != nil {
+        return nil, fmt.Errorf("failed to get config directory: %w", err)
+    }
 
-	path := filepath.Join(dir, indexFile)
-	data, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return &Index{
-			Notes: []Note{},
-			idMap: make(map[string]int),
-		}, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to read index: %w", err)
-	}
+    path := filepath.Join(dir, indexFile)
+    data, err := os.ReadFile(path)
+    if os.IsNotExist(err) {
+        return &Index{
+            Notes: []Note{},
+        }, nil
+    }
+    if err != nil {
+        return nil, fmt.Errorf("failed to read index: %w", err)
+    }
 
-	var index Index
-	if err := json.Unmarshal(data, &index); err != nil {
-		return nil, fmt.Errorf("failed to parse index: %w", err)
-	}
+    var index Index
+    if err := json.Unmarshal(data, &index); err != nil {
+        return nil, fmt.Errorf("failed to parse index: %w", err)
+    }
 
-	index.idMap = make(map[string]int, len(index.Notes))
-	for i, note := range index.Notes {
-		index.idMap[note.ID] = i
-	}
-
-	return &index, nil
+    return &index, nil
 }
 
 func SaveIndex(index *Index) error {
@@ -133,7 +126,6 @@ func VerifyUser() error {
 		index = &Index{
 			Notes:  []Note{},
 			UserID: user.ID,
-			idMap:  make(map[string]int),
 		}
 		if err := SaveIndex(index); err != nil {
 			return fmt.Errorf("failed to save new index: %w", err)
@@ -143,69 +135,52 @@ func VerifyUser() error {
 	return nil
 }
 
-func AddNote(note *api.Note, existingIndex ...*Index) (*Note, error) {
-	var index *Index
-	var err error
+func AddNote(note *api.Note) (*Note, error) {
+    index, err := LoadIndex()
+    if err != nil {
+        return nil, err
+    }
 
-	if len(existingIndex) > 0 && existingIndex[0] != nil {
-		index = existingIndex[0]
-	} else {
-		index, err = LoadIndex()
-		if err != nil {
-			return nil, err
-		}
-	}
+    sanitizedTitle := utils.SanitiseTitle(note.Title)
+    filename := fmt.Sprintf("%s-%s.md", note.ID, sanitizedTitle)
 
-	sanitizedTitle := utils.SanitiseTitle(note.Title)
-	filename := fmt.Sprintf("%s-%s.md", note.ID, sanitizedTitle)
+    createdAt, err := time.Parse(time.RFC3339, note.CreatedAt)
+    if err != nil {
+        return nil, fmt.Errorf("invalid CreatedAt format: %w", err)
+    }
 
-	createdAt, err := time.Parse(time.RFC3339, note.CreatedAt)
-	if err != nil {
-		return nil, fmt.Errorf("invalid CreatedAt format: %w", err)
-	}
+    updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
+    if err != nil {
+        return nil, fmt.Errorf("invalid UpdatedAt format: %w", err)
+    }
 
-	updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
-	if err != nil {
-		return nil, fmt.Errorf("invalid UpdatedAt format: %w", err)
-	}
+    newNote := Note{
+        ID:        note.ID,
+        Title:     note.Title,
+        Filename:  filename,
+        Tags:      note.Tags,
+        CreatedAt: createdAt,
+        UpdatedAt: updatedAt,
+    }
 
-	newNote := Note{
-		ID:        note.ID,
-		Title:     note.Title,
-		Filename:  filename,
-		Tags:      note.Tags,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
-	}
+    dir, err := token.GetConfigDir()
+    if err != nil {
+        return nil, fmt.Errorf("failed to get config directory: %w", err)
+    }
 
-	dir, err := token.GetConfigDir()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get config directory: %w", err)
-	}
+    // Simply append the new note
+    index.Notes = append(index.Notes, newNote)
 
-	if idx, exists := index.idMap[note.ID]; exists {
-		if index.Notes[idx].Filename != filename {
-			oldPath := filepath.Join(dir, index.Notes[idx].Filename)
-			if err := os.Remove(oldPath); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("failed to remove old note file: %w", err)
-			}
-		}
-		index.Notes[idx] = newNote
-	} else {
-		index.Notes = append(index.Notes, newNote)
-		index.idMap[note.ID] = len(index.Notes) - 1
-	}
+    notePath := filepath.Join(dir, filename)
+    if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
+        return nil, fmt.Errorf("failed to write note file: %w", err)
+    }
 
-	notePath := filepath.Join(dir, filename)
-	if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
-		return nil, fmt.Errorf("failed to write note file: %w", err)
-	}
+    if err := SaveIndex(index); err != nil {
+        return nil, fmt.Errorf("failed to update index: %w", err)
+    }
 
-	if err := SaveIndex(index); err != nil {
-		return nil, fmt.Errorf("failed to update index: %w", err)
-	}
-
-	return &newNote, nil
+    return &newNote, nil
 }
 
 func SelectNote(title string) (*Note, error) {
@@ -265,51 +240,50 @@ func FindNotes(title string) ([]Note, error) {
 }
 
 func GetNoteByID(id string) (*Note, error) {
-	index, err := LoadIndex()
-	if err != nil {
-		return nil, err
-	}
+    index, err := LoadIndex()
+    if err != nil {
+        return nil, err
+    }
 
-	idx, exists := index.idMap[id]
-	if !exists {
-		return nil, fmt.Errorf("no note found with ID: %s", id)
-	}
+    for _, note := range index.Notes {
+        if note.ID == id {
+            return &note, nil
+        }
+    }
 
-	note := index.Notes[idx]
-	return &note, nil
+    return nil, fmt.Errorf("no note found with ID: %s", id)
 }
 
 func DeleteNote(id string) error {
-	index, err := LoadIndex()
-	if err != nil {
-		return err
-	}
+    index, err := LoadIndex()
+    if err != nil {
+        return err
+    }
 
-	idx, exists := index.idMap[id]
-	if !exists {
-		return fmt.Errorf("no note found with ID: %s", id)
-	}
+    for i, note := range index.Notes {
+        if note.ID == id {
+            filename := note.Filename
+            index.Notes = append(index.Notes[:i], index.Notes[i+1:]...)
 
-	filename := index.Notes[idx].Filename
+            dir, err := token.GetConfigDir()
+            if err != nil {
+                return fmt.Errorf("failed to get config directory: %w", err)
+            }
 
-	index.Notes = append(index.Notes[:idx], index.Notes[idx+1:]...)
-	delete(index.idMap, id)
+            notePath := filepath.Join(dir, filename)
+            if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
+                return fmt.Errorf("failed to delete note file: %w", err)
+            }
 
-	dir, err := token.GetConfigDir()
-	if err != nil {
-		return fmt.Errorf("failed to get config directory: %w", err)
-	}
+            if err := SaveIndex(index); err != nil {
+                return fmt.Errorf("failed to update index: %w", err)
+            }
 
-	notePath := filepath.Join(dir, filename)
-	if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to delete note file: %w", err)
-	}
+            return nil
+        }
+    }
 
-	if err := SaveIndex(index); err != nil {
-		return fmt.Errorf("failed to update index: %w", err)
-	}
-
-	return nil
+    return fmt.Errorf("no note found with ID: %s", id)
 }
 
 func UpdateNote(note *api.Note) error {
@@ -318,17 +292,23 @@ func UpdateNote(note *api.Note) error {
 		return err
 	}
 
-	idx, exists := index.idMap[note.ID]
-	if !exists {
-		return fmt.Errorf("note not found in local storage")
-	}
-
 	updatedAt, err := time.Parse(time.RFC3339, note.UpdatedAt)
 	if err != nil {
 		return err
 	}
 
-	index.Notes[idx].UpdatedAt = updatedAt
+	found := false
+	for i := range index.Notes {
+		if index.Notes[i].ID == note.ID {
+			index.Notes[i].UpdatedAt = updatedAt
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("note note found in local storage")
+	}
 
 	if err := SaveIndex(index); err != nil {
 		return fmt.Errorf("failed to update index: %w", err)
@@ -336,6 +316,7 @@ func UpdateNote(note *api.Note) error {
 
 	return nil
 }
+
 
 func ReadNoteContent(filename string) (string, error) {
 	dir, err := token.GetConfigDir()
@@ -377,15 +358,21 @@ func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
 		return fmt.Errorf("invalid UpdatedAt format: %w", err)
 	}
 
-	idx, exists := index.idMap[newNote.ID]
-	if !exists {
-		return fmt.Errorf("note not found in local storage")
+	found := false
+	for i := range index.Notes {
+		if index.Notes[i].ID == newNote.ID {
+			index.Notes[i].Title = newNote.Title
+			index.Notes[i].Tags = newNote.Tags
+			index.Notes[i].Filename = newFilename
+			index.Notes[i].UpdatedAt = updatedAt
+			found = true
+			break
+		}
 	}
 
-	index.Notes[idx].Title = newNote.Title
-	index.Notes[idx].Tags = newNote.Tags
-	index.Notes[idx].Filename = newFilename
-	index.Notes[idx].UpdatedAt = updatedAt
+	if !found {
+		return fmt.Errorf("note not found in local storage")
+	}
 
 	if err := SaveIndex(index); err != nil {
 		return fmt.Errorf("failed to update index: %w", err)

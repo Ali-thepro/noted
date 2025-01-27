@@ -102,6 +102,7 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 
 		fmt.Printf("Note metadata updated successfully!\n")
 		fmt.Printf("Title: %s\n", note.Title)
+		fmt.Printf("ID: %s\n", note.ID)
 		if len(note.Tags) > 0 {
 			fmt.Printf("Tags: %v\n", strings.Join(note.Tags, ", "))
 		}
