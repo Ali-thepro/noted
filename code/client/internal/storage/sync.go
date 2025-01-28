@@ -147,7 +147,6 @@ func AddNoteForSync(note *api.Note, index *Index, idMap map[string]int) (*Note, 
 		return nil, fmt.Errorf("failed to write note file: %w", err)
 	}
 
-
 	return &newNote, nil
 }
 
