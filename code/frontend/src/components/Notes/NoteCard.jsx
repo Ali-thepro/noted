@@ -1,22 +1,19 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
-import { useDispatch } from 'react-redux'
-import { deleteNote } from '../../redux/reducers/noteReducer'
 import NoteModal from './NoteModal'
 import { FaClock, FaEdit, FaTimes } from 'react-icons/fa'
 
 const MAX_VISIBLE_TAGS = 3
 
-const NoteCard = ({ note, onClick, onTagClick }) => {
-  const dispatch = useDispatch()
+const NoteCard = ({ note, onClick, onTagClick, onDelete }) => {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showAllTags, setShowAllTags] = useState(false)
 
   const handleDelete = (e) => {
     e.stopPropagation()
     if (window.confirm('Are you sure you want to delete this note?')) {
-      dispatch(deleteNote(note.id))
+      onDelete()
     }
   }
 
@@ -149,6 +146,7 @@ NoteCard.propTypes = {
   }).isRequired,
   onClick: PropTypes.func.isRequired,
   onTagClick: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 }
 
 export default NoteCard

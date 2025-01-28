@@ -151,24 +151,35 @@ func AddNoteForSync(note *api.Note, index *Index, idMap map[string]int) (*Note, 
 }
 
 func DeleteNoteForSync(id string, index *Index, idMap map[string]int) error {
-	if idx, exists := idMap[id]; exists {
-		dir, err := token.GetConfigDir()
-		if err != nil {
-			return fmt.Errorf("failed to get config directory: %w", err)
-		}
-
-		filename := index.Notes[idx].Filename
-
-		notePath := filepath.Join(dir, filename)
-		if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("failed to remove note file: %w", err)
-		}
-
-		index.Notes = append(index.Notes[:idx], index.Notes[idx+1:]...)
-		delete(idMap, id)
-
-		// No need to save index here as sync will do it
+	idx, exists := idMap[id]
+	if !exists {
 		return nil
 	}
+
+	if idx < 0 || idx >= len(index.Notes) {
+		return fmt.Errorf("invalid index %d for note %s (total notes: %d)",
+			idx, id, len(index.Notes))
+	}
+
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	notePath := filepath.Join(dir, index.Notes[idx].Filename)
+	if err := os.Remove(notePath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to delete note file: %w", err)
+	}
+
+	index.Notes = append(index.Notes[:idx], index.Notes[idx+1:]...)
+
+	for noteID, noteIdx := range idMap {
+		if noteIdx > idx {
+			idMap[noteID] = noteIdx - 1
+		}
+	}
+
+	delete(idMap, id)
+
 	return nil
 }
