@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { initializeNotes } from '../redux/reducers/noteReducer'
+import { initializeNotes, deleteNote } from '../redux/reducers/noteReducer'
 import NoteCard from '../components/Notes/NoteCard'
 import SearchBar from '../components/Notes/SearchBar'
 import SortControls from '../components/Notes/SortControls'
@@ -48,6 +48,26 @@ const HomePage = () => {
       debouncedInitializeNotes.cancel()
     }
   }, [debouncedInitializeNotes, keyword, tag, sortBy, sortOrder, currentPage])
+
+  const handleNoteDelete = async (noteId) => {
+    const params = []
+    if (keyword) params.push(`search=${encodeURIComponent(keyword)}`)
+    if (tag) params.push(`tag=${encodeURIComponent(tag)}`)
+    const querySortBy = sortBy === 'date' ? 'updatedAt' : 'title'
+    const querySortOrder = sortOrder
+    const queryStartIndex = (currentPage - 1) * limit
+    params.push(`sortBy=${encodeURIComponent(querySortBy)}`)
+    params.push(`sortOrder=${encodeURIComponent(querySortOrder)}`)
+    params.push(`startIndex=${encodeURIComponent(queryStartIndex)}`)
+    params.push(`limit=${encodeURIComponent(limit)}`)
+    const query = params.length > 0 ? params.join('&') : ''
+
+    await dispatch(deleteNote(noteId, query))
+
+    if (notes.length === 1 && currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
 
   const handleKeywordChange = (value) => {
     setSortBy('date')
@@ -125,6 +145,7 @@ const HomePage = () => {
                 note={note}
                 onClick={() => handleNoteClick(note.id)}
                 onTagClick={handleTagChange}
+                onDelete={() => handleNoteDelete(note.id)}
               />
             ))}
           </div>
