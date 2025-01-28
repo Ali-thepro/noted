@@ -40,7 +40,7 @@ This will download new notes and update existing ones.`,
 			if stats.DeletedNotes > 0 {
 				fmt.Printf("✓ Deleted %d notes\n", stats.DeletedNotes)
 			}
-			fmt.Printf("Total notes: %d\n", stats.TotalNotes)
+			fmt.Printf("Total notes synced: %d\n", stats.TotalNotes)
 		} else {
 			fmt.Printf("✓ Synced %d notes\n", stats.NewNotes+stats.UpdatedNotes)
 		}
