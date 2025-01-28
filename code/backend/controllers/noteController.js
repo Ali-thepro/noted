@@ -1,6 +1,5 @@
 const Note = require('../models/note')
 const DeletedNote = require('../models/deletedNote')
-const Version = require('../models/version')
 const createError = require('../utils/error')
 
 const getNotes = async (request, response, next) => {
@@ -218,111 +217,6 @@ const getDeletedNotes = async (request, response, next) => {
       .sort({ deletedAt: -1 })
 
     response.json(deletedNotes)
-  } catch (error) {
-    next(error)
-  }
-}
-
-const createVersion = async (request, response, next) => {
-  const { noteId } = request.params
-  const { type, content, baseVersion, metadata } = request.body
-  const user = request.user
-
-  try {
-    const note = await Note.findById({ _id: noteId, user: user.id })
-    if (!note) {
-      return next(createError('Note not found or unauthorized', 404))
-    }
-
-    const latestVersion = await Version.findOne({ noteId })
-      .sort({ versionNumber: -1 })
-    const versionNumber = latestVersion ? latestVersion.versionNumber + 1 : 1
-
-    const version = new Version({
-      noteId,
-      versionNumber,
-      type,
-      content,
-      baseVersion,
-      metadata: {
-        ...metadata,
-      }
-    })
-
-    const savedVersion = await version.save()
-    response.status(201).json(savedVersion)
-  } catch (error) {
-    next(error)
-  }
-}
-
-const getVersions = async (request, response, next) => {
-  const { noteId } = request.params
-  const user = request.user
-
-  try {
-    const note = await Note.findOne({ _id: noteId, user: user.id })
-    if (!note) {
-      return next(createError('Note not found or unauthorized', 404))
-    }
-
-    const versions = await Version.find({ noteId })
-      .sort({ versionNumber: -1 })
-      .select('versionNumber type metadata createdAt')
-
-    response.json(versions)
-  } catch (error) {
-    next(error)
-  }
-}
-
-const getVersion = async (request, response, next) => {
-  const { noteId, versionNumber } = request.params
-  const user = request.user
-
-  try {
-    const note = await Note.findOne({ _id: noteId, user: user.id })
-    if (!note) {
-      return next(createError('Note not found or unauthorized', 404))
-    }
-
-    const version = await Version.findOne({ 
-      noteId, 
-      versionNumber: parseInt(versionNumber) 
-    })
-
-    if (!version) {
-      return next(createError('Version not found', 404))
-    }
-
-    response.json(version)
-  } catch (error) {
-    next(error)
-  }
-}
-
-const getVersionChain = async (request, response, next) => {
-  const { noteId, versionNumber } = request.params
-  const user = request.user
-
-  try {
-    const note = await Note.findOne({ _id: noteId, user: user.id })
-    if (!note) {
-      return next(createError('Note not found or unauthorized', 404))
-    }
-
-    const targetVersion = parseInt(versionNumber)
-    const versions = await Version.find({
-      noteId,
-      versionNumber: { $lte: targetVersion }
-    })
-      .sort({ versionNumber: -1 })
-
-    if (versions.length === 0) {
-      return next(createError('Version chain not found', 404))
-    }
-
-    response.json(versions)
   } catch (error) {
     next(error)
   }
