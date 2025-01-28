@@ -72,6 +72,12 @@ func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 		fmt.Println("Your session has expired. Please login again.")
 		return fmt.Errorf("%s", errResp.Error)
 	}
+	if resp.StatusCode == http.StatusNotFound {
+		if resp.Request.Method == "DELETE" || resp.Request.Method == "PUT" {
+			return fmt.Errorf("note has already been deleted from the server")
+		}
+		return fmt.Errorf("note not found on server")
+	}
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
 		var errResp ErrorResponse

@@ -1,4 +1,4 @@
-.PHONY: build clean
+.PHONY: build build-linux build-darwin build-windows clean lint fmt vet
 
 BINARY_NAME=noted
 

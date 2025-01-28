@@ -1,4 +1,5 @@
 const Note = require('../models/note')
+const DeletedNote = require('../models/deletedNote')
 const createError = require('../utils/error')
 
 const getNotes = async (request, response, next) => {
@@ -132,8 +133,90 @@ const deleteNote = async (request, response, next) => {
       return next(createError('Note not found or unauthorized', 404))
     }
 
+    const deletedNote = new DeletedNote({
+      noteId: id,
+      tags: note.tags,
+      user: user.id
+    })
+
+    await deletedNote.save()
     await Note.findByIdAndDelete(id)
     response.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getNoteMetadata = async (request, response, next) => {
+  const user = request.user
+  const { since, tag } = request.query
+
+  try {
+    const filter = {
+      user: user.id,
+      ...(since ? {
+        updatedAt: { $gte: since }
+      } : {}),
+      ...(tag ? {
+        tags: {
+          $regex: tag,
+          $options: 'i',
+        },
+      } : {}),
+    }
+
+    const notes = await Note.find(filter)
+      .select('id title tags updatedAt createdAt')
+      .sort({ updatedAt: -1 })
+
+    response.json(notes)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getBulkNotes = async (request, response, next) => {
+  const user = request.user
+  const { ids } = request.body
+
+  if (!Array.isArray(ids)) {
+    return next(createError('Invalid request : ids must be an array', 400))
+  }
+
+  try {
+    const notes = await Note.find({
+      _id: { $in: ids },
+      user: user.id
+    })
+    response.json(notes)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getDeletedNotes = async (request, response, next) => {
+  const user = request.user
+  const { since, tag } = request.query
+
+  try {
+    const filter = {
+      user: user.id,
+      ...(since ? {
+        deletedAt: { $gte: since }
+      } : {}),
+      ...(tag ? {
+        tags: {
+          $regex: tag,
+          $options: 'i',
+        },
+      } : {}),
+    }
+
+    const deletedNotes = await DeletedNote.find(filter)
+      .select('noteId deletedAt')
+      .sort({ deletedAt: -1 })
+
+    response.json(deletedNotes)
   } catch (error) {
     next(error)
   }
@@ -144,5 +227,8 @@ module.exports = {
   getNote,
   createNote,
   updateNote,
-  deleteNote
+  deleteNote,
+  getNoteMetadata,
+  getBulkNotes,
+  getDeletedNotes
 }
