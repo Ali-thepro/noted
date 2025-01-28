@@ -6,10 +6,6 @@ const versionSchema = new mongoose.Schema({
     ref: 'Note',
     required: true
   },
-  versionNumber: {
-    type: Number,
-    required: true
-  },
   type: {
     type: String,
     enum: ['diff', 'snapshot'],
@@ -20,8 +16,9 @@ const versionSchema = new mongoose.Schema({
     required: true
   },
   baseVersion: {
-    type: Number,
-    required: function() { return this.type === 'diff'}
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Version',
+    required: function() { return this.type === 'diff' }
   },
   metadata: {
     title: String,
@@ -29,7 +26,7 @@ const versionSchema = new mongoose.Schema({
   }
 }, { timestamps: true })
 
-versionSchema.index({ noteId: 1, versionNumber: -1 })
+versionSchema.index({ noteId: 1, createdAt: -1 })
 versionSchema.index({ noteId: 1, type: 1 })
 
 versionSchema.set('toJSON', {
