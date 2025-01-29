@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/sergi/go-diff/diffmatchpatch"
-	"github.com/spf13/cobra"
+	"noted/cmd/version"
 	"noted/internal/api"
 	"noted/internal/storage"
 	"strings"
+
+	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/spf13/cobra"
 )
 
 var pushCmd = &cobra.Command{
@@ -57,6 +59,18 @@ You can specify either the note ID as an argument or use --title flag.`,
 		}
 
 		latestVersion := versions[0]
+
+		var baseContent string
+		if latestVersion.Type == "snapshot" {
+			baseContent = latestVersion.Content
+		} else {
+			chain, err := client.GetVersionChain(noteToPush.ID, latestVersion.CreatedAt)
+			if err != nil {
+				return fmt.Errorf("failed to get version chain: %w", err)
+			}
+			baseContent = version.BuildVersionContent(chain)
+		}
+
 		versionType := "diff"
 		var versionContent string
 		var baseVersion string
@@ -66,7 +80,7 @@ You can specify either the note ID as an argument or use --title flag.`,
 			versionContent = content
 		} else {
 			dmp := diffmatchpatch.New()
-			diffs := dmp.DiffMain(latestVersion.Content, content, false)
+			diffs := dmp.DiffMain(baseContent, content, false)
 			versionContent = dmp.DiffToDelta(diffs)
 			baseVersion = latestVersion.ID
 		}
