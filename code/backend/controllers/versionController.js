@@ -62,7 +62,7 @@ const getVersionChain = async (request, response, next) => {
 
     const versions = await Version.find(query)
       .sort({ createdAt: -1 })
-      .populate('baseVersion')
+      // .populate('baseVersion')
 
     if (versions.length === 0) {
       return next(createError('No versions found', 404))
@@ -76,7 +76,7 @@ const getVersionChain = async (request, response, next) => {
       if (currentVersion.type === 'snapshot') {
         break
       }
-      currentVersion = currentVersion.baseVersion
+      currentVersion = await Version.findOne({ _id: currentVersion.baseVersion })
     }
 
     response.json(versionChain)
@@ -97,7 +97,7 @@ const getVersions = async (request, response, next) => {
 
     const versions = await Version.find({ noteId })
       .sort({ createdAt: -1 })
-      .select('-content')
+      // .select('-content')
 
     response.json(versions)
   } catch (error) {

@@ -63,10 +63,10 @@ func (c *Client) GetVersions(noteID string) ([]*Version, error) {
 	return versions, nil
 }
 
-func (c *Client) GetVersionChain(noteID string, until string) ([]*Version, error) {
+func (c *Client) GetVersionChain(noteID string, until time.Time) ([]*Version, error) {
 	url := fmt.Sprintf("/version/%s/chain", noteID)
-	if until != "" {
-		url += fmt.Sprintf("?until=%s", until)
+	if !until.IsZero() {
+		url += fmt.Sprintf("?until=%s", until.Format(time.RFC3339Nano))
 	}
 
 	resp, err := c.doRequest("GET", url, nil)
