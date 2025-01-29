@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
@@ -47,6 +48,43 @@ You can specify either the note ID as an argument or use --title flag.`,
 			return err
 		}
 
+		versions, err := client.GetVersions(noteToPush.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get versions: %w", err)
+		}
+		if len(versions) == 0 {
+			return fmt.Errorf("no versions found for note")
+		}
+
+		latestVersion := versions[0]
+		versionType := "diff"
+		var versionContent string
+		var baseVersion string
+
+		if shouldCreateSnapshot(versions) {
+			versionType = "snapshot"
+			versionContent = content
+		} else {
+			dmp := diffmatchpatch.New()
+			diffs := dmp.DiffMain(latestVersion.Content, content, false)
+			versionContent = dmp.DiffToDelta(diffs)
+			baseVersion = latestVersion.ID
+		}
+
+		_, err = client.CreateVersion(noteToPush.ID, &api.CreateVersionRequest{
+			Type:        versionType,
+			Content:     versionContent,
+			BaseVersion: baseVersion,
+			Metadata: api.VersionMetadata{
+				Title:         noteToPush.Title,
+				Tags:          noteToPush.Tags,
+				VersionNumber: latestVersion.Metadata.VersionNumber + 1,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create version: %w", err)
+		}
+
 		note, err := client.UpdateNote(noteToPush.ID, api.UpdateNoteRequest{
 			Content: content,
 		})
@@ -70,6 +108,17 @@ You can specify either the note ID as an argument or use --title flag.`,
 		}
 		return nil
 	},
+}
+
+func shouldCreateSnapshot(versions []*api.Version) bool {
+	if len(versions) == 0 {
+		return true
+	}
+
+	latestVersion := versions[0]
+	nextVersionNumber := latestVersion.Metadata.VersionNumber + 1
+
+	return nextVersionNumber%10 == 0 || latestVersion.Type != "snapshot"
 }
 
 func init() {

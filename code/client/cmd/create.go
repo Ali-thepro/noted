@@ -44,6 +44,19 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
+		_, err = client.CreateVersion(note.ID, &api.CreateVersionRequest{
+			Type:    "snapshot",
+			Content: note.Content,
+			Metadata: api.VersionMetadata{
+				Title:         note.Title,
+				Tags:          note.Tags,
+				VersionNumber: 1,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create initial version: %w", err)
+		}
+
 		_, err = storage.AddNote(note)
 		if err != nil {
 			return fmt.Errorf("failed to save note storage: %w", err)
