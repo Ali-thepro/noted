@@ -330,6 +330,15 @@ func ReadNoteContent(filename string) (string, error) {
 	return string(content), nil
 }
 
+func WriteNoteContent(filename string, content string) error {
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(dir, filename), []byte(content), 0600)
+}
+
 func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
 	index, err := LoadIndex()
 	if err != nil {

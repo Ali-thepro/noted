@@ -23,6 +23,7 @@ const versionSchema = new mongoose.Schema({
   metadata: {
     title: String,
     tags: [String],
+    versionNumber: Number,
   }
 }, { timestamps: true })
 

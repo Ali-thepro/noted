@@ -13,15 +13,17 @@ const createVersion = async (request, response, next) => {
       return next(createError('Note not found or unauthorized', 404))
     }
 
-    let baseVersionId = null
-    if (type === 'diff') {
-      const latestVersion = await Version.findOne({ noteId })
-        .sort({ createdAt: -1 })
+    const latestVersion = await Version.findOne({ noteId })
+      .sort({ createdAt: -1 })
 
+    const nextVersionNumber = latestVersion ? latestVersion.metadata.versionNumber + 1 : 1
+
+    let baseVersion = null
+    if (type === 'diff') {
       if (!latestVersion) {
         return next(createError('No base version found for diff', 400))
       }
-      baseVersionId = latestVersion._id
+      baseVersion = latestVersion._id
     }
 
     const version = new Version({
@@ -30,9 +32,9 @@ const createVersion = async (request, response, next) => {
       content,
       metadata: {
         ...metadata,
-        timestamp: new Date()
+        versionNumber: nextVersionNumber
       },
-      ...(baseVersionId && { baseVersionId })
+      ...(baseVersion && { baseVersion })
     })
 
     const savedVersion = await version.save()
@@ -60,7 +62,7 @@ const getVersionChain = async (request, response, next) => {
 
     const versions = await Version.find(query)
       .sort({ createdAt: -1 })
-      .populate('baseVersionId')
+      .populate('baseVersion')
 
     if (versions.length === 0) {
       return next(createError('No versions found', 404))
@@ -74,7 +76,7 @@ const getVersionChain = async (request, response, next) => {
       if (currentVersion.type === 'snapshot') {
         break
       }
-      currentVersion = currentVersion.baseVersionId
+      currentVersion = currentVersion.baseVersion
     }
 
     response.json(versionChain)
