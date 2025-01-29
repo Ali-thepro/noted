@@ -14,12 +14,12 @@ func selectVersion(versions []*api.Version) (*api.Version, error) {
 		v := versions[i]
 		displayIndex := length - i
 		fmt.Printf("%d. Version #%d (%s) - %s\n",
-            displayIndex,
-            v.Metadata.VersionNumber,
-            v.CreatedAt.Format("2006-01-02 15:04:05"),
-            v.Type,
-        )
-    }
+			displayIndex,
+			v.Metadata.VersionNumber,
+			v.CreatedAt.Format("2006-01-02 15:04:05"),
+			v.Type,
+		)
+	}
 
 	var choice int
 	fmt.Print("\nChoose a number: ")
