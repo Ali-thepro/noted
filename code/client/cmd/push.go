@@ -118,7 +118,7 @@ func shouldCreateSnapshot(versions []*api.Version) bool {
 	latestVersion := versions[0]
 	nextVersionNumber := latestVersion.Metadata.VersionNumber + 1
 
-	return nextVersionNumber%10 == 0 || latestVersion.Type != "snapshot"
+	return nextVersionNumber%10 == 0
 }
 
 func init() {
