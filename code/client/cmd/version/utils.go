@@ -3,33 +3,33 @@ package version
 import (
 	"fmt"
 	"noted/internal/api"
-	// "sort"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 func selectVersion(versions []*api.Version) (*api.Version, error) {
 	fmt.Println("Available versions:")
-	// sort.Slice(versions, func(i, j int) bool {
-	// 	return versions[i].CreatedAt.Before(versions[j].CreatedAt)
-	// })
-	for i, v := range versions {
+	length := len(versions)
+	for i := length - 1; i >= 0; i-- {
+		v := versions[i]
+		displayIndex := length - i
 		fmt.Printf("%d. Version #%d (%s) - %s\n",
-			i+1,
-			v.Metadata.VersionNumber,
-			v.CreatedAt.Format("2006-01-02 15:04:05"),
-			v.Type,
-		)
-	}
+            displayIndex,
+            v.Metadata.VersionNumber,
+            v.CreatedAt.Format("2006-01-02 15:04:05"),
+            v.Type,
+        )
+    }
 
 	var choice int
 	fmt.Print("\nChoose a number: ")
 	_, err := fmt.Scanf("%d", &choice)
-	if err != nil || choice < 1 || choice > len(versions) {
+	if err != nil || choice < 1 || choice > length {
 		return nil, fmt.Errorf("invalid selection")
 	}
 
-	return versions[choice-1], nil
+	selectedIndex := length - choice
+	return versions[selectedIndex], nil
 }
 
 func BuildVersionContent(chain []*api.Version) string {
