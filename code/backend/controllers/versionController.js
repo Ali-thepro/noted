@@ -16,7 +16,7 @@ const createVersion = async (request, response, next) => {
     const latestVersion = await Version.findOne({ noteId })
       .sort({ createdAt: -1 })
 
-    const nextVersionNumber = latestVersion ? latestVersion.metadata.versionNumber + 1 : 1
+    // const nextVersionNumber = latestVersion ? latestVersion.metadata.versionNumber + 1 : 1
 
     let baseVersion = null
     if (type === 'diff') {
@@ -32,7 +32,7 @@ const createVersion = async (request, response, next) => {
       content,
       metadata: {
         ...metadata,
-        versionNumber: nextVersionNumber
+        // versionNumber: nextVersionNumber
       },
       ...(baseVersion && { baseVersion })
     })
