@@ -5,7 +5,6 @@ import (
 	"noted/internal/api"
 	"noted/internal/storage"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -65,7 +64,7 @@ var listCmd = &cobra.Command{
 			fmt.Printf("#%-3d  %-8s  %-20s  %s\n",
 				v.Metadata.VersionNumber,
 				v.Type,
-				v.CreatedAt.Format(time.RFC822),
+				v.CreatedAt.Format("2006-01-02 15:04:05"),
 				tags,
 			)
 		}
