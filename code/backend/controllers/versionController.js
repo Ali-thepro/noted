@@ -4,26 +4,13 @@ const createError = require('../utils/error')
 
 const createVersion = async (request, response, next) => {
   const { noteId } = request.params
-  const { type, content, metadata } = request.body
+  const { type, content, metadata, baseVersion } = request.body
   const user = request.user
 
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })
     if (!note) {
       return next(createError('Note not found or unauthorized', 404))
-    }
-
-    const latestVersion = await Version.findOne({ noteId })
-      .sort({ createdAt: -1 })
-
-    // const nextVersionNumber = latestVersion ? latestVersion.metadata.versionNumber + 1 : 1
-
-    let baseVersion = null
-    if (type === 'diff') {
-      if (!latestVersion) {
-        return next(createError('No base version found for diff', 400))
-      }
-      baseVersion = latestVersion._id
     }
 
     const version = new Version({
