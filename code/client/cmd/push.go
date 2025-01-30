@@ -71,11 +71,16 @@ You can specify either the note ID as an argument or use --title flag.`,
 			baseContent = version.BuildVersionContent(chain)
 		}
 
+		if baseContent == content {
+			fmt.Println("No changes detected. Nothing to push.")
+			return nil
+		}
+
 		versionType := "diff"
 		var versionContent string
 		var baseVersion string
 
-		if shouldCreateSnapshot(versions) {
+		if shouldCreateSnapshot(latestVersion) {
 			versionType = "snapshot"
 			versionContent = content
 		} else {
@@ -124,14 +129,8 @@ You can specify either the note ID as an argument or use --title flag.`,
 	},
 }
 
-func shouldCreateSnapshot(versions []*api.Version) bool {
-	if len(versions) == 0 {
-		return true
-	}
-
-	latestVersion := versions[0]
+func shouldCreateSnapshot(latestVersion *api.Version) bool {
 	nextVersionNumber := latestVersion.Metadata.VersionNumber + 1
-
 	return nextVersionNumber%10 == 0
 }
 
