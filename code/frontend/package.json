@@ -27,6 +27,7 @@
     "@uiw/codemirror-themes-all": "^4.23.7",
     "@uiw/react-codemirror": "^4.23.7",
     "axios": "^1.7.9",
+    "diff-match-patch": "^1.0.5",
     "dompurify": "^3.2.3",
     "flowbite-react": "^0.10.2",
     "highlight.js": "^11.11.1",
