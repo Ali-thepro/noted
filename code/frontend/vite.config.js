@@ -47,5 +47,12 @@ export default defineConfig({
     globals: true,
     setupFiles: './testSetup.js',
     include: ['tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    deps: {
+      optimizer: {
+        web: {
+          include: [/msw/]
+        }
+      }
+    },
   }
 })
