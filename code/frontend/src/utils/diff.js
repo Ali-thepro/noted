@@ -1,5 +1,14 @@
 import { diff_match_patch } from 'diff-match-patch'
 
+function encode(str) {
+  return encodeURIComponent(str)
+    .replace(/[!'()*]/g, function(c) {
+      return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+    })
+    .replace(/%20/g, '+')
+}
+
+
 diff_match_patch.prototype.diff_toDelta = function (diffs) {
   let delta = []
 
@@ -8,7 +17,7 @@ diff_match_patch.prototype.diff_toDelta = function (diffs) {
 
     switch (op) {
     case diff_match_patch.DIFF_INSERT:
-      const encodedInsert = encodeURIComponent(text).replace(/\+/g, ' ') // eslint-disable-line
+      const encodedInsert = encode(text).replace(/\+/g, " ") // eslint-disable-line
       delta.push(`+${encodedInsert}`)
       break
     case diff_match_patch.DIFF_DELETE:
