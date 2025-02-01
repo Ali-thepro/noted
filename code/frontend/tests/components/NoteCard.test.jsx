@@ -42,7 +42,7 @@ describe('NoteCard Component', () => {
 
   it('renders initial tags with "more" button when there are more than MAX_VISIBLE_TAGS', () => {
     render(
-      <NoteCard 
+      <NoteCard
         note={mockNote}
         onClick={mockOnClick}
         onTagClick={mockOnTagClick}
@@ -52,7 +52,6 @@ describe('NoteCard Component', () => {
     expect(screen.getByText('react')).toBeInTheDocument()
     expect(screen.getByText('javascript')).toBeInTheDocument()
     expect(screen.getByText('testing')).toBeInTheDocument()
-    
     expect(screen.queryByText('frontend')).not.toBeInTheDocument()
     expect(screen.getByText('+1 more')).toBeInTheDocument()
   })
@@ -62,7 +61,7 @@ describe('NoteCard Component', () => {
       tags: ['react', 'javascript']
     }
     render(
-      <NoteCard 
+      <NoteCard
         note={noteWithFewTags}
         onClick={mockOnClick}
         onTagClick={mockOnTagClick}
