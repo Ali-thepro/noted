@@ -114,7 +114,7 @@ function NotePage() {
     }
   }, [activeNote, latestVersion])
 
-  const { maybeCreateVersion } = useVersion(createVersionHandler, 15 * 60 * 1000)
+  const { maybeCreateVersion } = useVersion(createVersionHandler, 10 * 60 * 1000)
 
   const debouncedSetContent = useMemo(() => debounce((newContent) => {
     setContent(newContent)
