@@ -9,6 +9,7 @@ import debounce from 'lodash.debounce'
 import extractTitle from '../utils/extractTitle'
 import diff_match_patch from '../utils/diff'
 import { shouldCreateSnapshot, buildVersionContent } from '../utils/diff'
+import useVersion from '../hooks/useVersion'
 
 const AUTOSAVE_DELAY = 700
 const SETCONTENT_DELAY = 100
@@ -55,8 +56,15 @@ function NotePage() {
   }, [activeNote])
 
 
-  const debouncedSave = useMemo(() => debounce(async (newContent) => {
-    if (!activeNote?.id || !latestVersion) return
+  const debouncedSave = useMemo(() => debounce((newContent) => {
+    if (activeNote?.id) {
+      const title = extractTitle(newContent, activeNote.title)
+      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent, title }))
+    }
+  }, AUTOSAVE_DELAY), [dispatch, activeNote])
+
+  const createVersionHandler = useCallback(async (newContent) => {
+    if (!activeNote?.id || !latestVersion) return null
 
     try {
       let baseContent
@@ -68,7 +76,7 @@ function NotePage() {
       }
 
       if (baseContent === newContent) {
-        return
+        return null
       }
 
       const title = extractTitle(newContent, activeNote.title)
@@ -100,18 +108,13 @@ function NotePage() {
         }
       })
 
-      await dispatch(editNote(activeNote.id, {
-        ...activeNote,
-        content: newContent,
-        title
-      }))
-
       setLatestVersion(newVersion)
     } catch (error) {
-      console.error('Failed to save version:', error)
+      console.error('Failed to create version:', error)
     }
-  }, AUTOSAVE_DELAY), [dispatch, activeNote, latestVersion])
+  }, [activeNote, latestVersion])
 
+  const { maybeCreateVersion } = useVersion(createVersionHandler, 15 * 60 * 1000)
 
   const debouncedSetContent = useMemo(() => debounce((newContent) => {
     setContent(newContent)
@@ -131,7 +134,8 @@ function NotePage() {
   const handleChange = useCallback((newContent) => {
     debouncedSetContent(newContent)
     debouncedSave(newContent)
-  }, [debouncedSetContent, debouncedSave])
+    maybeCreateVersion(newContent)
+  }, [debouncedSetContent, debouncedSave, maybeCreateVersion])
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
