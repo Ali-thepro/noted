@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { createNote, editNote } from '../../redux/reducers/noteReducer'
+import { createVersion } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
 
@@ -46,6 +47,15 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           tags: processedTags
         }))
         if (newNote) {
+          await createVersion(newNote.id, {
+            type: 'snapshot',
+            content: newNote.content,
+            metadata: {
+              title: newNote.title,
+              tags: newNote.tags,
+              versionNumber: 1
+            }
+          })
           setTitle('')
           setTags('')
           onClose()

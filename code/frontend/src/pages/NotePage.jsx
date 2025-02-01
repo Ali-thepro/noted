@@ -2,10 +2,13 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchNote, editNote } from '../redux/reducers/noteReducer'
+import { createVersion, getVersions, getVersionChain } from '../services/version'
 import NoteEditor from '../components/Editor/NoteEditor'
 import NotePreview from '../components/Preview/NotePreview'
 import debounce from 'lodash.debounce'
 import extractTitle from '../utils/extractTitle'
+import diff_match_patch from '../utils/diff'
+import { shouldCreateSnapshot, buildVersionContent } from '../utils/diff'
 
 const AUTOSAVE_DELAY = 700
 const SETCONTENT_DELAY = 100
@@ -19,13 +22,7 @@ function NotePage() {
 
   const [content, setContent] = useState(activeNote?.content || '')
   const [previewContent, setPreviewContent] = useState(activeNote?.content || '')
-
-  useEffect(() => {
-    if (activeNote) {
-      setContent(activeNote.content)
-      setPreviewContent(activeNote.content)
-    }
-  }, [activeNote])
+  const [latestVersion, setLatestVersion] = useState(null)
 
   useEffect(() => {
     if (!user) {
@@ -38,12 +35,83 @@ function NotePage() {
     }
   }, [dispatch, id, user, navigate])
 
-  const debouncedSave = useMemo(() => debounce((newContent) => {
-    if (activeNote?.id) {
-      const title = extractTitle(newContent, activeNote.title)
-      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent, title }))
+  useEffect(() => {
+    const initializeNote = async () => {
+      if (!activeNote?.id) return
+
+      try {
+        const versions = await getVersions(activeNote.id)
+        if (versions && versions.length > 0) {
+          setLatestVersion(versions[0])
+          setContent(activeNote.content)
+          setPreviewContent(activeNote.content)
+        }
+      } catch (error) {
+        console.error('Failed to initialize note:', error)
+      }
     }
-  }, AUTOSAVE_DELAY), [dispatch, activeNote])
+
+    initializeNote()
+  }, [activeNote])
+
+
+  const debouncedSave = useMemo(() => debounce(async (newContent) => {
+    if (!activeNote?.id || !latestVersion) return
+
+    try {
+      let baseContent
+      if (latestVersion.type === 'snapshot') {
+        baseContent = latestVersion.content
+      } else {
+        const chain = await getVersionChain(activeNote.id, latestVersion.createdAt)
+        baseContent = buildVersionContent(chain)
+      }
+
+      if (baseContent === newContent) {
+        return
+      }
+
+      const title = extractTitle(newContent, activeNote.title)
+      const nextVersionNumber = latestVersion.metadata.versionNumber + 1
+
+      let versionType = 'diff'
+      let versionContent
+      let baseVersion
+
+      if (shouldCreateSnapshot(latestVersion)) {
+        versionType = 'snapshot'
+        versionContent = newContent
+      } else {
+        const dmp = new diff_match_patch()
+        const diffs = dmp.diff_main(baseContent, newContent, false)
+        dmp.diff_cleanupEfficiency(diffs)
+        versionContent = dmp.diff_toDelta(diffs)
+        baseVersion = latestVersion.id
+      }
+
+      const newVersion = await createVersion(activeNote.id, {
+        type: versionType,
+        content: versionContent,
+        baseVersion,
+        metadata: {
+          title,
+          tags: activeNote.tags,
+          versionNumber: nextVersionNumber
+        }
+      })
+
+      await dispatch(editNote(activeNote.id, {
+        ...activeNote,
+        content: newContent,
+        title
+      }))
+
+      setLatestVersion(newVersion)
+    } catch (error) {
+      console.error('Failed to save version:', error)
+    }
+  }, AUTOSAVE_DELAY), [dispatch, activeNote, latestVersion])
+
 
   const debouncedSetContent = useMemo(() => debounce((newContent) => {
     setContent(newContent)

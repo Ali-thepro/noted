@@ -67,7 +67,7 @@ diff_match_patch.prototype.diff_fromDelta = function (text, delta) {
     }
 
     const op = token.charAt(0)
-    let param = token.charAt(1)
+    let param = token.slice(1)
 
     if (op === '+') {
       param = param.replace(/\+/g, '%2b')
@@ -101,6 +101,49 @@ diff_match_patch.prototype.diff_fromDelta = function (text, delta) {
   }
 
   return diffs
+}
+
+export const shouldCreateSnapshot = (versionNumber) => {
+  return versionNumber % 10 === 0
+}
+
+export const buildVersionContent = (chain) => {
+  if (!chain || chain.length === 0) return ''
+
+  if (chain[0].type !== 'snapshot') {
+    console.warn(`Warning: Chain doesn't start with snapshot (starts with ${chain[0].type})`)
+    return ''
+  }
+
+  const dmp = new diff_match_patch()
+  let content = chain[0].content
+
+  for (let i = 1; i < chain.length; i++) {
+    const version = chain[i]
+    if (version.type !== 'diff') {
+      console.warn(`Warning: Unexpected version type in chain: ${version.type}`)
+      continue
+    }
+
+    try {
+      const diffs = dmp.diff_fromDelta(content, version.content)
+      const patches = dmp.patch_make(content, diffs)
+      const [newContent, results] = dmp.patch_apply(patches, content)
+
+      const allApplied = results.every(result => result)
+      if (!allApplied) {
+        console.warn(`Warning: Some patches failed to apply for version #${version.metadata.versionNumber}`)
+        continue
+      }
+
+      content = newContent
+    } catch (error) {
+      console.error(`Warning: Failed to parse diff delta for version #${version.metadata.versionNumber}:`, error)
+      continue
+    }
+  }
+
+  return content
 }
 
 export default diff_match_patch
