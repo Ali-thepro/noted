@@ -2,36 +2,8 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
 import SignUp from '../../src/pages/SignUp'
+import server from '../../src/mocks/setup'
 import { http, HttpResponse } from 'msw'
-import { setupServer } from 'msw/node'
-
-const server = setupServer(
-  http.post('/api/auth/signup', async ({ request }) => {
-    const body = await request.json()
-    if (
-      body.email === 'newuser@test.com' &&
-      body.password === 'password123' &&
-      body.username === 'newuser'
-    ) {
-      return HttpResponse.json({
-        id: '2',
-        username: 'newuser',
-        email: 'newuser@test.com',
-        oauth: false,
-        provider: 'local'
-      })
-    }
-    return new HttpResponse(
-      JSON.stringify({ error: 'Registration failed' }),
-      { status: 400 }
-    )
-  })
-)
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
-
 describe('SignUp Component', () => {
   describe('Rendering', () => {
     it('renders all form elements correctly', () => {
@@ -164,7 +136,7 @@ describe('SignUp Component', () => {
       )
 
       const { store } = render(<SignUp />, {
-        path: '/signup?mode=cli&redirect=http://localhost:3000/callback'
+        path: `/signup?mode=cli&redirect=${redirectUrl}`
       })
 
       const usernameInput = screen.getByPlaceholderText('Username')

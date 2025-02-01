@@ -2,18 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
 import Header from '../../src/components/Header'
-import { http, HttpResponse } from 'msw'
-import { setupServer } from 'msw/node'
-
-const server = setupServer(
-  http.post('/api/auth/signout', () => {
-    return HttpResponse.json({ message: 'Signed out successfully' })
-  })
-)
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+import server from '../../src/mocks/setup' // eslint-disable-line
 
 describe('Header Component', () => {
   describe('Theme Toggle', () => {

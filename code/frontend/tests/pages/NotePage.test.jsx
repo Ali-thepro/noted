@@ -1,5 +1,9 @@
 import { vi } from 'vitest'
 import { forwardRef } from 'react'
+import { screen, waitFor } from '@testing-library/react'
+import { render } from '../test-utils'
+import NotePage from '../../src/pages/NotePage'
+import server from '../../src/mocks/setup' // eslint-disable-line
 
 vi.mock('@uiw/react-codemirror', () => ({
   default: forwardRef(function CodeMirrorMock(props, ref) {
@@ -10,28 +14,6 @@ vi.mock('@uiw/react-codemirror', () => ({
     )
   })
 }))
-
-import { screen, waitFor } from '@testing-library/react'
-import { render } from '../test-utils'
-import { http, HttpResponse } from 'msw'
-import { setupServer } from 'msw/node'
-import NotePage from '../../src/pages/NotePage'
-
-
-const server = setupServer(
-  http.get('/api/note/:id', () => {
-    return HttpResponse.json({
-      id: '123',
-      title: 'Test Note',
-      content: '# Test Content',
-      userId: '1'
-    })
-  })
-)
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
 
 describe('NotePage Authentication', () => {
   describe('Authentication Protection', () => {
@@ -71,9 +53,7 @@ describe('NotePage Authentication', () => {
       })
 
       await waitFor(() => {
-        // Should stay on notes page
         expect(location.pathname).toBe('/notes/123')
-        // Check for mocked editor instead of actual textbox
         expect(screen.getByTestId('editor')).toBeInTheDocument()
       })
     })
