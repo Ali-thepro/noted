@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-function useVersionManager(createVersionFn, timeLimit = 15 * 60 * 1000) {
+const useVersionManager = (createVersionFn, timeLimit = 15 * 60 * 1000) => {
   const [lastVersionTime, setLastVersionTime] = useState(Date.now())
   const maybeCreateVersion = useCallback(async (newContent) => {
     const now = Date.now()
