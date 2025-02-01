@@ -86,6 +86,7 @@ You can specify either the note ID as an argument or use --title flag.`,
 		} else {
 			dmp := diffmatchpatch.New()
 			diffs := dmp.DiffMain(baseContent, content, false)
+			diffs = dmp.DiffCleanupEfficiency(diffs)
 			versionContent = dmp.DiffToDelta(diffs)
 			baseVersion = latestVersion.ID
 		}
