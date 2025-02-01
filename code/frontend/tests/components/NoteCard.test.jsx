@@ -39,4 +39,37 @@ describe('NoteCard Component', () => {
       expect(screen.getByRole('button', { name: /delete note/i })).toBeInTheDocument()
     })
   })
+
+  it('renders initial tags with "more" button when there are more than MAX_VISIBLE_TAGS', () => {
+    render(
+      <NoteCard 
+        note={mockNote}
+        onClick={mockOnClick}
+        onTagClick={mockOnTagClick}
+      />
+    )
+
+    expect(screen.getByText('react')).toBeInTheDocument()
+    expect(screen.getByText('javascript')).toBeInTheDocument()
+    expect(screen.getByText('testing')).toBeInTheDocument()
+    
+    expect(screen.queryByText('frontend')).not.toBeInTheDocument()
+    expect(screen.getByText('+1 more')).toBeInTheDocument()
+  })
+  it('renders all tags when note has fewer than MAX_VISIBLE_TAGS', () => {
+    const noteWithFewTags = {
+      ...mockNote,
+      tags: ['react', 'javascript']
+    }
+    render(
+      <NoteCard 
+        note={noteWithFewTags}
+        onClick={mockOnClick}
+        onTagClick={mockOnTagClick}
+      />
+    )
+    expect(screen.getByText('react')).toBeInTheDocument()
+    expect(screen.getByText('javascript')).toBeInTheDocument()
+    expect(screen.queryByText(/more/i)).not.toBeInTheDocument()
+  })
 })
