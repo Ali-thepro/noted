@@ -39,7 +39,8 @@ diff_match_patch.prototype.diff_toDelta = function (diffs) {
       delta.push(`+${encodedInsert}`)
       break
     case diff_match_patch.DIFF_DELETE:
-      const deleteCount = [...text].length // eslint-disable-line
+        const deleteCount = [...text].length // eslint-disable-line
+      // or Array.from(text).length
       delta.push(`-${deleteCount}`)
       break
     case diff_match_patch.DIFF_EQUAL:
@@ -70,7 +71,11 @@ diff_match_patch.prototype.diff_fromDelta = function (text, delta) {
 
     if (op === '+') {
       param = param.replace(/\+/g, '%2b')
-      param = decodeURIComponent(param)
+      try {
+        param = decodeURIComponent(param)
+      } catch (err) { // eslint-disable-line
+        throw new Error(`Error decoding insert token: "${param}"`)
+      }
       diffs.push([diff_match_patch.DIFF_INSERT, param])
     } else if (op === '-' || op === '=') {
       const n = parseInt(param, 10)
