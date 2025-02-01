@@ -1,3 +1,5 @@
+import { screen, waitFor } from '@testing-library/react' // eslint-disable-line
+import userEvent from '@testing-library/user-event' // eslint-disable-line
 import { render } from '../test-utils'
 import NoteCard from '../../src/components/Notes/NoteCard'
 // eslint-disable-next-line no-unused-vars
@@ -38,4 +40,3 @@ describe('NoteCard Component', () => {
     })
   })
 })
-
