@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { render } from './test-utils'
-import OAuth from '../src/components/OAuth'
+import { render } from '../test-utils'
+import OAuth from '../../src/components/OAuth'
 
 describe('OAuth Component', () => {
   let mockHref = ''

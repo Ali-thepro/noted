@@ -1,4 +1,4 @@
-import extractTitle from '../src/utils/extractTitle'
+import extractTitle from '../../src/utils/extractTitle'
 
 describe('extractTitle', () => {
   const defaultTitle = 'Default Title'

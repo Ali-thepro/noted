@@ -12,10 +12,10 @@ vi.mock('@uiw/react-codemirror', () => ({
 }))
 
 import { screen, waitFor } from '@testing-library/react'
-import { render } from './test-utils'
+import { render } from '../test-utils'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import NotePage from '../src/pages/NotePage'
+import NotePage from '../../src/pages/NotePage'
 
 
 const server = setupServer(
