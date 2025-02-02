@@ -4,7 +4,7 @@ const app = require('../app')
 const User = require('../models/user')
 const Note = require('../models/note')
 const config = require('../utils/config')
-const { test, describe, beforeEach, after, before } = require('node:test')
+const { test, describe, beforeEach, after, before } = require('node:test') // eslint-disable-line
 
 // Connect to test database before tests
 before(async () => {
@@ -86,7 +86,7 @@ const createTestUser = async (userData = initialUsers[0]) => {
   const response = await api
     .post('/api/auth/signup')
     .send(userData)
-  
+
   return response.body
 }
 
@@ -95,7 +95,7 @@ const createTestNote = async (noteData, authCookie) => {
     .post('/api/notes')
     .set('Cookie', authCookie)
     .send(noteData)
-  
+
   return response.body
 }
 
@@ -124,4 +124,4 @@ module.exports = {
   createTestNote,
   mockGoogleProfile,
   mockGithubProfile
-} 
+}

@@ -29,10 +29,10 @@ describe('Auth API', () => {
       assert.strictEqual(response.body.email, newUser.email)
       assert.strictEqual(response.body.provider, 'local')
       assert.strictEqual(response.body.oauth, false)
-      
+
       // Password should not be returned
       assert.strictEqual(response.body.passwordHash, undefined)
-      
+
       // Verify user was saved to database
       const savedUser = await User.findOne({ email: newUser.email })
       assert.strictEqual(savedUser.username, newUser.username)
@@ -83,7 +83,7 @@ describe('Auth API', () => {
         .expect(400)
 
       assert.strictEqual(
-        response.body.error, 
+        response.body.error,
         'Password must be at least 8 characters long and must contain at least one number and one letter'
       )
     })
@@ -115,7 +115,7 @@ describe('Auth API', () => {
       // Check user data in response
       assert.strictEqual(response.body.email, 'test@test.com')
       assert.strictEqual(response.body.username, 'testuser')
-      
+
       // Check that cookies are set
       const cookies = response.headers['set-cookie']
       assert(cookies.some(cookie => cookie.includes('accessToken')))
@@ -151,4 +151,4 @@ describe('Auth API', () => {
   after(async () => {
     await mongoose.connection.close()
   })
-}) 
+})
