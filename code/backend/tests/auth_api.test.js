@@ -122,9 +122,9 @@ describe('Auth API', () => {
 
       test('email is already registered', async () => {
         await api
-        .post('/api/auth/signup')
-        .send(initialUsers[0])
-        
+          .post('/api/auth/signup')
+          .send(initialUsers[0])
+
         const usersAtStart = await getUsersInDb()
 
         const response = await api
@@ -175,7 +175,7 @@ describe('Auth API', () => {
 
       test('username is already taken', async () => {
         await api
-        .post('/api/auth/signup')
+          .post('/api/auth/signup')
           .send(initialUsers[0])
 
         const usersAtStart = await getUsersInDb()
