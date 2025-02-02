@@ -19,14 +19,6 @@ lint:
     - npm run lint
 
 test:
-  image: node:23.6.0
-  variables:
-    NODE_ENV: "test"
-    TEST_MONGODB_URI: "${TEST_MONGODB_URI}"
-    MONGODB_URI: "${MONGODB_URI}"
+  stage: test
   script:
-    - echo "NODE_ENV is $NODE_ENV"
-    - echo "TEST_MONGODB_URI is set: $([[ ! -z $TEST_MONGODB_URI ]] && echo 'true' || echo 'false')"
-    - cd code/backend
-    - npm install
     - npm run test
