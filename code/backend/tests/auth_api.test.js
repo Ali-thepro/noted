@@ -3,6 +3,7 @@ const assert = require('node:assert')
 const { test, describe, beforeEach, after } = require('node:test')
 const { api, clearDatabase, getUsersInDb, initialUsers } = require('./test_helper')
 const User = require('../models/user')
+const bcrypt = require('bcrypt')
 
 describe('Auth API', () => {
   beforeEach(async () => {
@@ -10,7 +11,19 @@ describe('Auth API', () => {
   })
 
   describe('User Registration (POST /api/auth/signup)', () => {
+    beforeEach(async () => {
+      const passwordHash = await bcrypt.hash('Password123', 10)
+      const user = new User({
+        username: 'rootuser',
+        email: 'root@test.com',
+        passwordHash,
+        provider: 'local',
+        oauth: false
+      })
+      await user.save()
+    })
     test('creates a new user with valid data', async () => {
+      const usersAtStart = await getUsersInDb()
       const newUser = {
         username: 'testuser',
         email: 'test@test.com',
@@ -33,14 +46,15 @@ describe('Auth API', () => {
       const savedUser = await User.findOne({ email: newUser.email })
       assert.strictEqual(savedUser.username, newUser.username)
 
-      const usersInDb = await getUsersInDb()
-      assert.strictEqual(usersInDb.length, 1)
-      const emails = usersInDb.map(user => user.email)
+      const usersAtEnd = await getUsersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+      const emails = usersAtEnd.map(user => user.email)
       assert(emails.includes(newUser.email))
     })
 
     describe('fails with proper error message when', () => {
       test('required fields are missing', async () => {
+        const usersAtStart = await getUsersInDb()
         const invalidUsers = [
           { email: 'test@test.com', password: 'Password123', confirmPassword: 'Password123' },
           { username: 'test', password: 'Password123', confirmPassword: 'Password123' },
@@ -54,11 +68,15 @@ describe('Auth API', () => {
             .send(invalidUser)
             .expect(400)
 
+          const usersAtEnd = await getUsersInDb()
+          assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
           assert.strictEqual(response.body.error, 'All fields are required')
         }
       })
 
       test('passwords do not match', async () => {
+        const usersAtStart = await getUsersInDb()
         const response = await api
           .post('/api/auth/signup')
           .send({
@@ -69,10 +87,14 @@ describe('Auth API', () => {
           })
           .expect(400)
 
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
         assert.strictEqual(response.body.error, 'Passwords do not match')
       })
 
       test('password is too weak', async () => {
+        const usersAtStart = await getUsersInDb()
         const weakPasswords = [
           'short',
           '12345678',
@@ -91,17 +113,19 @@ describe('Auth API', () => {
             })
             .expect(400)
 
-          assert.strictEqual(
-            response.body.error,
-            'Password must be at least 8 characters long and must contain at least one number and one letter'
-          )
+          const usersAtEnd = await getUsersInDb()
+          assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
+          assert.strictEqual(response.body.error, 'Password must be at least 8 characters long and must contain at least one number and one letter')
         }
       })
 
       test('email is already registered', async () => {
         await api
-          .post('/api/auth/signup')
-          .send(initialUsers[0])
+        .post('/api/auth/signup')
+        .send(initialUsers[0])
+        
+        const usersAtStart = await getUsersInDb()
 
         const response = await api
           .post('/api/auth/signup')
@@ -111,10 +135,14 @@ describe('Auth API', () => {
           })
           .expect(400)
 
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
         assert.strictEqual(response.body.error, 'An account with this email already exists')
       })
 
       test('username is too short', async () => {
+        const usersAtStart = await getUsersInDb()
         const response = await api
           .post('/api/auth/signup')
           .send({
@@ -123,10 +151,14 @@ describe('Auth API', () => {
           })
           .expect(400)
 
-        assert.strictEqual(response.body.error, 'User validation failed: username: username must be at least 7 characters long')
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
+        assert.strictEqual(response.body.error, 'User validation failed: username: username must be at least 5 characters long')
       })
 
       test('username is too long', async () => {
+        const usersAtStart = await getUsersInDb()
         const response = await api
           .post('/api/auth/signup')
           .send({
@@ -135,13 +167,18 @@ describe('Auth API', () => {
           })
           .expect(400)
 
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
         assert.strictEqual(response.body.error, 'User validation failed: username: username must not be more than 20 characters')
       })
 
       test('username is already taken', async () => {
         await api
-          .post('/api/auth/signup')
+        .post('/api/auth/signup')
           .send(initialUsers[0])
+
+        const usersAtStart = await getUsersInDb()
 
         const response = await api
           .post('/api/auth/signup')
@@ -150,6 +187,9 @@ describe('Auth API', () => {
             email: 'different@test.com'
           })
           .expect(400)
+
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
 
         assert.strictEqual(response.body.error, 'expected username to be unique')
       })
