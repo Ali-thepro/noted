@@ -79,7 +79,7 @@ You can specify either the note ID as an argument or use --title flag.`,
 		var versionContent string
 		var baseVersion string
 
-		if shouldCreateSnapshot(latestVersion) {
+		if ShouldCreateSnapshot(latestVersion) {
 			versionType = "snapshot"
 			versionContent = content
 		} else {
@@ -129,7 +129,7 @@ You can specify either the note ID as an argument or use --title flag.`,
 	},
 }
 
-func shouldCreateSnapshot(latestVersion *api.Version) bool {
+func ShouldCreateSnapshot(latestVersion *api.Version) bool {
 	nextVersionNumber := latestVersion.Metadata.VersionNumber + 1
 	return nextVersionNumber%10 == 0
 }

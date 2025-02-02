@@ -49,6 +49,9 @@ Displays changes in a git-like format with context.`,
 		if err != nil {
 			return fmt.Errorf("failed to get versions: %w", err)
 		}
+		if len(versions) == 0 {
+			return fmt.Errorf("no versions found for note")
+		}
 
 		if len(versions) < 2 {
 			return fmt.Errorf("need at least two versions to compare")

@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
+	"noted/internal/utils"
 	"strings"
 )
 
@@ -98,6 +99,47 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 
 		if _, err := storage.UpdateNoteMetadata(noteToEdit, note); err != nil {
 			return fmt.Errorf("failed to update local note metadata: %w", err)
+		}
+
+		if note.Title != noteToEdit.Title || !utils.StringSliceEqual(note.Tags, noteToEdit.Tags) {
+			versions, err := client.GetVersions(noteToEdit.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get versions: %w", err)
+			}
+
+			if len(versions) == 0 {
+				return fmt.Errorf("no versions found for note")
+			}
+
+			latestVersion := versions[0]
+			versionType := "diff"
+			var content string
+			var baseVersion string
+
+			if ShouldCreateSnapshot(latestVersion) {
+				versionType = "snapshot"
+				content, err = storage.ReadNoteContent(noteToEdit.Filename)
+				if err != nil {
+					return fmt.Errorf("failed to read note content: %w", err)
+				}
+			} else {
+				content = latestVersion.Content
+				baseVersion = latestVersion.ID
+			}
+
+			_, err = client.CreateVersion(noteToEdit.ID, &api.CreateVersionRequest{
+				Type:        versionType,
+				Content:     content,
+				BaseVersion: baseVersion,
+				Metadata: api.VersionMetadata{
+					Title:         note.Title,
+					Tags:          note.Tags,
+					VersionNumber: latestVersion.Metadata.VersionNumber + 1,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create version: %w", err)
+			}
 		}
 
 		fmt.Printf("Note metadata updated successfully!\n")
