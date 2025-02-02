@@ -3,26 +3,56 @@ package version
 import (
 	"fmt"
 	"noted/internal/api"
+	"strings"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 func selectVersion(versions []*api.Version) (*api.Version, error) {
 	fmt.Println("Available versions:")
+	fmt.Println()
+
+	var maxVerLen, maxTitleLen, maxTagsLen int
+	for _, v := range versions {
+		verLen := len(fmt.Sprintf("#%d", v.Metadata.VersionNumber))
+		if verLen > maxVerLen {
+			maxVerLen = verLen
+		}
+		if len(v.Metadata.Title) > maxTitleLen {
+			maxTitleLen = len(v.Metadata.Title)
+		}
+		tagsLen := len(strings.Join(v.Metadata.Tags, ", "))
+		if tagsLen == 0 {
+			tagsLen = 4
+		}
+		if tagsLen > maxTagsLen {
+			maxTagsLen = tagsLen
+		}
+	}
+
+	headerFmt := fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
+	fmt.Printf(headerFmt, "Ver", "Type", "Created", "Title", "Tags")
+	fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+36))
+
 	length := len(versions)
 	for i := length - 1; i >= 0; i-- {
 		v := versions[i]
-		displayIndex := length - i
-		fmt.Printf("%d. Version #%d (%s) - %s\n",
-			displayIndex,
-			v.Metadata.VersionNumber,
-			v.CreatedAt.Format("2006-01-02 15:04:05"),
+		tags := strings.Join(v.Metadata.Tags, ", ")
+		if tags == "" {
+			tags = "none"
+		}
+
+		fmt.Printf(fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
+			fmt.Sprintf("#%d", v.Metadata.VersionNumber),
 			v.Type,
+			v.CreatedAt.Format("2006-01-02 15:04:05"),
+			v.Metadata.Title,
+			tags,
 		)
 	}
 
 	var choice int
-	fmt.Print("\nChoose a number: ")
+	fmt.Print("\nChoose a number (1-", length, "): ")
 	_, err := fmt.Scanf("%d", &choice)
 	if err != nil || choice < 1 || choice > length {
 		return nil, fmt.Errorf("invalid selection")

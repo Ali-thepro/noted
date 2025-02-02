@@ -51,9 +51,27 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("no versions found for note")
 		}
 
-		fmt.Printf("Versions for note \"%s\":\n\n", noteToList.Title)
-		fmt.Printf("%-4s  %-8s  %-20s  %-s\n", "Ver", "Type", "Created", "Tags")
-		fmt.Println(strings.Repeat("-", 80))
+		var maxVerLen, maxTitleLen, maxTagsLen int
+		for _, v := range versions {
+			verLen := len(fmt.Sprintf("#%d", v.Metadata.VersionNumber))
+			if verLen > maxVerLen {
+				maxVerLen = verLen
+			}
+			if len(v.Metadata.Title) > maxTitleLen {
+				maxTitleLen = len(v.Metadata.Title)
+			}
+			tagsLen := len(strings.Join(v.Metadata.Tags, ", "))
+			if tagsLen == 0 {
+				tagsLen = 4
+			}
+			if tagsLen > maxTagsLen {
+				maxTagsLen = tagsLen
+			}
+		}
+
+		headerFmt := fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
+		fmt.Printf(headerFmt, "Ver", "Type", "Created", "Title", "Tags")
+		fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+36))
 
 		for _, v := range versions {
 			tags := strings.Join(v.Metadata.Tags, ", ")
@@ -61,10 +79,11 @@ var listCmd = &cobra.Command{
 				tags = "none"
 			}
 
-			fmt.Printf("#%-3d  %-8s  %-20s  %s\n",
-				v.Metadata.VersionNumber,
+			fmt.Printf(fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
+				fmt.Sprintf("#%d", v.Metadata.VersionNumber),
 				v.Type,
 				v.CreatedAt.Format("2006-01-02 15:04:05"),
+				v.Metadata.Title,
 				tags,
 			)
 		}

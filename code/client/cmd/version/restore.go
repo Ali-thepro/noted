@@ -91,6 +91,8 @@ var restoreCmd = &cobra.Command{
 		}
 
 		note, err := client.UpdateNote(noteToRestore.ID, api.UpdateNoteRequest{
+			Title:   selectedVersion.Metadata.Title,
+			Tags:    selectedVersion.Metadata.Tags,
 			Content: content,
 		})
 		if err != nil {
