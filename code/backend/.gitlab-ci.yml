@@ -12,6 +12,7 @@ cache:
 before_script:
   - cd code/backend
   - npm install
+  - apt-get update && apt-get install -y dnsutils
   - echo "nameserver 8.8.8.8" | tee /etc/resolv.conf
   - echo "nameserver 8.8.4.4" | tee -a /etc/resolv.conf
   - nslookup cluster0.nugj6.mongodb.net
