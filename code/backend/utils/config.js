@@ -1,8 +1,16 @@
 require('dotenv').config()
 
+// Add debugging logs
+console.log('NODE_ENV:', process.env.NODE_ENV)
+console.log('TEST_MONGODB_URI:', process.env.TEST_MONGODB_URI ? 'Set' : 'Not set')
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set')
+
 const MONGODB_URI = process.env.NODE_ENV === 'test'
   ? process.env.TEST_MONGODB_URI
   : process.env.MONGODB_URI
+
+// Add another log to see final URI
+console.log('Selected MONGODB_URI:', MONGODB_URI)
 
 const PORT = process.env.PORT
 const ACCESS_SECRET = process.env.ACCESS_SECRET
