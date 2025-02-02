@@ -96,7 +96,7 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 			return fmt.Errorf("failed to update note metadata on server: %w", err)
 		}
 
-		if err := storage.UpdateNoteMetadata(noteToEdit, note); err != nil {
+		if _, err := storage.UpdateNoteMetadata(noteToEdit, note); err != nil {
 			return fmt.Errorf("failed to update local note metadata: %w", err)
 		}
 

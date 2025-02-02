@@ -2,11 +2,11 @@ package version
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
+	"noted/internal/utils"
 	"strconv"
-
-	"github.com/spf13/cobra"
 )
 
 var restoreCmd = &cobra.Command{
@@ -86,8 +86,14 @@ var restoreCmd = &cobra.Command{
 			content = selectedVersion.Content
 		}
 
-		if err := storage.WriteNoteContent(noteToRestore.Filename, content); err != nil {
-			return fmt.Errorf("failed to write note content: %w", err)
+		currentContent, err := storage.ReadNoteContent(noteToRestore.Filename)
+		if err != nil {
+			return fmt.Errorf("failed to read current note content: %w", err)
+		}
+
+		if noteToRestore.Title == selectedVersion.Metadata.Title && currentContent == content && utils.StringSliceEqual(noteToRestore.Tags, selectedVersion.Metadata.Tags) {
+			fmt.Println("Note is already at this version, no restoring needed")
+			return nil
 		}
 
 		note, err := client.UpdateNote(noteToRestore.ID, api.UpdateNoteRequest{
@@ -99,21 +105,26 @@ var restoreCmd = &cobra.Command{
 			return fmt.Errorf("failed to update note on server: %w", err)
 		}
 
+		newFilename, err := storage.UpdateNoteMetadata(noteToRestore, note)
+		if err != nil {
+			return fmt.Errorf("failed to update local note metadata: %w", err)
+		}
+
+		if err := storage.WriteNoteContent(newFilename, content); err != nil {
+			return fmt.Errorf("failed to write note content: %w", err)
+		}
+
 		_, err = client.CreateVersion(noteToRestore.ID, &api.CreateVersionRequest{
-			Type:    "snapshot", // Always create snapshot for restore
+			Type:    "snapshot",
 			Content: content,
 			Metadata: api.VersionMetadata{
-				Title:         noteToRestore.Title,
-				Tags:          noteToRestore.Tags,
+				Title:         selectedVersion.Metadata.Title,
+				Tags:          selectedVersion.Metadata.Tags,
 				VersionNumber: versions[0].Metadata.VersionNumber + 1,
 			},
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create restore version: %w", err)
-		}
-
-		if err := storage.UpdateNote(note); err != nil {
-			return fmt.Errorf("failed to update local note data: %w", err)
 		}
 
 		fmt.Printf("Note restored to version #%d successfully\n", selectedVersion.Metadata.VersionNumber)

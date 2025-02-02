@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/spf13/cobra"
 	"noted/cmd/version"
 	"noted/internal/api"
 	"noted/internal/storage"
 	"strings"
-
-	"github.com/sergi/go-diff/diffmatchpatch"
-	"github.com/spf13/cobra"
 )
 
 var pushCmd = &cobra.Command{

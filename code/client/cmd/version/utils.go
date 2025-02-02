@@ -2,10 +2,9 @@ package version
 
 import (
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"noted/internal/api"
 	"strings"
-
-	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 func selectVersion(versions []*api.Version) (*api.Version, error) {

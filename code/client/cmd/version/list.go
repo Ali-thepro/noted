@@ -2,11 +2,10 @@ package version
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
 	"strings"
-
-	"github.com/spf13/cobra"
 )
 
 var listCmd = &cobra.Command{

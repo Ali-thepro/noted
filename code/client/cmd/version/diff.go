@@ -3,13 +3,12 @@ package version
 import (
 	"bytes"
 	"fmt"
-	"noted/internal/api"
-	"noted/internal/storage"
-	"strings"
-
 	"github.com/fatih/color"
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/spf13/cobra"
+	"noted/internal/api"
+	"noted/internal/storage"
+	"strings"
 )
 
 var diffCmd = &cobra.Command{

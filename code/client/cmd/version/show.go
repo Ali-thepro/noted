@@ -2,13 +2,12 @@ package version
 
 import (
 	"fmt"
+	"github.com/charmbracelet/glamour"
+	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/config"
 	"noted/internal/storage"
 	"strconv"
-
-	"github.com/charmbracelet/glamour"
-	"github.com/spf13/cobra"
 )
 
 var showCmd = &cobra.Command{
