@@ -6,7 +6,6 @@ import { createVersion, getVersions, getVersionChain } from '../services/version
 import NoteEditor from '../components/Editor/NoteEditor'
 import NotePreview from '../components/Preview/NotePreview'
 import debounce from 'lodash.debounce'
-import extractTitle from '../utils/extractTitle'
 import diff_match_patch from '../utils/diff'
 import { shouldCreateSnapshot, buildVersionContent } from '../utils/diff'
 import useVersion from '../hooks/useVersion'
@@ -58,8 +57,7 @@ function NotePage() {
 
   const debouncedSave = useMemo(() => debounce((newContent) => {
     if (activeNote?.id) {
-      const title = extractTitle(newContent, activeNote.title)
-      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent, title }))
+      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent }))
     }
   }, AUTOSAVE_DELAY), [dispatch, activeNote])
 
@@ -79,7 +77,6 @@ function NotePage() {
         return null
       }
 
-      const title = extractTitle(newContent, activeNote.title)
       const nextVersionNumber = latestVersion.metadata.versionNumber + 1
 
       let versionType = 'diff'
@@ -102,17 +99,19 @@ function NotePage() {
         content: versionContent,
         baseVersion,
         metadata: {
-          title,
+          title: activeNote.title,
           tags: activeNote.tags,
           versionNumber: nextVersionNumber
         }
       })
 
+      await dispatch(editNote(activeNote.id, { ...activeNote, content: newContent }))
+
       setLatestVersion(newVersion)
     } catch (error) {
       console.error('Failed to create version:', error)
     }
-  }, [activeNote, latestVersion])
+  }, [activeNote, latestVersion, dispatch])
 
   const { maybeCreateVersion } = useVersion(createVersionHandler, 10 * 60 * 1000)
 
