@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { createNote, editNote } from '../../redux/reducers/noteReducer'
-import { createVersion } from '../../services/version'
+import { createVersion, getVersions } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
+import { shouldCreateSnapshot } from '../../utils/diff'
 
 const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
   const dispatch = useDispatch()
@@ -22,6 +23,11 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
     }
   }, [isEditing, noteData, show])
 
+  const arraysEqual = (a, b) => {
+    if (a.length !== b.length) return false
+    return a.every((item, index) => item === b[index])
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -35,7 +41,32 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           title: title.trim(),
           tags: processedTags
         }))
+
         if (updatedNote) {
+          if (updatedNote.title !== noteData.title || !arraysEqual(updatedNote.tags, noteData.tags)) {
+            try {
+              const versions = await getVersions(updatedNote.id)
+              if (versions && versions.length > 0) {
+                const latestVersion = versions[0]
+                const versionType = shouldCreateSnapshot(latestVersion) ? 'snapshot' : 'diff'
+                const nextVersionNumber = latestVersion.metadata.versionNumber + 1
+                const baseVersion = versionType === 'diff' ? latestVersion.id : null
+
+                await createVersion(updatedNote.id, {
+                  type: versionType,
+                  content: updatedNote.content,
+                  baseVersion: baseVersion,
+                  metadata: {
+                    title: updatedNote.title,
+                    tags: updatedNote.tags,
+                    versionNumber: nextVersionNumber
+                  },
+                })
+              }
+            } catch (error) {
+              console.error('Failed to initialize note:', error)
+            }
+          }
           setTitle('')
           setTags('')
           onClose()
