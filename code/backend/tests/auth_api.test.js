@@ -4,6 +4,8 @@ const { test, describe, beforeEach, after } = require('node:test')
 const { api, clearDatabase, getUsersInDb, initialUsers } = require('./test_helper')
 const User = require('../models/user')
 const bcrypt = require('bcrypt')
+const config = require('../utils/config')
+const nock = require('nock')
 
 describe('Auth API', () => {
   beforeEach(async () => {
@@ -118,7 +120,6 @@ describe('Auth API', () => {
 
         const usersAtEnd = await getUsersInDb()
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
-
         assert.strictEqual(response.body.error, 'Passwords do not match')
       })
 
@@ -419,6 +420,10 @@ describe('Auth API', () => {
   })
 
   describe('OAuth Authentication', () => {
+    beforeEach(async () => {
+      nock.cleanAll()
+    })
+
     describe('Google OAuth Flow', () => {
       test('redirects to Google OAuth URL with correct parameters', async () => {
         const response = await api
@@ -444,6 +449,129 @@ describe('Auth API', () => {
         const state = JSON.parse(url.searchParams.get('state'))
         assert.deepStrictEqual(state, { mode: 'cli', redirect: 'http://localhost:3000/' })
       })
+
+      test('creates new user on first Google login', async () => {
+        const mockCode = 'valid_mock_auth_code'
+
+        nock('https://oauth2.googleapis.com')
+          .post('/token')
+          .reply(200, {
+            id_token: 'mock_id_token',
+            access_token: 'mock_access_token'
+          })
+
+        nock('https://www.googleapis.com')
+          .get('/oauth2/v1/userinfo')
+          .query({ alt: 'json', access_token: 'mock_access_token' })
+          .reply(200, {
+            email: 'google@test.com',
+            name: 'Google User',
+            verified_email: true
+          })
+
+        const response = await api
+          .get(`/api/auth/google/callback?code=${mockCode}`)
+          .expect(302)
+
+        assert(response.headers.location.startsWith(config.UI_URI + '/oauth/callback'))
+
+        const cookies = response.headers['set-cookie']
+        assert(cookies.some(cookie => cookie.includes('accessToken')))
+        assert(cookies.some(cookie => cookie.includes('refreshToken')))
+
+        const user = await User.findOne({ email: 'google@test.com' })
+        assert(user)
+        assert.strictEqual(user.provider, 'google')
+        assert(user.oauth)
+      })
+
+      test('handles CLI mode in Google callback', async () => {
+        const mockCode = 'valid_mock_auth_code'
+        const mockState = JSON.stringify({
+          mode: 'cli',
+          redirect: 'http://localhost:3000/callback'
+        })
+        
+        nock('https://oauth2.googleapis.com')
+          .post('/token')
+          .reply(200, {
+            id_token: 'mock_id_token',
+            access_token: 'mock_access_token'
+          })
+        
+          nock('https://www.googleapis.com')
+          .get('/oauth2/v1/userinfo')
+          .query({ alt: 'json', access_token: 'mock_access_token' })
+          .reply(200, {
+            email: 'google@test.com',
+            name: 'Google User',
+            verified_email: true
+          })
+        
+        const response = await api
+          .get(`/api/auth/google/callback?code=${mockCode}&state=${mockState}`)
+          .expect(302)
+        
+        assert(response.headers.location.startsWith('http://localhost:3000/callback?token='))
+        const cookies = response.headers['set-cookie']
+        assert(!cookies)
+      })
+
+      test('handles errors in Google OAuth flow', async () => {
+        const mockCode = 'invalid_code'
+        
+        nock('https://oauth2.googleapis.com')
+          .post('/token')
+          .replyWithError('Invalid authorization code')
+        
+        const response = await api
+          .get(`/api/auth/google/callback?code=${mockCode}`)
+          .expect(500)
+        
+        assert(response.body.error.includes('Error during Google OAuth callback'))
+      })
+
+      test('reuses existing Google user on subsequent logins', async () => {
+        await User.create({
+          email: 'google@test.com',
+          username: 'existing-google-user',
+          provider: 'google',
+          passwordHash: 'dummy',
+          oauth: true
+        })
+  
+        const usersAtStart = await getUsersInDb()
+
+        const mockCode = 'valid_mock_auth_code'
+        const mockState = JSON.stringify({})
+        
+        nock('https://oauth2.googleapis.com')
+          .post('/token')
+          .reply(200, {
+            id_token: 'mock_id_token',
+            access_token: 'mock_access_token'
+          })
+        
+        nock('https://www.googleapis.com')
+          .get('/oauth2/v1/userinfo')
+          .query({ alt: 'json', access_token: 'mock_access_token' })
+          .reply(200, {
+            email: 'google@test.com',
+            name: 'Google User',
+            verified_email: true
+          })
+        
+        await api
+          .get(`/api/auth/google/callback?code=${mockCode}&state=${mockState}`)
+          .expect(302)
+        
+        const usersAtEnd = await getUsersInDb()
+        const users = await User.find({ email: 'google@test.com' })
+        assert.strictEqual(users.length, 1)
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+        assert.strictEqual(users[0].username, 'existing-google-user')
+      })
+
     })
 
     describe('GitHub OAuth Flow', () => {
