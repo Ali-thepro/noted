@@ -103,7 +103,7 @@ describe('NoteModal Component', () => {
 
   describe('Form Submission', () => {
     it('handles create note submission', async () => {
-      const { store } = renderModal()
+      renderModal()
       const titleInput = screen.getByLabelText('Title')
       const tagsInput = screen.getByLabelText('Tags (comma-separated)')
 
