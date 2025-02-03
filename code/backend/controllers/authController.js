@@ -23,6 +23,8 @@ const createRefreshToken = (user) => {
 
 const signup = async (request, response, next) => {
   const { username, email, password, confirmPassword } = request.body
+  const mode = request.query.mode
+  const redirect = request.query.redirect
 
   if (
     !username ||
@@ -55,19 +57,55 @@ const signup = async (request, response, next) => {
     return next(createError('An account with this email already exists', 400))
   }
 
-  const saltRounds = 10
-  const passwordHash = await bcrypt.hash(password, saltRounds)
+  try {
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(password, saltRounds)
 
-  const user = new User({
-    username,
-    email,
-    passwordHash,
-    provider: 'local',
-  })
+    const user = new User({
+      username,
+      email,
+      passwordHash,
+      provider: 'local',
+    })
 
-  const savedUser = await user.save()
-  response.status(201).json(savedUser)
+    const savedUser = await user.save()
+
+    const userForToken = {
+      email: savedUser.email,
+      id: savedUser._id,
+    }
+
+    if (mode === 'cli' && redirect) {
+      const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '30d' })
+      return response.status(201).json({
+        user: savedUser,
+        redirectUrl: `${redirect}?token=${token}`
+      })
+    } else {
+      const accessToken = createAccessToken(savedUser)
+      const refreshToken = createRefreshToken(savedUser)
+
+      response
+        .status(201)
+        .cookie('accessToken', accessToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 15 * 60 * 1000
+        })
+        .cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+        .json(savedUser)
+    }
+  } catch (error) {
+    next(error)
+  }
 }
+
 
 
 

@@ -22,7 +22,7 @@ describe('Auth API', () => {
       })
       await user.save()
     })
-    test('creates a new user with valid data', async () => {
+    test('creates a new user with valid data and sets cookies', async () => {
       const usersAtStart = await getUsersInDb()
       const newUser = {
         username: 'testuser',
@@ -46,10 +46,37 @@ describe('Auth API', () => {
       const savedUser = await User.findOne({ email: newUser.email })
       assert.strictEqual(savedUser.username, newUser.username)
 
+      const cookies = response.headers['set-cookie']
+      assert(cookies.some(cookie => cookie.includes('accessToken')))
+      assert(cookies.some(cookie => cookie.includes('refreshToken')))
+
+
       const usersAtEnd = await getUsersInDb()
       assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
       const emails = usersAtEnd.map(user => user.email)
       assert(emails.includes(newUser.email))
+    })
+
+    test('handles CLI mode signup correctly', async () => {
+      const newUser = {
+        username: 'cliuser',
+        email: 'cli@test.com',
+        password: 'Password123',
+        confirmPassword: 'Password123'
+      }
+
+      const response = await api
+        .post('/api/auth/signup?mode=cli&redirect=http://localhost:3000/')
+        .send(newUser)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+      assert(response.body.redirectUrl.startsWith('http://localhost:3000/?token='))
+      assert(response.body.user.username === newUser.username)
+      assert(response.body.user.email === newUser.email)
+
+      const cookies = response.headers['set-cookie']
+      assert(!cookies)
     })
 
     describe('fails with proper error message when', () => {
@@ -67,6 +94,7 @@ describe('Auth API', () => {
             .post('/api/auth/signup')
             .send(invalidUser)
             .expect(400)
+            .expect('Content-Type', /application\/json/)
 
           const usersAtEnd = await getUsersInDb()
           assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -86,6 +114,7 @@ describe('Auth API', () => {
             confirmPassword: 'DifferentPassword123'
           })
           .expect(400)
+          .expect('Content-Type', /application\/json/)
 
         const usersAtEnd = await getUsersInDb()
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -112,6 +141,7 @@ describe('Auth API', () => {
               confirmPassword: password
             })
             .expect(400)
+            .expect('Content-Type', /application\/json/)
 
           const usersAtEnd = await getUsersInDb()
           assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -134,7 +164,7 @@ describe('Auth API', () => {
             username: 'different'
           })
           .expect(400)
-
+          .expect('Content-Type', /application\/json/)
         const usersAtEnd = await getUsersInDb()
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
 
@@ -150,6 +180,7 @@ describe('Auth API', () => {
             username: 'a'
           })
           .expect(400)
+          .expect('Content-Type', /application\/json/)
 
         const usersAtEnd = await getUsersInDb()
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -166,6 +197,7 @@ describe('Auth API', () => {
             username: 'a'.repeat(21)
           })
           .expect(400)
+          .expect('Content-Type', /application\/json/)
 
         const usersAtEnd = await getUsersInDb()
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -187,6 +219,7 @@ describe('Auth API', () => {
             email: 'different@test.com'
           })
           .expect(400)
+          .expect('Content-Type', /application\/json/)
 
         const usersAtEnd = await getUsersInDb()
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -196,63 +229,86 @@ describe('Auth API', () => {
     })
   })
 
-  describe('POST /api/auth/signin', () => {
+  describe('User Authentication (POST /api/auth/signin)', () => {
     beforeEach(async () => {
-      // Create a test user before each signin test
       await api
         .post('/api/auth/signup')
-        .send({
-          username: 'testuser',
-          email: 'test@test.com',
-          password: 'Password123',
-          confirmPassword: 'Password123'
-        })
+        .send(initialUsers[0])
     })
 
     test('succeeds with correct credentials', async () => {
       const response = await api
         .post('/api/auth/signin')
         .send({
-          email: 'test@test.com',
-          password: 'Password123'
+          email: initialUsers[0].email,
+          password: initialUsers[0].password
         })
         .expect(200)
         .expect('Content-Type', /application\/json/)
 
-      // Check user data in response
-      assert.strictEqual(response.body.email, 'test@test.com')
-      assert.strictEqual(response.body.username, 'testuser')
+      assert.strictEqual(response.body.email, initialUsers[0].email)
+      assert.strictEqual(response.body.username, initialUsers[0].username)
 
-      // Check that cookies are set
       const cookies = response.headers['set-cookie']
       assert(cookies.some(cookie => cookie.includes('accessToken')))
       assert(cookies.some(cookie => cookie.includes('refreshToken')))
     })
 
-    test('fails with incorrect password', async () => {
-      const response = await api
-        .post('/api/auth/signin')
-        .send({
-          email: 'test@test.com',
-          password: 'WrongPassword123'
-        })
-        .expect(401)
-
-      assert.strictEqual(response.body.error, 'Invalid email or password')
-    })
-
     test('handles CLI mode signin correctly', async () => {
       const response = await api
-        .post('/api/auth/signin?mode=cli&redirect=http://localhost:3000/callback')
+        .post('/api/auth/signin?mode=cli&redirect=http://localhost:3000/')
         .send({
           email: 'test@test.com',
           password: 'Password123'
         })
         .expect(200)
+        .expect('Content-Type', /application\/json/)
+      assert(response.body.redirectUrl.startsWith('http://localhost:3000/?token='))
 
-      // Should return redirect URL with token
-      assert(response.body.redirectUrl.startsWith('http://localhost:3000/callback?token='))
+      const cookies = response.headers['set-cookie']
+      assert(!cookies)
     })
+
+    describe('fails with proper error message when', () => {
+      test('required fields are missing', async () => {
+        const response = await api
+          .post('/api/auth/signin')
+          .send({
+            email: initialUsers[0].email
+          })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Email and password are required')
+      })
+
+      test('password is incorrect', async () => {
+        const response = await api
+          .post('/api/auth/signin')
+          .send({
+            email: initialUsers[0].email,
+            password: 'WrongPassword123'
+          })
+          .expect(401)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Invalid email or password')
+      })
+
+      test('email is incorrect', async () => {
+        const response = await api
+          .post('/api/auth/signin')
+          .send({
+            email: 'wrong@test.com',
+            password: initialUsers[0].password
+          })
+          .expect(401)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Invalid email or password')
+      })
+    })
+
   })
 
   after(async () => {
