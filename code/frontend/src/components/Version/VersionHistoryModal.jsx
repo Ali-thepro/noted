@@ -13,6 +13,8 @@ import { editorThemes } from '../../utils/themes'
 import { buildVersionContent } from '../../utils/diff'
 import moment from 'moment'
 import { toast } from 'react-toastify'
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
+
 
 const VersionHistoryModal = ({ show, onClose, note }) => {
   const dispatch = useDispatch()
@@ -21,6 +23,8 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
   const [versionContent, setVersionContent] = useState('')
   const [loading, setLoading] = useState(true)
   const [restoring, setRestoring] = useState(false)
+  const [isComparing, setIsComparing] = useState(false)
+  const [comparisonData, setComparisonData] = useState(null)
   const theme = useSelector(state => state.theme)
   const editorConfig = useSelector(state => state.editorConfig)
   const activeNote = useSelector(state => state.note.activeNote)
@@ -56,6 +60,7 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
 
   const handleVersionSelect = async (version) => {
     setSelectedVersion(version)
+    setIsComparing(false)
     try {
       let content
       if (version.type === 'snapshot') {
@@ -68,6 +73,47 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
     } catch (error) {
       console.error('Failed to build version content:', error)
       toast.error('Failed to load version content')
+    }
+  }
+
+  const handleCompare = async () => {
+    if (!selectedVersion) return
+
+    if (isComparing) {
+      setIsComparing(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const currentIndex = versions.findIndex(v => v.id === selectedVersion.id)
+      if (currentIndex === -1 || currentIndex === versions.length - 1) {
+        toast.error('No previous version to compare with')
+        return
+      }
+
+      const prevVersion = versions[currentIndex + 1]
+
+      let selectedContent = versionContent
+      let prevContent
+
+      if (prevVersion.type === 'snapshot') {
+        prevContent = prevVersion.content
+      } else {
+        const chain = await getVersionChain(note.id, prevVersion.createdAt)
+        prevContent = buildVersionContent(chain)
+      }
+
+      setComparisonData({
+        oldValue: prevContent,
+        newValue: selectedContent,
+      })
+      setIsComparing(true)
+    } catch (error) {
+      console.error('Failed to compare versions:', error)
+      toast.error('Failed to compare versions')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -143,12 +189,12 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
           </div>
         ) : (
           <div className="flex flex-col md:flex-row gap-4 h-[600px]">
-            <div className="w-full md:w-1/3 overflow-y-auto border rounded-lg dark:border-gray-700">
+            <div className="w-full md:w-1/3 overflow-y-auto border rounded-lg dark:border-gray-500">
               {versions.map((version) => (
                 <button
                   key={version.id}
                   onClick={() => handleVersionSelect(version)}
-                  className={`w-full text-left p-4 border-b dark:border-gray-700 
+                  className={`w-full text-left p-4 border-b dark:border-gray-600 
                     ${selectedVersion?.id === version.id
                   ? 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800'
                   : 'hover:bg-gray-100 dark:hover:bg-gray-600'}`}
@@ -170,13 +216,32 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
 
             <div className="flex-1 h-full overflow-hidden border rounded-lg dark:border-gray-700">
               {selectedVersion && (
-                <CodeMirror
-                  value={versionContent}
-                  height="100%"
-                  theme={editorThemes[editorConfig.theme]}
-                  extensions={extensions}
-                  className="h-full"
-                />
+                isComparing ? (
+                  <div className="h-full overflow-auto">
+                    <ReactDiffViewer
+                      oldValue={comparisonData.oldValue}
+                      newValue={comparisonData.newValue}
+                      splitView={false}
+                      useDarkTheme={theme === 'dark'}
+                      compareMethod={DiffMethod.WORDS}
+                      styles={{
+                        variables: {
+                          dark: {
+                            codeFoldContentColor: '#c0caf5'
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <CodeMirror
+                    value={versionContent}
+                    height="100%"
+                    theme={editorThemes[editorConfig.theme]}
+                    extensions={extensions}
+                    className="h-full"
+                  />
+                )
               )}
             </div>
           </div>
@@ -194,20 +259,21 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
             Close
           </Button>
           <Tooltip content="Compare with previous version"
-            className="bg-gray-800"
+            className="bg-gray-800 dark:bg-gray-800"
             arrow={false}
           >
             <Button
               color="blue"
               size="sm"
-              className="focus:ring-0"
+              onClick={handleCompare}
+              disabled={!selectedVersion || loading}
             >
               <FaExchangeAlt className="mr-2 mt-1" />
-              Compare
+              {isComparing ? 'Show Content' : 'Compare'}
             </Button>
           </Tooltip>
           <Button
-            color="red"
+            color="failure"
             size="sm"
             onClick={handleRestore}
             disabled={restoring}
