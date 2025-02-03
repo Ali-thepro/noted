@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
+	"noted/cmd/version"
 	"noted/internal/api"
 	"noted/internal/storage"
 	"noted/internal/utils"
 	"strings"
+
 )
 
 var editDataCmd = &cobra.Command{
@@ -18,6 +21,7 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToEdit *storage.Note
 		var err error
+		var newFilename string
 
 		if len(args) > 0 {
 			noteToEdit, err = storage.GetNoteByID(args[0])
@@ -97,7 +101,8 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 			return fmt.Errorf("failed to update note metadata on server: %w", err)
 		}
 
-		if _, err := storage.UpdateNoteMetadata(noteToEdit, note); err != nil {
+		newFilename, err = storage.UpdateNoteMetadata(noteToEdit, note)
+		if err != nil {
 			return fmt.Errorf("failed to update local note metadata: %w", err)
 		}
 
@@ -113,23 +118,39 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 
 			latestVersion := versions[0]
 			versionType := "diff"
-			var content string
+			var versionContent string
 			var baseVersion string
+
+			content, err := storage.ReadNoteContent(newFilename)
+			if err != nil {
+				return fmt.Errorf("failed to read note content: %w", err)
+			}
 
 			if ShouldCreateSnapshot(latestVersion) {
 				versionType = "snapshot"
-				content, err = storage.ReadNoteContent(noteToEdit.Filename)
-				if err != nil {
-					return fmt.Errorf("failed to read note content: %w", err)
-				}
+				versionContent = content
 			} else {
-				content = latestVersion.Content
+				var baseContent string
+				if latestVersion.Type == "snapshot" {
+					baseContent = latestVersion.Content
+				} else {
+					chain, err := client.GetVersionChain(noteToEdit.ID, latestVersion.CreatedAt)
+					if err != nil {
+						return fmt.Errorf("failed to get version chain: %w", err)
+					}
+					baseContent = version.BuildVersionContent(chain)
+				}
+
+				dmp := diffmatchpatch.New()
+				diffs := dmp.DiffMain(baseContent, content, false)
+				diffs = dmp.DiffCleanupEfficiency(diffs)
+				versionContent = dmp.DiffToDelta(diffs)
 				baseVersion = latestVersion.ID
 			}
 
 			_, err = client.CreateVersion(noteToEdit.ID, &api.CreateVersionRequest{
 				Type:        versionType,
-				Content:     content,
+				Content:     versionContent,
 				BaseVersion: baseVersion,
 				Metadata: api.VersionMetadata{
 					Title:         note.Title,
