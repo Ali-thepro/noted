@@ -543,7 +543,6 @@ describe('Auth API', () => {
         const usersAtStart = await getUsersInDb()
 
         const mockCode = 'valid_mock_auth_code'
-        const mockState = JSON.stringify({})
 
         nock('https://oauth2.googleapis.com')
           .post('/token')
@@ -562,7 +561,7 @@ describe('Auth API', () => {
           })
 
         await api
-          .get(`/api/auth/google/callback?code=${mockCode}&state=${mockState}`)
+          .get(`/api/auth/google/callback?code=${mockCode}`)
           .expect(302)
 
         const usersAtEnd = await getUsersInDb()
@@ -598,6 +597,143 @@ describe('Auth API', () => {
         const url = new URL(location)
         const state = JSON.parse(url.searchParams.get('state'))
         assert.deepStrictEqual(state, { mode: 'cli', redirect: 'http://localhost:3000/' })
+      })
+
+      test('creates new user on first GitHub login', async () => {
+        const mockCode = 'valid_mock_auth_code'
+
+        nock('https://github.com')
+          .post('/login/oauth/access_token')
+          .reply(200, {
+            access_token: 'mock_github_token'
+          })
+
+        nock('https://api.github.com')
+          .get('/user')
+          .reply(200, {
+            login: 'githubuser',
+            id: 12345
+          })
+
+        nock('https://api.github.com')
+          .get('/user/emails')
+          .reply(200, [{
+            email: 'github@test.com',
+            primary: true,
+            verified: true
+          }])
+
+        const response = await api
+          .get(`/api/auth/github/callback?code=${mockCode}`)
+          .expect(302)
+
+        assert(response.headers.location.startsWith(config.UI_URI + '/oauth/callback'))
+
+        const cookies = response.headers['set-cookie']
+        assert(cookies.some(cookie => cookie.includes('accessToken')))
+        assert(cookies.some(cookie => cookie.includes('refreshToken')))
+
+        const user = await User.findOne({ email: 'github@test.com' })
+        assert(user)
+        assert.strictEqual(user.provider, 'github')
+        assert.strictEqual(user.username, 'githubuser')
+        assert(user.oauth)
+      })
+
+      test('handles CLI mode in GitHub callback', async () => {
+        const mockCode = 'valid_mock_auth_code'
+        const mockState = JSON.stringify({
+          mode: 'cli',
+          redirect: 'http://localhost:3000/callback'
+        })
+
+        nock('https://github.com')
+          .post('/login/oauth/access_token')
+          .reply(200, {
+            access_token: 'mock_github_token'
+          })
+
+        nock('https://api.github.com')
+          .get('/user')
+          .reply(200, {
+            login: 'githubuser',
+            id: 12345
+          })
+
+        nock('https://api.github.com')
+          .get('/user/emails')
+          .reply(200, [{
+            email: 'github@test.com',
+            primary: true,
+            verified: true
+          }])
+
+
+        const response = await api
+          .get(`/api/auth/github/callback?code=${mockCode}&state=${mockState}`)
+          .expect(302)
+
+        assert(response.headers.location.startsWith('http://localhost:3000/callback?token='))
+        const cookies = response.headers['set-cookie']
+        assert(!cookies)
+      })
+
+      test('handles errors in GitHub OAuth flow', async () => {
+        const mockCode = 'invalid_code'
+
+        nock('https://github.com')
+          .post('/login/oauth/access_token')
+          .replyWithError('Invalid authorization code')
+
+        const response = await api
+          .get(`/api/auth/github/callback?code=${mockCode}`)
+          .expect(500)
+        assert(response.body.error.includes('Error during GitHub OAuth callback'))
+      })
+
+      test('reuses existing GitHub user on subsequent logins', async () => {
+        await User.create({
+          email: 'github@test.com',
+          username: 'existing-github-user',
+          provider: 'github',
+          passwordHash: 'dummy',
+          oauth: true
+        })
+
+        const usersAtStart = await getUsersInDb()
+
+        const mockCode = 'valid_mock_auth_code'
+
+        nock('https://github.com')
+          .post('/login/oauth/access_token')
+          .reply(200, {
+            access_token: 'mock_github_token'
+          })
+
+        nock('https://api.github.com')
+          .get('/user')
+          .reply(200, {
+            login: 'githubuser',
+            id: 12345
+          })
+
+        nock('https://api.github.com')
+          .get('/user/emails')
+          .reply(200, [{
+            email: 'github@test.com',
+            primary: true,
+            verified: true
+          }])
+
+        await api
+          .get(`/api/auth/github/callback?code=${mockCode}`)
+          .expect(302)
+
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+        const users = await User.find({ email: 'github@test.com' })
+        assert.strictEqual(users.length, 1)
+        assert.strictEqual(users[0].username, 'existing-github-user')
       })
     })
   })
