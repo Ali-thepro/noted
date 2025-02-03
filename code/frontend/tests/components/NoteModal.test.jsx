@@ -112,6 +112,8 @@ describe('NoteModal Component', () => {
 
       const submitButton = screen.getByRole('button', { name: 'Create Note' })
       await userEvent.click(submitButton)
+
+
       expect(mockOnClose).toHaveBeenCalled()
     })
   })
