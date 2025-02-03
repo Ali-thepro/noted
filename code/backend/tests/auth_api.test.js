@@ -308,7 +308,6 @@ describe('Auth API', () => {
         assert.strictEqual(response.body.error, 'Invalid email or password')
       })
     })
-
   })
 
   after(async () => {
