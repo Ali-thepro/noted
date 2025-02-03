@@ -310,6 +310,64 @@ describe('Auth API', () => {
     })
   })
 
+  describe('Refresh Token (POST /api/auth/refresh-token)', () => {
+    test('succeeds with valid refresh token', async () => {
+      await api.post('/api/auth/signup').send(initialUsers[0])
+      const signInResponse = await api
+        .post('/api/auth/signin')
+        .send({
+          email: initialUsers[0].email,
+          password: initialUsers[0].password,
+        })
+        .expect(200)
+
+      const cookies = signInResponse.headers['set-cookie']
+
+      const response = await api
+        .post('/api/auth/refresh-token')
+        .set('Cookie', cookies.join('; '))
+        .expect(200)
+
+      const newCookies = response.headers['set-cookie']
+      assert(newCookies.some((cookie) => cookie.includes('accessToken')))
+      assert.strictEqual(response.body.email, initialUsers[0].email)
+    })
+
+    test('fails when no refresh token provided', async () => {
+      const response = await api.post('/api/auth/refresh-token').expect(401)
+      assert.strictEqual(response.body.error, 'Refresh token not provided')
+    })
+
+    test('fails with an invalid refresh token', async () => {
+      const invalidCookie = 'refreshToken=invalidtoken'
+      const response = await api
+        .post('/api/auth/refresh-token')
+        .set('Cookie', invalidCookie)
+        .expect(403)
+      assert.strictEqual(response.body.error, 'Invalid refresh token')
+    })
+
+    test('fails when user not found for a valid refresh token', async () => {
+      await api.post('/api/auth/signup').send(initialUsers[0])
+      const signInResponse = await api
+        .post('/api/auth/signin')
+        .send({
+          email: initialUsers[0].email,
+          password: initialUsers[0].password,
+        })
+        .expect(200)
+      const cookies = signInResponse.headers['set-cookie']
+
+      await User.deleteMany({})
+
+      const response = await api
+        .post('/api/auth/refresh-token')
+        .set('Cookie', cookies.join('; '))
+        .expect(404)
+      assert.strictEqual(response.body.error, 'User not found')
+    })
+  })
+
   describe('Sign Out (POST /api/auth/signout)', () => {
     test('signs out user by clearing cookies', async () => {
       await api.post('/api/auth/signup').send(initialUsers[0])
@@ -329,7 +387,6 @@ describe('Auth API', () => {
       assert.strictEqual(response.text, 'User signed out successfully')
 
       const clearCookies = response.headers['set-cookie'] || []
-      console.log(clearCookies)
       assert(clearCookies.some((cookie) => cookie.includes('accessToken=;')))
       assert(clearCookies.some((cookie) => cookie.includes('refreshToken=;')))
     })
@@ -358,6 +415,62 @@ describe('Auth API', () => {
     test('fails when not authenticated', async () => {
       const response = await api.get('/api/auth/me').expect(401)
       assert.strictEqual(response.body.error, 'Unauthorised - No token, please re-authenticate')
+    })
+  })
+
+  describe('OAuth Authentication', () => {
+    describe('Google OAuth Flow', () => {
+      test('redirects to Google OAuth URL with correct parameters', async () => {
+        const response = await api
+          .get('/api/auth/google')
+          .expect(302)
+
+        const location = response.headers.location
+        assert(location.startsWith('https://accounts.google.com/o/oauth2/v2/auth'))
+        assert(location.includes('redirect_uri='))
+        const url = new URL(location)
+        assert.deepStrictEqual(JSON.parse(url.searchParams.get('state')), {})
+      })
+
+      test('handles CLI mode signin correctly', async () => {
+        const response = await api
+          .get('/api/auth/google?mode=cli&redirect=http://localhost:3000/')
+          .expect(302)
+
+        const location = response.headers.location
+        assert(location.startsWith('https://accounts.google.com/o/oauth2/v2/auth'))
+        assert(location.includes('redirect_uri='))
+        const url = new URL(location)
+        const state = JSON.parse(url.searchParams.get('state'))
+        assert.deepStrictEqual(state, { mode: 'cli', redirect: 'http://localhost:3000/' })
+      })
+    })
+
+    describe('GitHub OAuth Flow', () => {
+      test('redirects to GitHub OAuth URL with correct parameters', async () => {
+        const response = await api
+          .get('/api/auth/github')
+          .expect(302)
+
+        const location = response.headers.location
+        assert(location.startsWith('https://github.com/login/oauth/authorize'))
+        assert(location.includes('redirect_uri='))
+        const url = new URL(location)
+        assert.deepStrictEqual(JSON.parse(url.searchParams.get('state')), {})
+      })
+
+      test('handles CLI mode signin correctly', async () => {
+        const response = await api
+          .get('/api/auth/github?mode=cli&redirect=http://localhost:3000/')
+          .expect(302)
+
+        const location = response.headers.location
+        assert(location.startsWith('https://github.com/login/oauth/authorize'))
+        assert(location.includes('redirect_uri='))
+        const url = new URL(location)
+        const state = JSON.parse(url.searchParams.get('state'))
+        assert.deepStrictEqual(state, { mode: 'cli', redirect: 'http://localhost:3000/' })
+      })
     })
   })
 
