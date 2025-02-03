@@ -22,8 +22,6 @@ describe('SearchBar Component', () => {
           onTagChange={mockOnTagChange}
         />
       )
-
-      // Check if both inputs are rendered
       expect(screen.getByPlaceholderText('Search by keyword...')).toBeInTheDocument()
       expect(screen.getByPlaceholderText('Filter by tag...')).toBeInTheDocument()
     })
@@ -37,8 +35,6 @@ describe('SearchBar Component', () => {
           onTagChange={mockOnTagChange}
         />
       )
-
-      // Check if inputs have correct initial values
       expect(screen.getByPlaceholderText('Search by keyword...')).toHaveValue('test')
       expect(screen.getByPlaceholderText('Filter by tag...')).toHaveValue('react')
     })
@@ -90,11 +86,9 @@ describe('SearchBar Component', () => {
       const keywordInput = screen.getByPlaceholderText('Search by keyword...')
       const tagInput = screen.getByPlaceholderText('Filter by tag...')
 
-      // Clear keyword input
       await userEvent.clear(keywordInput)
       expect(mockOnKeywordChange).toHaveBeenCalledWith('')
 
-      // Clear tag input
       await userEvent.clear(tagInput)
       expect(mockOnTagChange).toHaveBeenCalledWith('')
     })
