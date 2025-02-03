@@ -6,10 +6,10 @@ import { createNote, editNote } from '../../redux/reducers/noteReducer'
 import { createVersion, getVersions, getVersionChain } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
-import { shouldCreateSnapshot } from '../../utils/diff'
+import { shouldCreateSnapshot , buildVersionContent} from '../../utils/diff'
 import diff_match_patch from '../../utils/diff'
-import { buildVersionContent } from '../../utils/diff'
-
+import { arraysEqual } from '../../utils/util'
+import { toast } from 'react-toastify'
 const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -25,10 +25,6 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
     }
   }, [isEditing, noteData, show])
 
-  const arraysEqual = (a, b) => {
-    if (a.length !== b.length) return false
-    return a.every((item, index) => item === b[index])
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -38,13 +34,18 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
       const processedTags = tags.split(',').map(tag => tag.trim()).filter(Boolean)
 
       if (isEditing) {
+        if (title.trim() === noteData.title && arraysEqual(processedTags, noteData.tags)) {
+          toast.info('Note has not changed, no changes made')
+          return
+        }
+
         const updatedNote = await dispatch(editNote(noteData.id, {
           ...noteData,
           title: title.trim(),
           tags: processedTags
         }))
 
-        if (updatedNote) {
+        if (updatedNote) {         
           if (updatedNote.title !== noteData.title || !arraysEqual(updatedNote.tags, noteData.tags)) {
             try {
               const versions = await getVersions(updatedNote.id)

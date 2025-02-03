@@ -14,7 +14,7 @@ import { buildVersionContent } from '../../utils/diff'
 import moment from 'moment'
 import { toast } from 'react-toastify'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
-
+import { arraysEqual } from '../../utils/util'
 
 const VersionHistoryModal = ({ show, onClose, note }) => {
   const dispatch = useDispatch()
@@ -122,6 +122,13 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
 
     try {
       setRestoring(true)
+
+      if (arraysEqual(activeNote.tags, selectedVersion.metadata.tags) && activeNote.title === selectedVersion.metadata.title && activeNote.content === versionContent) {
+        toast.info('Note is already at this version, no restoring needed')
+        return
+      }
+
+
       const updatedNote = await dispatch(editNote(activeNote.id, {
         ...activeNote,
         title: selectedVersion.metadata.title,
