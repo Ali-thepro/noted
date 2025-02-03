@@ -310,6 +310,57 @@ describe('Auth API', () => {
     })
   })
 
+  describe('Sign Out (POST /api/auth/signout)', () => {
+    test('signs out user by clearing cookies', async () => {
+      await api.post('/api/auth/signup').send(initialUsers[0])
+      const signInResponse = await api
+        .post('/api/auth/signin')
+        .send({
+          email: initialUsers[0].email,
+          password: initialUsers[0].password,
+        })
+        .expect(200)
+      const cookies = signInResponse.headers['set-cookie']
+
+      const response = await api
+        .post('/api/auth/signout')
+        .set('Cookie', cookies.join('; '))
+        .expect(200)
+      assert.strictEqual(response.text, 'User signed out successfully')
+
+      const clearCookies = response.headers['set-cookie'] || []
+      console.log(clearCookies)
+      assert(clearCookies.some((cookie) => cookie.includes('accessToken=;')))
+      assert(clearCookies.some((cookie) => cookie.includes('refreshToken=;')))
+    })
+  })
+
+  describe('Get Current User (GET /api/auth/me)', () => {
+    test('returns user info when authenticated', async () => {
+      await api.post('/api/auth/signup').send(initialUsers[0])
+      const signInResponse = await api
+        .post('/api/auth/signin')
+        .send({
+          email: initialUsers[0].email,
+          password: initialUsers[0].password,
+        })
+        .expect(200)
+      const cookies = signInResponse.headers['set-cookie']
+
+      const response = await api
+        .get('/api/auth/me')
+        .set('Cookie', cookies.join('; '))
+        .expect(200)
+      assert.strictEqual(response.body.email, initialUsers[0].email)
+      assert.strictEqual(response.body.username, initialUsers[0].username)
+    })
+
+    test('fails when not authenticated', async () => {
+      const response = await api.get('/api/auth/me').expect(401)
+      assert.strictEqual(response.body.error, 'Unauthorised - No token, please re-authenticate')
+    })
+  })
+
   after(async () => {
     await mongoose.connection.close()
   })
