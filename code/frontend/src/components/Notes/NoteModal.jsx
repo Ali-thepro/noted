@@ -6,7 +6,7 @@ import { createNote, editNote } from '../../redux/reducers/noteReducer'
 import { createVersion, getVersions, getVersionChain } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
-import { shouldCreateSnapshot , buildVersionContent} from '../../utils/diff'
+import { shouldCreateSnapshot , buildVersionContent } from '../../utils/diff'
 import diff_match_patch from '../../utils/diff'
 import { arraysEqual } from '../../utils/util'
 import { toast } from 'react-toastify'
@@ -45,7 +45,7 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           tags: processedTags
         }))
 
-        if (updatedNote) {         
+        if (updatedNote) {
           if (updatedNote.title !== noteData.title || !arraysEqual(updatedNote.tags, noteData.tags)) {
             try {
               const versions = await getVersions(updatedNote.id)
