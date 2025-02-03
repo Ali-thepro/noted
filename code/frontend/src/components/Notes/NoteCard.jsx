@@ -59,7 +59,7 @@ const NoteCard = ({ note, onClick, onTagClick, onDelete }) => {
         </div>
 
         <div className="flex-grow">
-          <h3 className="text-xl font-semibold mt-3 text-gray-900 dark:text-white mb-4 line-clamp-2">
+          <h3 className="text-xl font-semibold mt-3 text-gray-900 dark:text-white mb-4 line-clamp-2 break-words">
             {note.title}
           </h3>
         </div>
