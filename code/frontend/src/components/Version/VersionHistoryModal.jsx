@@ -2,41 +2,107 @@ import { useState, useEffect, useMemo } from 'react'
 import { Modal, Button, Spinner, Tooltip } from 'flowbite-react'
 import { FaHistory, FaExchangeAlt, FaUndo } from 'react-icons/fa'
 import PropTypes from 'prop-types'
-import { useSelector } from 'react-redux'
-import { getVersions } from '../../services/version'
+import { useSelector, useDispatch } from 'react-redux'
+import { editNote } from '../../redux/reducers/noteReducer'
+import { getVersions, getVersionChain, createVersion } from '../../services/version'
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { EditorView } from '@codemirror/view'
 import { editorThemes } from '../../utils/themes'
+import { buildVersionContent } from '../../utils/diff'
 import moment from 'moment'
+import { toast } from 'react-toastify'
 
-const VersionHistoryModal = ({ show, onClose, noteId }) => {
+const VersionHistoryModal = ({ show, onClose, note }) => {
+  const dispatch = useDispatch()
   const [versions, setVersions] = useState([])
   const [selectedVersion, setSelectedVersion] = useState(null)
+  const [versionContent, setVersionContent] = useState('')
   const [loading, setLoading] = useState(true)
+  const [restoring, setRestoring] = useState(false)
   const theme = useSelector(state => state.theme)
   const editorConfig = useSelector(state => state.editorConfig)
+  const activeNote = useSelector(state => state.note.activeNote)
 
   useEffect(() => {
     const fetchVersions = async () => {
       try {
-        const fetchedVersions = await getVersions(noteId)
+        const fetchedVersions = await getVersions(note.id)
         setVersions(fetchedVersions)
         if (fetchedVersions.length > 0) {
           setSelectedVersion(fetchedVersions[0])
         }
+        let content
+        if (fetchedVersions[0].type === 'snapshot') {
+          content = fetchedVersions[0].content
+        } else {
+          const chain = await getVersionChain(note.id, fetchedVersions[0].createdAt)
+          content = buildVersionContent(chain)
+        }
+        setVersionContent(content)
         setLoading(false)
       } catch (error) {
         console.error('Failed to fetch versions:', error)
         setLoading(false)
+        toast.error('Failed to fetch versions')
       }
     }
 
     if (show) {
       fetchVersions()
     }
-  }, [noteId, show])
+  }, [note.id, show])
+
+  const handleVersionSelect = async (version) => {
+    setSelectedVersion(version)
+    try {
+      let content
+      if (version.type === 'snapshot') {
+        content = version.content
+      } else {
+        const chain = await getVersionChain(note.id, version.createdAt)
+        content = buildVersionContent(chain)
+      }
+      setVersionContent(content)
+    } catch (error) {
+      console.error('Failed to build version content:', error)
+      toast.error('Failed to load version content')
+    }
+  }
+
+  const handleRestore = async () => {
+    if (!selectedVersion || !activeNote) return
+
+    try {
+      setRestoring(true)
+      const updatedNote = await dispatch(editNote(activeNote.id, {
+        ...activeNote,
+        title: selectedVersion.metadata.title,
+        content: versionContent,
+        tags: selectedVersion.metadata.tags
+      }))
+
+      if (updatedNote) {
+        await createVersion(note.id, {
+          type: 'snapshot',
+          content: versionContent,
+          metadata: {
+            title: selectedVersion.metadata.title,
+            tags: selectedVersion.metadata.tags,
+            versionNumber: versions[0].metadata.versionNumber + 1
+          }
+        })
+        toast.success('Note restored successfully')
+        onClose()
+      }
+    } catch (error) {
+      console.error('Failed to restore version:', error)
+      toast.error('Failed to restore version')
+    } finally {
+      setRestoring(false)
+    }
+  }
 
   const extensions = useMemo(() => [
     markdown({ base: markdownLanguage, codeLanguages: languages }),
@@ -81,11 +147,11 @@ const VersionHistoryModal = ({ show, onClose, noteId }) => {
               {versions.map((version) => (
                 <button
                   key={version.id}
-                  onClick={() => setSelectedVersion(version)}
+                  onClick={() => handleVersionSelect(version)}
                   className={`w-full text-left p-4 border-b dark:border-gray-700 
                     ${selectedVersion?.id === version.id
-                  ? 'bg-gray-100 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  ? 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-600'}`}
                 >
                   <div className="flex justify-between items-center gap-2">
                     <span className="font-medium truncate max-w-[70%] dark:text-white">
@@ -105,7 +171,7 @@ const VersionHistoryModal = ({ show, onClose, noteId }) => {
             <div className="flex-1 h-full overflow-hidden border rounded-lg dark:border-gray-700">
               {selectedVersion && (
                 <CodeMirror
-                  value={selectedVersion.content}
+                  value={versionContent}
                   height="100%"
                   theme={editorThemes[editorConfig.theme]}
                   extensions={extensions}
@@ -127,7 +193,10 @@ const VersionHistoryModal = ({ show, onClose, noteId }) => {
           >
             Close
           </Button>
-          <Tooltip content="Compare with previous version">
+          <Tooltip content="Compare with previous version"
+            className="bg-gray-800"
+            arrow={false}
+          >
             <Button
               color="blue"
               size="sm"
@@ -138,13 +207,13 @@ const VersionHistoryModal = ({ show, onClose, noteId }) => {
             </Button>
           </Tooltip>
           <Button
-            color="failure"
+            color="red"
             size="sm"
-            className="focus:ring-0"
-            onClick={() => {/* Will implement revert later */}}
+            onClick={handleRestore}
+            disabled={restoring}
           >
             <FaUndo className="mr-2 mt-1" />
-            Revert
+            {restoring ? 'Restoring...' : 'Revert'}
           </Button>
         </div>
       </Modal.Footer>
@@ -155,7 +224,7 @@ const VersionHistoryModal = ({ show, onClose, noteId }) => {
 VersionHistoryModal.propTypes = {
   show: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  noteId: PropTypes.string.isRequired
+  note: PropTypes.object.isRequired
 }
 
 export default VersionHistoryModal

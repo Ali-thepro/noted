@@ -149,7 +149,7 @@ const Header = () => {
 
       {showVersionHistory && activeNote && (
         <VersionHistoryModal
-          noteId={activeNote.id}
+          note={activeNote}
           show={showVersionHistory}
           onClose={() => setShowVersionHistory(false)}
         />

@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { createNote, editNote } from '../../redux/reducers/noteReducer'
-import { createVersion, getVersions } from '../../services/version'
+import { createVersion, getVersions, getVersionChain } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
 import { shouldCreateSnapshot } from '../../utils/diff'
+import diff_match_patch from '../../utils/diff'
+import { buildVersionContent } from '../../utils/diff'
 
 const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
   const dispatch = useDispatch()
@@ -48,23 +50,42 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
               const versions = await getVersions(updatedNote.id)
               if (versions && versions.length > 0) {
                 const latestVersion = versions[0]
-                const versionType = shouldCreateSnapshot(latestVersion) ? 'snapshot' : 'diff'
-                const nextVersionNumber = latestVersion.metadata.versionNumber + 1
-                const baseVersion = versionType === 'diff' ? latestVersion.id : null
+                let versionType = 'diff'
+                let versionContent
+                let baseVersion
+
+                if (shouldCreateSnapshot(latestVersion.metadata.versionNumber)) {
+                  versionType = 'snapshot'
+                  versionContent = updatedNote.content
+                } else {
+                  let baseContent
+                  if (latestVersion.type === 'snapshot') {
+                    baseContent = latestVersion.content
+                  } else {
+                    const chain = await getVersionChain(updatedNote.id, latestVersion.createdAt)
+                    baseContent = buildVersionContent(chain)
+                  }
+
+                  const dmp = new diff_match_patch()
+                  const diffs = dmp.diff_main(baseContent, updatedNote.content, false)
+                  dmp.diff_cleanupEfficiency(diffs)
+                  versionContent = dmp.diff_toDelta(diffs)
+                  baseVersion = latestVersion.id
+                }
 
                 await createVersion(updatedNote.id, {
                   type: versionType,
-                  content: updatedNote.content,
-                  baseVersion: baseVersion,
+                  content: versionContent,
+                  baseVersion,
                   metadata: {
                     title: updatedNote.title,
                     tags: updatedNote.tags,
-                    versionNumber: nextVersionNumber
+                    versionNumber: latestVersion.metadata.versionNumber + 1
                   },
                 })
               }
             } catch (error) {
-              console.error('Failed to initialize note:', error)
+              console.error('Failed to create version:', error)
             }
           }
           setTitle('')
