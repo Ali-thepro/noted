@@ -739,6 +739,7 @@ describe('Auth API', () => {
   })
 
   after(async () => {
+    await clearDatabase()
     await mongoose.connection.close()
   })
 })
