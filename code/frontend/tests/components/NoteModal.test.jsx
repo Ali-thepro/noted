@@ -58,10 +58,10 @@ describe('NoteModal Component', () => {
     it('handles tags input', async () => {
       renderModal()
       const tagsInput = screen.getByLabelText('Tags (comma-separated)')
-      
+
       fireEvent.change(tagsInput, { target: { value: '' } })
       fireEvent.change(tagsInput, { target: { value: 'tag1, tag2, tag3' } })
-      
+
       await waitFor(() => {
         expect(tagsInput).toHaveValue('tag1, tag2, tag3')
       })
@@ -71,10 +71,10 @@ describe('NoteModal Component', () => {
       renderModal()
       const titleInput = screen.getByLabelText('Title')
       const submitButton = screen.getByRole('button', { name: /create note/i })
-      
+
       fireEvent.change(titleInput, { target: { value: '' } })
       fireEvent.change(titleInput, { target: { value: 'Test Title' } })
-      
+
       await waitFor(() => {
         expect(submitButton).toBeEnabled()
       })
@@ -98,7 +98,7 @@ describe('NoteModal Component', () => {
       renderModal({ isEditing: true, noteData: mockNote })
       const titleInput = screen.getByLabelText('Title')
       const tagsInput = screen.getByLabelText('Tags (comma-separated)')
-      
+
       fireEvent.change(titleInput, { target: { value: '' } })
       fireEvent.change(titleInput, { target: { value: 'Updated Title' } })
       fireEvent.change(tagsInput, { target: { value: '' } })
