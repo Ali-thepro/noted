@@ -13,8 +13,8 @@ describe('Image Upload API (POST /api/image/upload)', () => {
   let originalS3Upload
 
   beforeEach(async () => {
-    await clearDatabase()  
-    fs.writeFileSync(tempFilePath, 'dummy image content')  
+    await clearDatabase()
+    fs.writeFileSync(tempFilePath, 'dummy image content')
     originalS3Upload = AWS.S3.prototype.upload
     AWS.S3.prototype.upload = function (params, callback) {
       callback(null, { Location: 'https://example.com/mock-upload.png' })
@@ -26,18 +26,18 @@ describe('Image Upload API (POST /api/image/upload)', () => {
         email: initialUsers[0].email,
         password: initialUsers[0].password,
       })
-    
+
     cookies = response.headers['set-cookie']
   })
 
   afterEach(async () => {
-    AWS.S3.prototype.upload = originalS3Upload  
+    AWS.S3.prototype.upload = originalS3Upload
     if (fs.existsSync(tempFilePath)) {
       fs.unlinkSync(tempFilePath)
     }
   })
 
-  test('succeeds with valid user session and file uploaded', async () => {  
+  test('succeeds with valid user session and file uploaded', async () => {
     const uploadResponse = await api
       .post('/api/image/upload')
       .set('Cookie', cookies.join('; '))
