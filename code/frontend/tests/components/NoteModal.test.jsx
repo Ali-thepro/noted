@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
 import NoteModal from '../../src/components/Notes/NoteModal'
@@ -58,18 +58,26 @@ describe('NoteModal Component', () => {
     it('handles tags input', async () => {
       renderModal()
       const tagsInput = screen.getByLabelText('Tags (comma-separated)')
-      await userEvent.clear(tagsInput)
-      await userEvent.type(tagsInput, 'tag1, tag2, tag3')
-      expect(tagsInput).toHaveValue('tag1, tag2, tag3')
+      
+      fireEvent.change(tagsInput, { target: { value: '' } })
+      fireEvent.change(tagsInput, { target: { value: 'tag1, tag2, tag3' } })
+      
+      await waitFor(() => {
+        expect(tagsInput).toHaveValue('tag1, tag2, tag3')
+      })
     })
 
     it('enables submit button when title is provided', async () => {
       renderModal()
       const titleInput = screen.getByLabelText('Title')
-      const submitButton = screen.getByRole('button', { name: 'Create Note' })
-      await userEvent.clear(titleInput)
-      await userEvent.type(titleInput, 'Test Title')
-      expect(submitButton).toBeEnabled()
+      const submitButton = screen.getByRole('button', { name: /create note/i })
+      
+      fireEvent.change(titleInput, { target: { value: '' } })
+      fireEvent.change(titleInput, { target: { value: 'Test Title' } })
+      
+      await waitFor(() => {
+        expect(submitButton).toBeEnabled()
+      })
     })
   })
 
@@ -90,11 +98,13 @@ describe('NoteModal Component', () => {
       renderModal({ isEditing: true, noteData: mockNote })
       const titleInput = screen.getByLabelText('Title')
       const tagsInput = screen.getByLabelText('Tags (comma-separated)')
-      await userEvent.clear(titleInput)
-      await userEvent.type(titleInput, 'Updated Title')
-      await userEvent.clear(tagsInput)
-      await userEvent.type(tagsInput, 'new, tags')
-      await vi.waitFor(() => {
+      
+      fireEvent.change(titleInput, { target: { value: '' } })
+      fireEvent.change(titleInput, { target: { value: 'Updated Title' } })
+      fireEvent.change(tagsInput, { target: { value: '' } })
+      fireEvent.change(tagsInput, { target: { value: 'new, tags' } })
+
+      await waitFor(() => {
         expect(titleInput).toHaveValue('Updated Title')
         expect(tagsInput).toHaveValue('new, tags')
       })
