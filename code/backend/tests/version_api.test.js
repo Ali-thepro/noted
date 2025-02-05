@@ -112,6 +112,103 @@ describe('Version API', () => {
     })
   })
 
+  describe('Getting version chain (GET /api/version/:noteId/chain)', () => {
+    beforeEach(async () => {
+      await api
+        .post(`/api/version/${noteId}`)
+        .set('Cookie', authCookie)
+        .send({
+          ...initialVersions[1],
+          baseVersion: baseVersionId
+        })
+    })
+
+    test('returns complete version chain', async () => {
+      const response = await api
+        .get(`/api/version/${noteId}/chain`)
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(Array.isArray(response.body))
+      assert.strictEqual(response.body.length, 2)
+      assert.strictEqual(response.body[0].type, 'snapshot')
+      assert.strictEqual(response.body[1].type, 'diff')
+    })
+
+    test('supports until parameter', async () => {
+      const until = new Date().toISOString()
+      const response = await api
+        .get(`/api/version/${noteId}/chain?until=${until}`)
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(response.body.every(version => new Date(version.createdAt) <= new Date(until)))
+    })
+
+    test('fails with invalid note id', async () => {
+      const invalidNoteId = new mongoose.Types.ObjectId()
+
+      const response = await api
+        .get(`/api/version/${invalidNoteId}/chain`)
+        .set('Cookie', authCookie)
+        .expect(404)
+
+      assert.strictEqual(response.body.error, 'Note not found or unauthorized')
+    })
+
+    test('fails when no versions exist', async () => {
+      await clearDatabase()
+
+      const signupResponse = await api.post('/api/auth/signup').send(initialUsers[0])
+      authCookie = signupResponse.headers['set-cookie']
+
+      const noteResponse = await api
+        .post('/api/note/create')
+        .set('Cookie', authCookie)
+        .send(initialNotes[0])
+
+      const response = await api
+        .get(`/api/version/${noteResponse.body.id}/chain`)
+        .set('Cookie', authCookie)
+        .expect(404)
+
+      assert.strictEqual(response.body.error, 'No versions found')
+    })
+  })
+
+  describe('Getting versions (GET /api/version/:noteId)', () => {
+    test('returns all versions for a note', async () => {
+      await api
+        .post(`/api/version/${noteId}`)
+        .set('Cookie', authCookie)
+        .send({
+          ...initialVersions[1],
+          baseVersion: baseVersionId
+        })
+
+      const response = await api
+        .get(`/api/version/${noteId}`)
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(Array.isArray(response.body))
+      assert.strictEqual(response.body.length, 2)
+      assert(response.body.some(v => v.type === 'snapshot'))
+      assert(response.body.some(v => v.type === 'diff'))
+    })
+
+    test('fails with invalid note id', async () => {
+      const invalidNoteId = new mongoose.Types.ObjectId()
+
+      const response = await api
+        .get(`/api/version/${invalidNoteId}`)
+        .set('Cookie', authCookie)
+        .expect(404)
+
+      assert.strictEqual(response.body.error, 'Note not found or unauthorized')
+    })
+  })
+
   after(async () => {
     await clearDatabase()
     await mongoose.connection.close()
