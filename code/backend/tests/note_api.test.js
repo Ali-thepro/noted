@@ -12,7 +12,7 @@ describe('Note API', () => {
     await clearDatabase()
 
     const response = await api.post('/api/auth/signup').send(initialUsers[0])
-    userId = response.body.id
+    userId = response.body.id // eslint-disable-line
     authCookie = response.headers['set-cookie']
 
     for (const note of initialNotes) {
