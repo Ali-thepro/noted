@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"noted/internal/storage"
 	"noted/internal/token"
 	"os"
 	"os/signal"
@@ -92,6 +93,10 @@ func handleCallback(w http.ResponseWriter, r *http.Request, tokenChan chan strin
 func handleSuccessfullLogin(tokenStr string) error {
 	if err := token.Save(tokenStr); err != nil {
 		return fmt.Errorf("failed to save token: %w", err)
+	}
+
+	if err := storage.VerifyUser(); err != nil {
+		return fmt.Errorf("failed to verify user: %w", err)
 	}
 
 	fmt.Println("Successfully logged in")

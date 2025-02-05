@@ -3,9 +3,13 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { createNote, editNote } from '../../redux/reducers/noteReducer'
+import { createVersion, getVersions, getVersionChain } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
-
+import { shouldCreateSnapshot , buildVersionContent } from '../../utils/diff'
+import diff_match_patch from '../../utils/diff'
+import { arraysEqual } from '../../utils/util'
+import { toast } from 'react-toastify'
 const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -21,6 +25,7 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
     }
   }, [isEditing, noteData, show])
 
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -29,12 +34,61 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
       const processedTags = tags.split(',').map(tag => tag.trim()).filter(Boolean)
 
       if (isEditing) {
+        if (title.trim() === noteData.title && arraysEqual(processedTags, noteData.tags)) {
+          toast.info('Note has not changed, no changes made')
+          return
+        }
+
         const updatedNote = await dispatch(editNote(noteData.id, {
           ...noteData,
           title: title.trim(),
           tags: processedTags
         }))
+
         if (updatedNote) {
+          if (updatedNote.title !== noteData.title || !arraysEqual(updatedNote.tags, noteData.tags)) {
+            try {
+              const versions = await getVersions(updatedNote.id)
+              if (versions && versions.length > 0) {
+                const latestVersion = versions[0]
+                let versionType = 'diff'
+                let versionContent
+                let baseVersion
+
+                if (shouldCreateSnapshot(latestVersion.metadata.versionNumber)) {
+                  versionType = 'snapshot'
+                  versionContent = updatedNote.content
+                } else {
+                  let baseContent
+                  if (latestVersion.type === 'snapshot') {
+                    baseContent = latestVersion.content
+                  } else {
+                    const chain = await getVersionChain(updatedNote.id, latestVersion.createdAt)
+                    baseContent = buildVersionContent(chain)
+                  }
+
+                  const dmp = new diff_match_patch()
+                  const diffs = dmp.diff_main(baseContent, updatedNote.content, false)
+                  dmp.diff_cleanupEfficiency(diffs)
+                  versionContent = dmp.diff_toDelta(diffs)
+                  baseVersion = latestVersion.id
+                }
+
+                await createVersion(updatedNote.id, {
+                  type: versionType,
+                  content: versionContent,
+                  baseVersion,
+                  metadata: {
+                    title: updatedNote.title,
+                    tags: updatedNote.tags,
+                    versionNumber: latestVersion.metadata.versionNumber + 1
+                  },
+                })
+              }
+            } catch (error) {
+              console.error('Failed to create version:', error)
+            }
+          }
           setTitle('')
           setTags('')
           onClose()
@@ -46,6 +100,15 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           tags: processedTags
         }))
         if (newNote) {
+          await createVersion(newNote.id, {
+            type: 'snapshot',
+            content: newNote.content,
+            metadata: {
+              title: newNote.title,
+              tags: newNote.tags,
+              versionNumber: 1
+            }
+          })
           setTitle('')
           setTags('')
           onClose()

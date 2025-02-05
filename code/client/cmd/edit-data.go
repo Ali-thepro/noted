@@ -2,21 +2,26 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
+	"noted/cmd/version"
 	"noted/internal/api"
 	"noted/internal/storage"
+	"noted/internal/utils"
 	"strings"
+
 )
 
 var editDataCmd = &cobra.Command{
 	Use:   "edit-data [id]",
 	Short: "Edit note metadata",
 	Long: `Edit note title and tags. 
-You can specify either the note ID/shortID as an argument or use --title flag.
+You can specify either the note ID as an argument or use --title flag.
 By default, new tags are appended to existing ones. Use --replace-tags to overwrite instead.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToEdit *storage.Note
 		var err error
+		var newFilename string
 
 		if len(args) > 0 {
 			noteToEdit, err = storage.GetNoteByID(args[0])
@@ -96,12 +101,71 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 			return fmt.Errorf("failed to update note metadata on server: %w", err)
 		}
 
-		if err := storage.UpdateNoteMetadata(noteToEdit, note); err != nil {
+		newFilename, err = storage.UpdateNoteMetadata(noteToEdit, note)
+		if err != nil {
 			return fmt.Errorf("failed to update local note metadata: %w", err)
+		}
+
+		if note.Title != noteToEdit.Title || !utils.StringSliceEqual(note.Tags, noteToEdit.Tags) {
+			versions, err := client.GetVersions(noteToEdit.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get versions: %w", err)
+			}
+
+			if len(versions) == 0 {
+				return fmt.Errorf("no versions found for note")
+			}
+
+			latestVersion := versions[0]
+			versionType := "diff"
+			var versionContent string
+			var baseVersion string
+
+			content, err := storage.ReadNoteContent(newFilename)
+			if err != nil {
+				return fmt.Errorf("failed to read note content: %w", err)
+			}
+
+			if ShouldCreateSnapshot(latestVersion) {
+				versionType = "snapshot"
+				versionContent = content
+			} else {
+				var baseContent string
+				if latestVersion.Type == "snapshot" {
+					baseContent = latestVersion.Content
+				} else {
+					chain, err := client.GetVersionChain(noteToEdit.ID, latestVersion.CreatedAt)
+					if err != nil {
+						return fmt.Errorf("failed to get version chain: %w", err)
+					}
+					baseContent = version.BuildVersionContent(chain)
+				}
+
+				dmp := diffmatchpatch.New()
+				diffs := dmp.DiffMain(baseContent, content, false)
+				diffs = dmp.DiffCleanupEfficiency(diffs)
+				versionContent = dmp.DiffToDelta(diffs)
+				baseVersion = latestVersion.ID
+			}
+
+			_, err = client.CreateVersion(noteToEdit.ID, &api.CreateVersionRequest{
+				Type:        versionType,
+				Content:     versionContent,
+				BaseVersion: baseVersion,
+				Metadata: api.VersionMetadata{
+					Title:         note.Title,
+					Tags:          note.Tags,
+					VersionNumber: latestVersion.Metadata.VersionNumber + 1,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create version: %w", err)
+			}
 		}
 
 		fmt.Printf("Note metadata updated successfully!\n")
 		fmt.Printf("Title: %s\n", note.Title)
+		fmt.Printf("ID: %s\n", note.ID)
 		if len(note.Tags) > 0 {
 			fmt.Printf("Tags: %v\n", strings.Join(note.Tags, ", "))
 		}

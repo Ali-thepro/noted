@@ -170,7 +170,6 @@ const refreshToken = async (request, response, next) => {
     }
 
     const newAccessToken = createAccessToken(user)
-    const newRefreshToken = createRefreshToken(user)
 
     response
       .cookie('accessToken', newAccessToken, {
@@ -178,12 +177,6 @@ const refreshToken = async (request, response, next) => {
         sameSite: 'strict',
         secure: true,
         maxAge: 15 * 60 * 1000,
-      })
-      .cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-        secure: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json(user)
   } catch (error) {

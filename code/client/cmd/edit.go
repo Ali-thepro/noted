@@ -13,7 +13,7 @@ var editCmd = &cobra.Command{
 	Use:   "edit [id]",
 	Short: "Edit a note",
 	Long: `Edit a note using your default text editor.
-You can specify either the note ID/shortID as an argument or use --title flag`,
+You can specify either the note ID as an argument or use --title flag`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToEdit *storage.Note
 		var err error

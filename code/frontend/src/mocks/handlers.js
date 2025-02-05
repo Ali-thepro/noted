@@ -54,5 +54,28 @@ export const handlers = [
 
   http.post(`${hostname}/auth/signout`, () => {
     return HttpResponse.json({ message: 'Signed out successfully' })
+  }),
+
+  http.get(`${hostname}/version/:noteId`, () => {
+    return HttpResponse.json({
+      id: '1',
+      type: 'snapshot',
+      content: '# Test Content',
+      metadata: {
+        versionNumber: 1,
+        title: 'Test Note',
+        tags: []
+      },
+      createdAt: new Date().toISOString()
+    })
+  }),
+
+  http.post(`${hostname}/version/:noteId`, () => {
+    return HttpResponse.json({
+      id: '123',
+      title: 'Test Note',
+      content: '# Test Content',
+      tags: []
+    })
   })
 ]

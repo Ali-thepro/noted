@@ -10,8 +10,8 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete [id]",
 	Short: "Delete a note",
-	Long: `Delete a note using either its ID/shortID or title. 
-You can specify either the note ID/shortID as an argument or use --title flag .`,
+	Long: `Delete a note using either its ID or title. 
+You can specify either the note ID as an argument or use --title flag .`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToDelete *storage.Note
 		var err error
@@ -36,9 +36,8 @@ You can specify either the note ID/shortID as an argument or use --title flag .`
 			}
 		}
 
-		fmt.Printf("Are you sure you want to delete note \"%s\" (%s)? (y/N): ",
+		fmt.Printf("Are you sure you want to delete note \"%s\"? (y/N): ",
 			noteToDelete.Title,
-			noteToDelete.ShortID,
 		)
 
 		var response string
@@ -55,12 +54,12 @@ You can specify either the note ID/shortID as an argument or use --title flag .`
 			return err
 		}
 
-		if err := client.DeleteNote(noteToDelete.ID); err != nil {
-			return fmt.Errorf("failed to delete note from server: %w", err)
-		}
-
 		if err := storage.DeleteNote(noteToDelete.ID); err != nil {
 			return fmt.Errorf("failed to delete local note data: %w", err)
+		}
+
+		if err := client.DeleteNote(noteToDelete.ID); err != nil {
+			return fmt.Errorf("failed to delete note from server: %w", err)
 		}
 
 		fmt.Printf("Note \"%s\" deleted successfully\n", noteToDelete.Title)

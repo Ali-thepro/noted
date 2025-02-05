@@ -115,11 +115,12 @@ export const editNote = (id, noteData) => {
   }
 }
 
-export const deleteNote = (id) => {
+export const deleteNote = (id, query) => {
   return async dispatch => {
     try {
       await noteService.deleteNote(id)
       dispatch(removeNote(id))
+      dispatch(initializeNotes(query))
       toast.success('Note deleted successfully')
     } catch (error) {
       const message = error.response?.data?.error || error.message

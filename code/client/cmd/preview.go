@@ -12,7 +12,7 @@ var previewCmd = &cobra.Command{
 	Use:   "preview [id]",
 	Short: "Preview a note with markdown formatting",
 	Long: `Preview a note's content with markdown formatting using glamour.
-You can specify either the note ID/shortID as an argument or use --title flag.`,
+You can specify either the note ID as an argument or use --title flag.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToPreview *storage.Note
 		var err error
