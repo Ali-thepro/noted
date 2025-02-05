@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"noted/internal/storage"
-
 	"github.com/spf13/cobra"
+	"noted/internal/storage"
 )
 
 var syncCmd = &cobra.Command{

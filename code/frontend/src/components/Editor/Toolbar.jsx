@@ -11,7 +11,7 @@ import {
 import PropTypes from 'prop-types'
 
 const toolbarItems = [
-  { action: 'header', icon: <FaHeading />, tooltip: 'Add Heading', prefix: '# ', suffix: '' },
+  { action: 'header', icon: <FaHeading />, tooltip: 'Heading', prefix: '# ', suffix: '' },
   { action: 'bold', icon: <FaBold />, tooltip: 'Bold', prefix: '**', suffix: '**' },
   { action: 'italic', icon: <FaItalic />, tooltip: 'Italic', prefix: '*', suffix: '*' },
   { action: 'strikethrough', icon: <FaStrikethrough />, tooltip: 'Strikethrough', prefix: '~~', suffix: '~~' },
