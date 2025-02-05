@@ -1,8 +1,7 @@
 const mongoose = require('mongoose')
 const assert = require('node:assert')
 const { test, describe, beforeEach, after } = require('node:test')
-const { api, clearDatabase, initialNotes, getNotesInDb, initialUsers } = require('./test_helper')
-const Note = require('../models/note')
+const { api, clearDatabase, initialNotes, initialUsers } = require('./test_helper')
 
 
 describe('Note API', () => {
