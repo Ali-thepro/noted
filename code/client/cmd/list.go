@@ -38,7 +38,7 @@ var listCmd = &cobra.Command{
 			maxTitleLen = 70
 		}
 
-		headerFmt := fmt.Sprintf("%%-%ds  %%-%ds\n", maxIDLen, maxTitleLen)
+		headerFmt := fmt.Sprintf("%%-%ds  %%-%ds  %%-%ds\n", maxIDLen, maxTitleLen, 15)
 
 		fmt.Printf("\n"+headerFmt, "ID", "TITLE", "UPDATED")
 		fmt.Println(strings.Repeat("-", maxIDLen+maxTitleLen+24))
