@@ -149,6 +149,7 @@ describe('Modal Controls', () => {
       expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
+
     await user.click(screen.getByText('Close'))
     expect(onClose).toHaveBeenCalled()
   })
