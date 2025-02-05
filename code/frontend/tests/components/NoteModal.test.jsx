@@ -2,6 +2,7 @@ import { screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
 import NoteModal from '../../src/components/Notes/NoteModal'
+import server from '../../src/mocks/setup' // eslint-disable-line
 
 describe('NoteModal Component', () => {
   const mockNote = {

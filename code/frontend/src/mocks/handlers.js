@@ -13,6 +13,17 @@ export const handlers = [
     })
   }),
 
+  http.post(`${hostname}/note/create`, async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json({
+      id: '123',
+      title: body.title,
+      content: body.content,
+      tags: body.tags,
+      userId: '1',
+      updatedAt: new Date().toISOString()
+    })
+  }),
 
   http.post(`${hostname}/auth/signin`, async ({ request }) => {
     const body = await request.json()
@@ -72,10 +83,14 @@ export const handlers = [
 
   http.post(`${hostname}/version/:noteId`, () => {
     return HttpResponse.json({
-      id: '123',
-      title: 'Test Note',
+      id: '456',
+      type: 'snapshot',
       content: '# Test Content',
-      tags: []
+      metadata: {
+        versionNumber: 1,
+        title: 'Test Note',
+        tags: []
+      }
     })
   })
 ]
