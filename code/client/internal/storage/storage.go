@@ -330,15 +330,24 @@ func ReadNoteContent(filename string) (string, error) {
 	return string(content), nil
 }
 
-func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
+func WriteNoteContent(filename string, content string) error {
+	dir, err := token.GetConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get config directory: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(dir, filename), []byte(content), 0600)
+}
+
+func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) (string, error) {
 	index, err := LoadIndex()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	dir, err := token.GetConfigDir()
 	if err != nil {
-		return fmt.Errorf("failed to get config directory: %w", err)
+		return "", fmt.Errorf("failed to get config directory: %w", err)
 	}
 
 	sanitizedTitle := utils.SanitiseTitle(newNote.Title)
@@ -348,13 +357,13 @@ func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
 		oldPath := filepath.Join(dir, oldNote.Filename)
 		newPath := filepath.Join(dir, newFilename)
 		if err := os.Rename(oldPath, newPath); err != nil {
-			return fmt.Errorf("failed to rename note file: %w", err)
+			return "", fmt.Errorf("failed to rename note file: %w", err)
 		}
 	}
 
 	updatedAt, err := time.Parse(time.RFC3339, newNote.UpdatedAt)
 	if err != nil {
-		return fmt.Errorf("invalid UpdatedAt format: %w", err)
+		return "", fmt.Errorf("invalid UpdatedAt format: %w", err)
 	}
 
 	found := false
@@ -370,12 +379,12 @@ func UpdateNoteMetadata(oldNote *Note, newNote *api.Note) error {
 	}
 
 	if !found {
-		return fmt.Errorf("note not found in local storage")
+		return "", fmt.Errorf("note not found in local storage")
 	}
 
 	if err := SaveIndex(index); err != nil {
-		return fmt.Errorf("failed to update index: %w", err)
+		return "", fmt.Errorf("failed to update index: %w", err)
 	}
 
-	return nil
+	return newFilename, nil
 }

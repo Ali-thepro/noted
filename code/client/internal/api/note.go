@@ -25,7 +25,9 @@ type CreateNoteRequest struct {
 }
 
 type UpdateNoteRequest struct {
-	Content string `json:"content"`
+	Title   string   `json:"title"`
+	Tags    []string `json:"tags"`
+	Content string   `json:"content"`
 }
 
 type UpdateNoteMetadataRequest struct {
