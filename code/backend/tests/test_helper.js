@@ -2,6 +2,7 @@ const supertest = require('supertest')
 const app = require('../app')
 const User = require('../models/user')
 const Note = require('../models/note')
+const deletedNote = require('../models/deletedNote')
 
 const api = supertest(app)
 
@@ -36,6 +37,7 @@ const initialNotes = [
 const clearDatabase = async () => {
   await User.deleteMany({})
   await Note.deleteMany({})
+  await deletedNote.deleteMany({})
 }
 
 const getUsersInDb = async () => {

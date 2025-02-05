@@ -227,6 +227,23 @@ describe('Auth API', () => {
 
         assert.strictEqual(response.body.error, 'expected username to be unique')
       })
+
+      test('username contains invalid characters', async () => {
+        const usersAtStart = await getUsersInDb()
+        const response = await api
+          .post('/api/auth/signup')
+          .send({
+            ...initialUsers[0],
+            username: '!!"!fefef23'
+          })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        const usersAtEnd = await getUsersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
+        assert.strictEqual(response.body.error, 'User validation failed: username: username can only contain letters and numbers')
+      })
     })
   })
 

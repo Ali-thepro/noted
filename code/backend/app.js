@@ -6,7 +6,6 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 const config = require('./utils/config')
-const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 const authRouter = require('./routes/authRouter')
 const imageRouter = require('./routes/imageRouter')
@@ -17,10 +16,10 @@ mongoose.set('strictQuery', false)
 
 mongoose.connect(config.MONGODB_URI)
   .then(() => {
-    logger.info('connected to MongoDB')
+    console.log('connected to MongoDB')
   })
   .catch(error => {
-    logger.error('error connecting to MongoDB:', error.message)
+    console.error('error connecting to MongoDB:', error.message)
   })
 
 morgan.token('body', (req) => JSON.stringify(req.body))
