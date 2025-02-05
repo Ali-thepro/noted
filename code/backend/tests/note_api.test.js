@@ -6,13 +6,11 @@ const { api, clearDatabase, initialNotes, getNotesInDb, initialUsers } = require
 
 describe('Note API', () => {
   let authCookie
-  let userId // eslint-disable-line
 
   beforeEach(async () => {
     await clearDatabase()
 
     const response = await api.post('/api/auth/signup').send(initialUsers[0])
-    userId = response.body.id
     authCookie = response.headers['set-cookie']
 
     for (const note of initialNotes) {
@@ -177,7 +175,141 @@ describe('Note API', () => {
     })
   })
 
+  describe('Note deletion (DELETE /api/note/delete/:id)', () => {
+    test('succeeds with valid id', async () => {
+      const notesAtStart = await getNotesInDb()
+      const noteToDelete = notesAtStart[0]
 
+      await api
+        .delete(`/api/note/delete/${noteToDelete.id}`)
+        .set('Cookie', authCookie)
+        .expect(204)
+
+      const notesAtEnd = await getNotesInDb()
+      assert.strictEqual(notesAtEnd.length, notesAtStart.length - 1)
+      assert(!notesAtEnd.map(n => n.id).includes(noteToDelete.id))
+    })
+
+    test('fails with invalid id', async () => {
+      const invalidId = new mongoose.Types.ObjectId()
+
+      const response = await api
+        .delete(`/api/note/delete/${invalidId}`)
+        .set('Cookie', authCookie)
+        .expect(404)
+
+      assert.strictEqual(response.body.error, 'Note not found or unauthorized')
+    })
+  })
+
+  describe('Note metadata (GET /api/note/metadata)', () => {
+    test('returns correct metadata', async () => {
+      const response = await api
+        .get('/api/note/metadata')
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(Array.isArray(response.body))
+      assert(response.body.every(note =>
+        note.id &&
+        note.title &&
+        note.tags &&
+        note.updatedAt &&
+        note.createdAt
+      ))
+    })
+
+    test('supports since parameter', async () => {
+      const since = new Date(Date.now() - 1000).toISOString()
+      const response = await api
+        .get(`/api/note/metadata?since=${since}`)
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(response.body.every(note => new Date(note.updatedAt) >= new Date(since)))
+    })
+
+    test('supports tag filtering', async () => {
+      const response = await api
+        .get('/api/note/metadata?tag=first')
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(response.body.every(note => note.tags.includes('first')))
+    })
+  })
+
+  describe('Bulk notes retrieval (POST /api/note/bulk)', () => {
+    test('returns specified notes', async () => {
+      const notesInDb = await getNotesInDb()
+      const noteIds = notesInDb.map(note => note.id)
+
+      const response = await api
+        .post('/api/note/bulk')
+        .set('Cookie', authCookie)
+        .send({ ids: noteIds })
+        .expect(200)
+
+
+      assert(Array.isArray(response.body))
+      assert.strictEqual(response.body.length, noteIds.length)
+      assert(response.body.every(note =>
+        noteIds.includes(note.id)
+      ))
+    })
+
+    test('fails with invalid request format', async () => {
+      const response = await api
+        .post('/api/note/bulk')
+        .set('Cookie', authCookie)
+        .send({ ids: 'not-an-array' })
+        .expect(400)
+
+      assert.strictEqual(response.body.error, 'Invalid request : ids must be an array')
+    })
+  })
+
+
+  describe('Deleted notes (GET /api/note/deleted)', () => {
+    test('returns deleted notes metadata', async () => {
+      const notesAtStart = await getNotesInDb()
+      const noteToDelete = notesAtStart[0]
+
+      await api
+        .delete(`/api/note/delete/${noteToDelete.id}`)
+        .set('Cookie', authCookie)
+        .expect(204)
+
+      const response = await api
+        .get('/api/note/deleted')
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(Array.isArray(response.body))
+      assert(response.body.some(note =>
+        note.noteId === noteToDelete.id
+      ))
+    })
+
+    test('supports since parameter', async () => {
+      const since = new Date(Date.now() - 1000).toISOString()
+      const response = await api
+        .get(`/api/note/deleted?since=${since}`)
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(response.body.every(note => new Date(note.deletedAt) >= new Date(since)))
+    })
+
+    test('supports tag filtering', async () => {
+      const response = await api
+        .get('/api/note/deleted?tag=first')
+        .set('Cookie', authCookie)
+        .expect(200)
+
+      assert(response.body.every(note => note.tags.includes('first')))
+    })
+  })
 
   after(async () => {
     await clearDatabase()
