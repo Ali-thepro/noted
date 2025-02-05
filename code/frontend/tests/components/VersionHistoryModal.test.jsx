@@ -149,8 +149,28 @@ describe('Modal Controls', () => {
       expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
-
     await user.click(screen.getByText('Close'))
     expect(onClose).toHaveBeenCalled()
+  })
+
+  describe('Version Interaction', () => {
+
+    it('handles version comparison', async () => {
+      const user = userEvent.setup()
+
+      render(<VersionHistoryModal {...defaultProps} />, {
+        preloadedState: defaultState
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText('Compare')).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByText('Compare'))
+
+      await waitFor(() => {
+        expect(screen.getByText('Show Content')).toBeInTheDocument()
+      })
+    })
   })
 })
