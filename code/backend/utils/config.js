@@ -1,6 +1,9 @@
 require('dotenv').config()
 
-const MONGODB_URI = process.env.MONGODB_URI
+const MONGODB_URI = process.env.NODE_ENV === 'test'
+  ? process.env.TEST_MONGODB_URI
+  : process.env.MONGODB_URI
+
 const PORT = process.env.PORT
 const ACCESS_SECRET = process.env.ACCESS_SECRET
 const REFRESH_SECRET = process.env.REFRESH_SECRET
@@ -16,6 +19,7 @@ const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME
 const AWS_BUCKET_REGION = process.env.AWS_BUCKET_REGION
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY
+
 
 module.exports = {
   MONGODB_URI,
