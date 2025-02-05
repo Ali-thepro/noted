@@ -50,8 +50,9 @@ describe('NoteModal Component', () => {
     it('handles title input', async () => {
       renderModal()
       const titleInput = screen.getByLabelText('Title')
-      await userEvent.clear(titleInput)
-      await userEvent.type(titleInput, 'New Note Title')
+
+      fireEvent.change(titleInput, { target: { value: '' } })
+      fireEvent.change(titleInput, { target: { value: 'New Note Title' } })
       expect(titleInput).toHaveValue('New Note Title')
     })
 
