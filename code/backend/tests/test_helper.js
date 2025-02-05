@@ -2,7 +2,8 @@ const supertest = require('supertest')
 const app = require('../app')
 const User = require('../models/user')
 const Note = require('../models/note')
-const deletedNote = require('../models/deletedNote')
+const DeletedNote = require('../models/deletedNote')
+const Version = require('../models/version')
 
 const api = supertest(app)
 
@@ -34,10 +35,32 @@ const initialNotes = [
   }
 ]
 
+const initialVersions = [
+  {
+    type: 'snapshot',
+    content: 'Initial content snapshot',
+    metadata: {
+      title: 'First test note',
+      tags: ['test', 'first'],
+      versionNumber: 1
+    }
+  },
+  {
+    type: 'diff',
+    content: 'Some diff content',
+    metadata: {
+      title: 'First test note updated',
+      tags: ['test', 'first', 'updated'],
+      versionNumber: 2
+    }
+  }
+]
+
 const clearDatabase = async () => {
   await User.deleteMany({})
   await Note.deleteMany({})
-  await deletedNote.deleteMany({})
+  await DeletedNote.deleteMany({})
+  await Version.deleteMany({})
 }
 
 const getUsersInDb = async () => {
@@ -53,8 +76,9 @@ const getNotesInDb = async () => {
 module.exports = {
   api,
   initialUsers,
+  initialNotes,
+  initialVersions,
   clearDatabase,
   getUsersInDb,
-  initialNotes,
-  getNotesInDb
+  getNotesInDb,
 }
