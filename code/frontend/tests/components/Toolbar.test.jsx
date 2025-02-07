@@ -4,8 +4,6 @@ import { render } from '../test-utils'
 import userEvent from '@testing-library/user-event'
 import Toolbar from '../../src/components/Editor/Toolbar'
 
-
-// Mock ImageUploader component
 vi.mock('../../src/components/Editor/ImageUploader', () => ({
   default: ({ onUpload, onClose }) => (
     <div data-testid="image-uploader">
@@ -23,8 +21,6 @@ describe('Toolbar', () => {
   describe('Basic Rendering', () => {
     it('renders basic formatting buttons', () => {
       render(<Toolbar {...defaultProps} />)
-
-      // Check basic formatting buttons using tooltip content
       expect(screen.getByText('Bold')).toBeInTheDocument()
       expect(screen.getByText('Italic')).toBeInTheDocument()
       expect(screen.getByText('Heading')).toBeInTheDocument()
@@ -36,7 +32,6 @@ describe('Toolbar', () => {
       const user = userEvent.setup()
       render(<Toolbar {...defaultProps} />)
 
-      // Find button using data-testid
       const boldButton = screen.getByTestId('toolbar-bold')
       await user.click(boldButton)
 
