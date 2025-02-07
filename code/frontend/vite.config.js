@@ -54,5 +54,20 @@ export default defineConfig({
         }
       }
     },
+    coverage: {
+      exclude: [
+        'postcss.config.js',
+        'tailwind.config.js',
+        'vite.config.js',
+        'src/main.jsx',
+        'src/utils/fonts.js',
+        'src/utils/themes.js',
+        'src/utils/chainIcon.js',
+        'src/mocks/setup.js',
+        'src/redux/store.js',
+        'src/services/axiosConfig.js',
+
+      ]
+    }
   }
 })
