@@ -18,7 +18,7 @@ describe('ThemeProvider', () => {
       )
 
       const wrapper = screen.getByTestId('child').parentElement.parentElement
-      expect(wrapper.className).toContain('light')
+      expect(wrapper).toHaveClass('light')
     })
 
     it('applies dark theme when selected', () => {
@@ -34,7 +34,7 @@ describe('ThemeProvider', () => {
       )
 
       const wrapper = screen.getByTestId('child').parentElement.parentElement
-      expect(wrapper.className).toContain('dark')
+      expect(wrapper).toHaveClass('dark')
     })
   })
 
@@ -68,12 +68,12 @@ describe('ThemeProvider', () => {
       )
 
       const contentWrapper = screen.getByTestId('child').parentElement
-      expect(contentWrapper.className).toContain('min-h-screen')
-      expect(contentWrapper.className).toContain('w-full')
-      expect(contentWrapper.className).toContain('bg-white')
-      expect(contentWrapper.className).toContain('dark:bg-[rgb(30,33,34)]')
-      expect(contentWrapper.className).toContain('text-gray-700')
-      expect(contentWrapper.className).toContain('dark:text-gray-200')
+      expect(contentWrapper).toHaveClass('min-h-screen')
+      expect(contentWrapper).toHaveClass('w-full')
+      expect(contentWrapper).toHaveClass('bg-white')
+      expect(contentWrapper).toHaveClass('dark:bg-[rgb(30,33,34)]')
+      expect(contentWrapper).toHaveClass('text-gray-700')
+      expect(contentWrapper).toHaveClass('dark:text-gray-200')
     })
   })
-}) 
+})
