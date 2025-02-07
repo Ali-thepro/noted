@@ -66,6 +66,8 @@ export default defineConfig({
         'src/mocks/setup.js',
         'src/redux/store.js',
         'src/services/axiosConfig.js',
+        'eslint.config.js',
+        'App.jsx'
 
       ]
     }
