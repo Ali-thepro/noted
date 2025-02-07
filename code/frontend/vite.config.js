@@ -67,8 +67,10 @@ export default defineConfig({
         'src/redux/store.js',
         'src/services/axiosConfig.js',
         'eslint.config.js',
-        'App.jsx'
-
+        'App.jsx',
+        'src/hooks/useDebounce.js',
+        'src/hooks/useVersion.js',
+        'src/components/ScrollToTop.jsx',
       ]
     }
   }
