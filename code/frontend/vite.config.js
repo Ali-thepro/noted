@@ -41,4 +41,37 @@ export default defineConfig({
       },
     },
   },
+
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './testSetup.js',
+    include: ['tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    deps: {
+      optimizer: {
+        web: {
+          include: [/msw/]
+        }
+      }
+    },
+    coverage: {
+      exclude: [
+        'postcss.config.js',
+        'tailwind.config.js',
+        'vite.config.js',
+        'src/main.jsx',
+        'src/utils/fonts.js',
+        'src/utils/themes.js',
+        'src/utils/chainIcon.js',
+        'src/mocks/setup.js',
+        'src/redux/store.js',
+        'src/services/axiosConfig.js',
+        'eslint.config.js',
+        'App.jsx',
+        'src/hooks/useDebounce.js',
+        'src/hooks/useVersion.js',
+        'src/components/ScrollToTop.jsx',
+      ]
+    }
+  }
 })

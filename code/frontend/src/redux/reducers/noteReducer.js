@@ -107,12 +107,10 @@ export const editNote = (id, noteData) => {
       const updatedNote = await noteService.updateNote(id, noteData)
       dispatch(updateNote(updatedNote))
       dispatch(setNotification('Note saved successfully', 'success'))
-      return updatedNote
     } catch (error) {
       const message = error.response?.data?.error || error.message
       dispatch(setNotification(message, 'failure'))
       dispatch(setLoading(false))
-      return null
     }
   }
 }

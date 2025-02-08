@@ -71,6 +71,7 @@ const Toolbar = ({ onAction }) => {
                   ${index !== 0 && index !== toolbarItems.length - 1 ? 'rounded-none' : ''}
                   ${index !== 0 ? '-ml-px' : ''}
                 `}
+                data-testid={`toolbar-${item.action}`}
               >
                 {item.icon}
               </Button>

@@ -106,9 +106,6 @@ const signup = async (request, response, next) => {
   }
 }
 
-
-
-
 const signin = async (request, response, next) => {
   const { email, password } = request.body
   const mode = request.query.mode
@@ -188,7 +185,6 @@ const refreshToken = async (request, response, next) => {
   }
 }
 
-
 function getGoogleAuthURL(mode, redirect) {
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
   const options = {
@@ -210,7 +206,6 @@ function getGoogleAuthURL(mode, redirect) {
   const queryOptions = new URLSearchParams(options).toString()
 
   return `${rootUrl}?${queryOptions}`
-
 }
 
 const googleOauth = (request, response) => {
@@ -220,7 +215,6 @@ const googleOauth = (request, response) => {
   const googleAuthURL = getGoogleAuthURL(mode, redirect)
   response.redirect(googleAuthURL)
 }
-
 
 const google = async (request, response, next) => {
   const code = request.query.code
@@ -278,7 +272,6 @@ const google = async (request, response, next) => {
       id: user._id,
     }
 
-
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
       response.redirect(`${redirect}?token=${token}`)
@@ -307,7 +300,6 @@ const google = async (request, response, next) => {
     return next(createError('Error during Google OAuth callback', 500))
   }
 }
-
 
 function getGitHubAuthURL(mode,redirect) {
   const rootUrl = 'https://github.com/login/oauth/authorize'
@@ -379,7 +371,6 @@ const github = async (request, response, next) => {
       },
     })
 
-
     const primaryEmail = userEmail.find(email => email.primary).email
 
     const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
@@ -399,7 +390,6 @@ const github = async (request, response, next) => {
       email: user.email,
       id: user._id,
     }
-
 
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })

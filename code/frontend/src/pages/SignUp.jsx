@@ -1,16 +1,16 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Label, TextInput, Button, Spinner } from 'flowbite-react'
 import { useState, useEffect } from 'react'
-import { signup } from '../services/auth'
 import { setNotification } from '../redux/reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import Notification from '../components/Notification'
 import OAuth  from '../components/OAuth'
+import { signupUser } from '../redux/reducers/authReducer'
 
 
 const SignUp = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '', confirmPassword: '' })
-  const [loading, setLoading] = useState(false)
+  const loading = useSelector(state => state.auth.loading)
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -49,23 +49,15 @@ const SignUp = () => {
       dispatch(setNotification('All fields are required', 'failure'))
       return
     }
-    try {
-      setLoading(true)
-      const response = await signup(formData)
-      if (response.status === 201) {
-        setLoading(false)
-        if (cliMode) {
-          navigate(`/signin?mode=${mode}&redirect=${redirect}`)
-        }
-        navigate('/signin')
-      }
-      setFormData({ username: '', email: '', password: '', confirmPassword: '' })
-    } catch (error) {
-      console.log(error)
-      dispatch(setNotification(error.response.data.error, 'failure'))
-      setLoading(false)
-    }
 
+    const result = await dispatch(signupUser(formData, mode, redirect))
+    if (result.success && !cliMode) {
+      navigate('/')
+    } else if (result.success && cliMode && result.redirectUrl) {
+      dispatch(setNotification('Redirecting...', 'success'))
+      window.location.replace(result.redirectUrl)
+      return
+    }
   }
 
   return (

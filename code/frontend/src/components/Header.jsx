@@ -54,6 +54,7 @@ const Header = () => {
                 className="focus:ring-0"
                 onClick={() => changeViewMode('edit')}
                 gradientDuoTone={viewMode === 'edit' ? 'purpleToBlue' : undefined}
+                aria-label="edit"
               >
                 <FaPen />
               </Button>
@@ -63,6 +64,7 @@ const Header = () => {
                 className="focus:ring-0"
                 onClick={() => changeViewMode('split')}
                 gradientDuoTone={viewMode === 'split' ? 'purpleToBlue' : undefined}
+                aria-label="split"
               >
                 <FaColumns />
               </Button>
@@ -72,6 +74,7 @@ const Header = () => {
                 className="focus:ring-0"
                 onClick={() => changeViewMode('preview')}
                 gradientDuoTone={viewMode === 'preview' ? 'purpleToBlue' : undefined}
+                aria-label="preview"
               >
                 <FaEye />
               </Button>
@@ -91,6 +94,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {isNotePage && activeNote && (
             <Button
+              aria-label="Edit View"
               color="gray"
               size="sm"
               pill
@@ -120,8 +124,9 @@ const Header = () => {
             color="gray"
             pill
             onClick={changeTheme}
+            aria-label="toggle theme"
           >
-            {theme === 'light' ? <FaMoon size="15"/> : <FaSun size="15"/>}
+            {theme === 'light' ? <FaMoon size="15" data-testid="theme-icon-moon" /> : <FaSun size="15" data-testid="theme-icon-sun" />}
           </Button>
 
           {user ? (

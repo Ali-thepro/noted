@@ -4,13 +4,16 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import stylisticJs from '@stylistic/eslint-plugin-js'
+import vitest from '@vitest/eslint-plugin'
+import testingLibrary from 'eslint-plugin-testing-library'
+import { configs } from 'eslint-plugin-jest-dom'
 
 export default [
   { ignores: ['dist', 'tailwind.config.js'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest',
       globals: globals.browser,
       parserOptions: {
         ecmaVersion: 'latest',
@@ -48,5 +51,33 @@ export default [
         { allowConstantExport: true },
       ]
     },
+  },
+
+  {
+    files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', 'tests/**/*.{js,jsx}', 'testSetup.js', 'src/mocks/**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        test: 'readonly',
+        expect: 'readonly',
+        describe: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        vi: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        it: 'readonly',
+      },
+    },
+    plugins: {
+      vitest,
+      'testing-library': testingLibrary,
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+    },
+    ...configs['flat/recommended'],
+    ...testingLibrary.configs['react/recommended'],
   },
 ]

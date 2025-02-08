@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
-import { signin, googleAuth, githubAuth, signOutUserFromDB, refreshUserToken } from '../../services/auth'
+import { signin, googleAuth, githubAuth, signOutUserFromDB, refreshUserToken, signup } from '../../services/auth'
 import { toast } from 'react-toastify'
 
 
@@ -37,6 +37,28 @@ const authSlice = createSlice({
     // },
   }
 })
+
+export const signupUser = (credentials, mode, redirect) => {
+  return async dispatch => {
+    dispatch(initial())
+    try {
+      const response = await signup(credentials, mode, redirect)
+      if (mode === 'cli' && response.redirectUrl) {
+        dispatch(clearLoading())
+        return { success: true, redirectUrl: response.redirectUrl }
+      }
+      dispatch(setUser(response))
+      dispatch(updateTokenExpiry())
+      toast.success('Account created and logged in successfully')
+      return { success: true }
+    } catch (error) {
+      const message = error.response?.data?.error || error.message
+      dispatch(setNotification(message, 'failure'))
+      dispatch(setError())
+      return false
+    }
+  }
+}
 
 export const login = (credentials, mode, redirect) => {
   return async dispatch => {
