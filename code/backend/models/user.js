@@ -36,6 +36,18 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: ['local', 'google', 'github'],
     },
+    masterPasswordHash: {
+      type: String,
+      required: false,
+    },
+    protectedSymmetricKey: {
+      type: String,
+      required: false
+    },
+    kdfAlgorithm: {
+      type: String,
+      default: 'argon2id'
+    },
   }
 )
 
