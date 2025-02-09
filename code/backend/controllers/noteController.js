@@ -61,10 +61,6 @@ const getNotes = async (request, response, next) => {
     response.json({
       notes,
       total,
-      encryptionInfo: {
-        protectedSymmetricKey: user.protectedSymmetricKey,
-        kdfAlgorithm: user.kdfAlgorithm
-      }
     })
   } catch (error) {
     next(error)
@@ -86,11 +82,7 @@ const getNote = async (request, response, next) => {
     }
 
     response.json({
-      note,
-      encryptionInfo: {
-        protectedSymmetricKey: user.protectedSymmetricKey,
-        kdfAlgorithm: user.kdfAlgorithm
-      }
+      note
     })
   } catch (error) {
     next(error)
@@ -245,11 +237,7 @@ const getBulkNotes = async (request, response, next) => {
       user: user.id
     })
     response.json({
-      notes,
-      encryptionInfo: {
-        protectedSymmetricKey: user.protectedSymmetricKey,
-        kdfAlgorithm: user.kdfAlgorithm
-      }
+      notes
     })
   } catch (error) {
     next(error)

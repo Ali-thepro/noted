@@ -44,6 +44,7 @@ app.use('/api/image', imageRouter)
 app.use('/api/note', noteRouter)
 app.use('/api/version', versionRouter)
 app.use('/api/encryption', encryptionRouter)
+
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 app.use(middleware.customErrorHandler)

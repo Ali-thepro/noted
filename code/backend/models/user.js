@@ -44,10 +44,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false
     },
-    kdfAlgorithm: {
+    iv: {
       type: String,
-      default: 'argon2id'
     },
+    HKDF_salt: {
+      type: String,
+    }
   }
 )
 
