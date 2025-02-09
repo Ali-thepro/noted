@@ -11,11 +11,6 @@ const deletedNoteSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
-    tags: [{
-      type: String,
-      trim: true,
-      lowercase: true,
-    }],
     deletedAt: {
       type: Date,
       default: Date.now

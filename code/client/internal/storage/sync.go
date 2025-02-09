@@ -17,11 +17,7 @@ type SyncStats struct {
 	DeletedNotes int
 }
 
-type SyncOptions struct {
-	Tag string
-}
-
-func SyncNotes(opts SyncOptions) (*SyncStats, error) {
+func SyncNotes() (*SyncStats, error) {
 	index, err := LoadIndex()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load index: %w", err)
@@ -32,7 +28,7 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
 		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
 
-	serverNotes, err := client.GetNoteMetadata(index.LastSync, opts.Tag)
+	serverNotes, err := client.GetNoteMetadata(index.LastSync)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch metadata: %w", err)
 	}
@@ -44,7 +40,7 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
 
 	stats := &SyncStats{}
 
-	deletedNotes, err := client.GetDeletedNotes(index.LastSync, opts.Tag)
+	deletedNotes, err := client.GetDeletedNotes(index.LastSync)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deleted notes: %w", err)
 	}

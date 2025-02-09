@@ -31,7 +31,11 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
     setIsSubmitting(true)
 
     try {
-      const processedTags = tags.split(',').map(tag => tag.trim()).filter(Boolean)
+      const processedTags = tags
+        .split(',')
+        .map(tag => tag.trim().toLowerCase())
+        .filter(tag => tag && tag.length <= 20)
+        .filter((tag, index, self) => self.indexOf(tag) === index)
 
       if (isEditing) {
         if (title.trim() === noteData.title && arraysEqual(processedTags, noteData.tags)) {
@@ -144,7 +148,7 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
               />
             </div>
             <div>
-              <Label htmlFor="tags" value="Tags (comma-separated)" />
+              <Label htmlFor="tags" value="Tags (comma-separated, max length 20 characters)" />
               <Textarea
                 id="tags"
                 value={tags}

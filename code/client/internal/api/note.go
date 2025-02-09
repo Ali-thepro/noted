@@ -114,15 +114,11 @@ func (c *Client) UpdateNoteMetadata(id string, req UpdateNoteMetadataRequest) (*
 	return &note, nil
 }
 
-func (c *Client) GetNoteMetadata(since time.Time, tag string) ([]*NoteMetadata, error) {
+func (c *Client) GetNoteMetadata(since time.Time) ([]*NoteMetadata, error) {
 	query := make(url.Values)
 	if !since.IsZero() {
 		query.Set("since", since.Format(time.RFC3339))
 	}
-	if tag != "" {
-		query.Set("tag", tag)
-	}
-
 	url := "/note/metadata"
 	if len(query) > 0 {
 		url += "?" + query.Encode()
@@ -162,13 +158,10 @@ func (c *Client) GetBulkNotes(ids []string) ([]*Note, error) {
 	return notes, nil
 }
 
-func (c *Client) GetDeletedNotes(since time.Time, tag string) ([]*DeletedNote, error) {
+func (c *Client) GetDeletedNotes(since time.Time) ([]*DeletedNote, error) {
 	query := make(url.Values)
 	if !since.IsZero() {
 		query.Set("since", since.Format(time.RFC3339))
-	}
-	if tag != "" {
-		query.Set("tag", tag)
 	}
 
 	url := "/note/deleted"

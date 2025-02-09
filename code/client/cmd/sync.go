@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"noted/internal/storage"
+
+	"github.com/spf13/cobra"
 )
 
 var syncCmd = &cobra.Command{
@@ -12,14 +13,11 @@ var syncCmd = &cobra.Command{
 	Long: `Synchronize your local notes with the server.
 This will download new notes and update existing ones.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tag, _ := cmd.Flags().GetString("tag")
 		verbose, _ := cmd.Flags().GetBool("verbose")
 
 		fmt.Println("Syncing notes...")
 
-		stats, err := storage.SyncNotes(storage.SyncOptions{
-			Tag: tag,
-		})
+		stats, err := storage.SyncNotes()
 		if err != nil {
 			return fmt.Errorf("sync failed: %w", err)
 		}
@@ -51,6 +49,5 @@ This will download new notes and update existing ones.`,
 func init() {
 	rootCmd.AddCommand(syncCmd)
 	syncCmd.Flags().BoolP("force", "f", false, "Force sync all notes")
-	syncCmd.Flags().StringP("tag", "t", "", "Sync only notes with specific tag")
 	syncCmd.Flags().BoolP("verbose", "v", false, "Show detailed sync information")
 }

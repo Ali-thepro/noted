@@ -1,26 +1,50 @@
 const Note = require('../models/note')
 const DeletedNote = require('../models/deletedNote')
 const createError = require('../utils/error')
+const ENCRYPTION_ERRORS = require('../utils/encryptionErrors')
+// const getNotes = async (request, response, next) => {
+//   const { tag, search } = request.query
+//   const user = request.user
+
+//   try {
+//     const filter = {
+//       user: user.id,
+//       ...(tag ? {
+//         tags: {
+//           $regex: tag,
+//           $options: 'i',
+//         },
+//       } : {}),
+//       ...(search ? {
+//         $or: [
+//           { title: { $regex: search, $options: 'i' } },
+//           { content: { $regex: search, $options: 'i' } },
+//         ],
+//       } : {}),
+//     }
+
+//     const startIndex = parseInt(request.query.startIndex) || 0
+//     const limit = parseInt(request.query.limit) || 9
+//     const sortBy = request.query.sortBy || 'updatedAt'
+//     const sortOrder = request.query.sortOrder === 'asc' ? 1 : -1
+
+//     const total = await Note.countDocuments(filter)
+//     const notes = await Note.find(filter)
+//       .sort({ [sortBy]: sortOrder })
+//       .skip(startIndex)
+//       .limit(limit)
+//     response.json({ notes, total })
+//   } catch (error) {
+//     next(error)
+//   }
+// }
 
 const getNotes = async (request, response, next) => {
-  const { tag, search } = request.query
   const user = request.user
 
   try {
-    const filter = {
-      user: user.id,
-      ...(tag ? {
-        tags: {
-          $regex: tag,
-          $options: 'i',
-        },
-      } : {}),
-      ...(search ? {
-        $or: [
-          { title: { $regex: search, $options: 'i' } },
-          { content: { $regex: search, $options: 'i' } },
-        ],
-      } : {}),
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
     }
 
     const startIndex = parseInt(request.query.startIndex) || 0
@@ -28,12 +52,20 @@ const getNotes = async (request, response, next) => {
     const sortBy = request.query.sortBy || 'updatedAt'
     const sortOrder = request.query.sortOrder === 'asc' ? 1 : -1
 
-    const total = await Note.countDocuments(filter)
-    const notes = await Note.find(filter)
+    const total = await Note.countDocuments({ user: user.id })
+    const notes = await Note.find({ user: user.id })
       .sort({ [sortBy]: sortOrder })
       .skip(startIndex)
       .limit(limit)
-    response.json({ notes, total })
+
+    response.json({
+      notes,
+      total,
+      encryptionInfo: {
+        protectedSymmetricKey: user.protectedSymmetricKey,
+        kdfAlgorithm: user.kdfAlgorithm
+      }
+    })
   } catch (error) {
     next(error)
   }
@@ -44,12 +76,22 @@ const getNote = async (request, response, next) => {
   const user = request.user
 
   try {
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
+    }
+
     const note = await Note.findOne({ _id: id, user: user.id })
     if (!note) {
       return next(createError('Note not found or unauthorized', 404))
     }
 
-    response.json(note)
+    response.json({
+      note,
+      encryptionInfo: {
+        protectedSymmetricKey: user.protectedSymmetricKey,
+        kdfAlgorithm: user.kdfAlgorithm
+      }
+    })
   } catch (error) {
     next(error)
   }
@@ -57,14 +99,19 @@ const getNote = async (request, response, next) => {
 
 const createNote = async (request, response, next) => {
   const user = request.user
-  const { title, content, tags } = request.body
+  const { title, content, tags, cipherKey } = request.body
 
   try {
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
+    }
+
     const note = new Note({
       title,
       content,
       tags: tags || [],
-      user: user.id
+      cipherKey,
+      user: user.id,
     })
 
     const savedNote = await note.save()
@@ -100,15 +147,19 @@ const createNote = async (request, response, next) => {
 const updateNote = async (request, response, next) => {
   const { id } = request.params
   const user = request.user
-
-  const title = request.body.title
-  const content = request.body.content
-  const tags = request.body.tags
+  const { title, content, tags, cipherKey } = request.body
 
   try {
     const updatedNote = await Note.findOneAndUpdate(
       { _id: id, user: user.id },
-      { $set: { title, content, tags } },
+      {
+        $set: {
+          title,
+          content,
+          tags,
+          cipherKey
+        }
+      },
       { new: true, runValidators: true }
     )
 
@@ -128,6 +179,10 @@ const deleteNote = async (request, response, next) => {
   const user = request.user
 
   try {
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
+    }
+
     const note = await Note.findOne({ _id: id, user: user.id })
     if (!note) {
       return next(createError('Note not found or unauthorized', 404))
@@ -135,7 +190,6 @@ const deleteNote = async (request, response, next) => {
 
     const deletedNote = new DeletedNote({
       noteId: id,
-      tags: note.tags,
       user: user.id
     })
 
@@ -149,24 +203,22 @@ const deleteNote = async (request, response, next) => {
 
 const getNoteMetadata = async (request, response, next) => {
   const user = request.user
-  const { since, tag } = request.query
+  const { since } = request.query
 
   try {
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
+    }
+
     const filter = {
       user: user.id,
       ...(since ? {
         updatedAt: { $gte: since }
-      } : {}),
-      ...(tag ? {
-        tags: {
-          $regex: tag,
-          $options: 'i',
-        },
-      } : {}),
+      } : {})
     }
 
     const notes = await Note.find(filter)
-      .select('id title tags updatedAt createdAt')
+      .select('id updatedAt createdAt')
       .sort({ updatedAt: -1 })
 
     response.json(notes)
@@ -184,11 +236,21 @@ const getBulkNotes = async (request, response, next) => {
   }
 
   try {
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
+    }
+
     const notes = await Note.find({
       _id: { $in: ids },
       user: user.id
     })
-    response.json(notes)
+    response.json({
+      notes,
+      encryptionInfo: {
+        protectedSymmetricKey: user.protectedSymmetricKey,
+        kdfAlgorithm: user.kdfAlgorithm
+      }
+    })
   } catch (error) {
     next(error)
   }
@@ -196,19 +258,17 @@ const getBulkNotes = async (request, response, next) => {
 
 const getDeletedNotes = async (request, response, next) => {
   const user = request.user
-  const { since, tag } = request.query
+  const { since } = request.query
 
   try {
+    if (!user.masterPasswordHash) {
+      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
+    }
+
     const filter = {
       user: user.id,
       ...(since ? {
         deletedAt: { $gte: since }
-      } : {}),
-      ...(tag ? {
-        tags: {
-          $regex: tag,
-          $options: 'i',
-        },
       } : {}),
     }
 
