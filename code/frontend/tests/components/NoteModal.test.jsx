@@ -59,7 +59,7 @@ describe('NoteModal Component', () => {
 
     it('handles tags input', async () => {
       renderModal()
-      const tagsInput = screen.getByLabelText('Tags (comma-separated)')
+      const tagsInput = screen.getByLabelText('Tags (comma-separated, max length 20 characters)')
 
       fireEvent.change(tagsInput, { target: { value: '' } })
       fireEvent.change(tagsInput, { target: { value: 'tag1, tag2, tag3' } })
@@ -99,7 +99,7 @@ describe('NoteModal Component', () => {
     it('updates form fields correctly', async () => {
       renderModal({ isEditing: true, noteData: mockNote })
       const titleInput = screen.getByLabelText('Title')
-      const tagsInput = screen.getByLabelText('Tags (comma-separated)')
+      const tagsInput = screen.getByLabelText('Tags ((comma-separated, max length 20 characters)')
 
       fireEvent.change(titleInput, { target: { value: '' } })
       fireEvent.change(titleInput, { target: { value: 'Updated Title' } })
@@ -117,7 +117,7 @@ describe('NoteModal Component', () => {
     it('handles create note submission', async () => {
       renderModal()
       const titleInput = screen.getByLabelText('Title')
-      const tagsInput = screen.getByLabelText('Tags (comma-separated)')
+      const tagsInput = screen.getByLabelText('Tags ((comma-separated, max length 20 characters)')
 
       await userEvent.type(titleInput, 'New Note')
       await userEvent.type(tagsInput, 'tag1, tag2')
