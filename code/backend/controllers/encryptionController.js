@@ -31,7 +31,7 @@ const getMasterPasswordHash = async (request, response) => {
 }
 
 const update_master_password = async (request, response, next) => {
-  const { currentMasterPasswordHash, newMasterPasswordHash, newProtectedSymmetricKey, newIv, newHKDF_salt } = request.body
+  const { currentMasterPasswordHash, newMasterPasswordHash, newProtectedSymmetricKey, newIv } = request.body
   const user = request.user
 
   if (!user.masterPasswordHash) {
@@ -46,7 +46,6 @@ const update_master_password = async (request, response, next) => {
     user.masterPasswordHash = newMasterPasswordHash
     user.protectedSymmetricKey = newProtectedSymmetricKey
     user.iv = newIv
-    user.HKDF_salt = newHKDF_salt
     await user.save()
 
     response.json({ message: 'Master password updated successfully' })
@@ -65,10 +64,10 @@ const getProtectedSymmetricKey = async (request, response) => {
   response.json({ protectedSymmetricKey: user.protectedSymmetricKey })
 }
 
-const getIvAndHKDFSalt = async (request, response) => {
+const getIv = async (request, response) => {
   const user = request.user
 
-  response.json({ iv: user.iv, HKDF_salt: user.HKDF_salt })
+  response.json({ iv: user.iv })
 }
 
 module.exports = {
@@ -76,5 +75,5 @@ module.exports = {
   getMasterPasswordHash,
   update_master_password,
   getProtectedSymmetricKey,
-  getIvAndHKDFSalt
+  getIv
 }

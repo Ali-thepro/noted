@@ -47,9 +47,6 @@ const userSchema = new mongoose.Schema(
     iv: {
       type: String,
     },
-    HKDF_salt: {
-      type: String,
-    }
   }
 )
 
