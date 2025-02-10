@@ -19,4 +19,5 @@ test.describe('User Registration', () => {
     await page.getByRole('button', { name: 'Sign up' }).click()
     await expect(page).toHaveURL('http://localhost:5173/signup')
   })
+  
 })
