@@ -256,7 +256,9 @@ const google = async (request, response, next) => {
     const passwordHash = await bcrypt.hash(generatedPassword, saltRounds)
 
     let user = await User.findOne({ email: userProfile.email, provider: 'google' })
+    let genMasterPassword = false
     if (!user) {
+      genMasterPassword = true
       const username = userProfile.name.replace(/\s+/g, '-') // Replace spaces with hyphens
       user = await User.create({
         email: userProfile.email,
@@ -292,7 +294,7 @@ const google = async (request, response, next) => {
           secure: true,
           maxAge: 7 * 24 * 60 * 60 * 1000
         })
-      response.redirect(`${config.UI_URI}/oauth/callback`)
+      response.redirect(genMasterPassword ? `${config.UI_URI}/oauth/callback?genMasterPassword=true` : `${config.UI_URI}/oauth/callback`)
     }
 
   } catch (error) {
@@ -376,8 +378,10 @@ const github = async (request, response, next) => {
     const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(generatedPassword, saltRounds)
+    let genMasterPassword = false
     let user = await User.findOne({ email: primaryEmail, provider: 'github' })
     if (!user) {
+      genMasterPassword = true
       user = await User.create({
         email: primaryEmail,
         username: userProfile.login,
@@ -411,7 +415,7 @@ const github = async (request, response, next) => {
           secure: true,
           maxAge: 7 * 24 * 60 * 60 * 1000
         })
-      response.redirect(`${config.UI_URI}/oauth/callback`)
+      response.redirect(genMasterPassword ? `${config.UI_URI}/oauth/callback?genMasterPassword=true` : `${config.UI_URI}/oauth/callback`)
     }
 
   } catch (error) {
