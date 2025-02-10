@@ -2,9 +2,9 @@ import { vi } from 'vitest'
 import { forwardRef } from 'react'
 import { screen, waitFor } from '@testing-library/react'
 import { render } from '../test-utils'
-import userEvent from '@testing-library/user-event'
+import userEvent from '@testing-library/user-event'//eslint-disable-line
 import NotePage from '../../src/pages/NotePage'
-import { createVersion, getVersions, getVersionChain } from '../../src/services/version'
+import { createVersion, getVersions, getVersionChain } from '../../src/services/version'//eslint-disable-line
 import server from '../../src/mocks/setup' // eslint-disable-line
 
 vi.mock('../../src/services/version', () => ({
@@ -16,16 +16,18 @@ vi.mock('../../src/services/version', () => ({
 vi.mock('@uiw/react-codemirror', () => ({
   default: forwardRef(function CodeMirrorMock(props, ref) {
     return (
-      <div 
-        ref={ref} 
+      <div
+        ref={ref}
         data-testid="editor"
-        onChange={e => props.onChange?.(e.target.value)}
+        onChange={e => props.onChange?.(e.target.value)} //eslint-disable-line
       >
         Mocked Editor
       </div>
     )
   })
 }))
+
+
 
 describe('NotePage', () => {
   beforeEach(() => {
@@ -52,7 +54,7 @@ describe('NotePage', () => {
             { path: '/signin', element: <div>Sign In Page</div> }
           ]
         })
-  
+
         await waitFor(() => {
           expect(location.pathname).toBe('/signin')
         })
@@ -74,7 +76,7 @@ describe('NotePage', () => {
             }
           }
         })
-  
+
         await waitFor(() => {
           expect(location.pathname).toBe('/notes/123')
           expect(screen.getByTestId('editor')).toBeInTheDocument()
