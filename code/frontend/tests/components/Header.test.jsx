@@ -3,6 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
 import Header from '../../src/components/Header'
 import server from '../../src/mocks/setup' // eslint-disable-line
+import { getVersions } from '../../src/services/version'
+
+vi.mock('../../src/services/version', () => ({
+  getVersions: vi.fn(),
+  getVersionChain: vi.fn()
+}))
 
 describe('Header Component', () => {
   describe('Theme Toggle', () => {
@@ -43,8 +49,6 @@ describe('Header Component', () => {
       expect(location.pathname).toBe('/about')
       expect(screen.getByText('About Page')).toBeInTheDocument()
     })
-
-
   })
 
   describe('Authentication State', () => {
@@ -154,6 +158,58 @@ describe('Header Component', () => {
       await userEvent.click(splitButton)
 
       expect(store.getState().note.viewMode).toBe('split')
+    })
+  })
+
+  describe('Version History', () => {
+    it('shows version history button only on note pages with active note', () => {
+      render(<Header />, {
+        path: '/notes/123',
+        preloadedState: {
+          auth: { user: null },
+          theme: 'light',
+          note: {
+            viewMode: 'edit',
+            activeNote: { id: '123', title: 'Test Note' }
+          }
+        }
+      })
+
+      const historyButton = screen.getByText('History').closest('button')
+      expect(historyButton).toBeInTheDocument()
+    })
+
+    describe('Version History', () => {
+      beforeEach(() => {
+        vi.clearAllMocks()
+        getVersions.mockResolvedValue([{
+          id: 'v1',
+          type: 'snapshot',
+          content: '# Initial Content',
+          metadata: { versionNumber: 1 },
+          createdAt: new Date().toISOString()
+        }])
+      })
+
+      it('opens version history modal when clicking history button', async () => {
+        render(<Header />, {
+          path: '/notes/123',
+          preloadedState: {
+            auth: { user: null },
+            theme: 'light',
+            note: {
+              viewMode: 'edit',
+              activeNote: { id: '123', title: 'Test Note' }
+            }
+          }
+        })
+
+        const historyButton = screen.getByText('History').closest('button')
+        await userEvent.click(historyButton)
+        await waitFor(() => {
+          expect(getVersions).toHaveBeenCalledWith('123')
+        })
+      })
     })
   })
 })
