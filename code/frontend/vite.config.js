@@ -63,14 +63,18 @@ export default defineConfig({
         'src/utils/fonts.js',
         'src/utils/themes.js',
         'src/utils/chainIcon.js',
+        'src/utils/find-language.js',
         'src/mocks/setup.js',
         'src/redux/store.js',
         'src/services/axiosConfig.js',
         'eslint.config.js',
-        'App.jsx',
-        'src/hooks/useDebounce.js',
-        'src/hooks/useVersion.js',
+        'src/App.jsx',
+        'src/hooks/useDebounce.jsx',
         'src/components/ScrollToTop.jsx',
+        'src/index.css',
+        'src/components/PrivateRoute.jsx',
+        'src/components/pages/OAuthCallback.jsx',
+
       ]
     }
   }
