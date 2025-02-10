@@ -22,6 +22,10 @@ const noteSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    iv: {
+      type: String,
+      required:true
+    }
   },
   { timestamps: true }
 )

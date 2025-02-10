@@ -28,6 +28,10 @@ const versionSchema = new mongoose.Schema({
   cipherKey: {
     type: String,
     required: true
+  },
+  iv: {
+    type: String,
+    required: true
   }
 }, { timestamps: true })
 

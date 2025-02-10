@@ -1,18 +1,13 @@
 const Version = require('../models/version')
 const Note = require('../models/note')
 const createError = require('../utils/error')
-const ENCRYPTION_ERRORS = require('../utils/encryptionErrors')
 
 const createVersion = async (request, response, next) => {
   const { noteId } = request.params
-  const { type, content, metadata, baseVersion, cipherKey } = request.body
+  const { type, content, metadata, baseVersion, cipherKey, iv } = request.body
   const user = request.user
 
   try {
-    if (!user.masterPasswordHash) {
-      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
-    }
-
     const note = await Note.findOne({ _id: noteId, user: user.id })
     if (!note) {
       return next(createError('Note not found or unauthorized', 404))
@@ -26,6 +21,7 @@ const createVersion = async (request, response, next) => {
         ...metadata,
       },
       cipherKey,
+      iv,
       ...(baseVersion && { baseVersion })
     })
 
@@ -42,10 +38,6 @@ const getVersionChain = async (request, response, next) => {
   const user = request.user
 
   try {
-    if (!user.masterPasswordHash) {
-      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
-    }
-
     const note = await Note.findOne({ _id: noteId, user: user.id })
     if (!note) {
       return next(createError('Note not found or unauthorized', 404))
@@ -75,13 +67,7 @@ const getVersionChain = async (request, response, next) => {
       currentVersion = await Version.findOne({ _id: currentVersion.baseVersion })
     }
 
-    response.json({
-      versionChain,
-      encryptionInfo: {
-        protectedSymmetricKey: user.protectedSymmetricKey,
-        kdfAlgorithm: user.kdfAlgorithm
-      }
-    })
+    response.json(versionChain)
   } catch (error) {
     next(error)
   }
@@ -92,10 +78,6 @@ const getVersions = async (request, response, next) => {
   const user = request.user
 
   try {
-    if (!user.masterPasswordHash) {
-      throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
-    }
-
     const note = await Note.findOne({ _id: noteId, user: user.id })
     if (!note) {
       return next(createError('Note not found or unauthorized', 404))
@@ -104,13 +86,7 @@ const getVersions = async (request, response, next) => {
     const versions = await Version.find({ noteId })
       .sort({ createdAt: -1 })
 
-    response.json({
-      versions,
-      encryptionInfo: {
-        protectedSymmetricKey: user.protectedSymmetricKey,
-        kdfAlgorithm: user.kdfAlgorithm
-      }
-    })
+    response.json(versions)
   } catch (error) {
     next(error)
   }

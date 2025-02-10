@@ -1,11 +1,11 @@
-const { ENCRYPTION_ERRORS } = require('../utils/encryption')
+const createError = require('../utils/error')
 
 const setup = async (request, response, next) => {
   const { masterPasswordHash, protectedSymmetricKey, iv } = request.body
   const user = request.user
 
   if (user.masterPasswordHash) {
-    throw ENCRYPTION_ERRORS.ENCRYPTION_SETUP_EXISTS
+    return next(createError('Encryption is already set up', 400))
   }
 
   try {
@@ -20,60 +20,36 @@ const setup = async (request, response, next) => {
   }
 }
 
-const getMasterPasswordHash = async (request, response) => {
-  const user = request.user
-
-  if (!user.masterPasswordHash) {
-    throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
-  }
-
-  response.json({ masterPasswordHash: user.masterPasswordHash })
-}
-
-const update_master_password = async (request, response, next) => {
-  const { currentMasterPasswordHash, newMasterPasswordHash, newProtectedSymmetricKey, newIv } = request.body
-  const user = request.user
-
-  if (!user.masterPasswordHash) {
-    throw ENCRYPTION_ERRORS.MASTER_PASSWORD_REQUIRED
-  }
-
-  if (user.masterPasswordHash !== currentMasterPasswordHash) {
-    throw ENCRYPTION_ERRORS.INVALID_MASTER_PASSWORD
-  }
-
+const getMasterPasswordHash = async (request, response, next) => {
   try {
-    user.masterPasswordHash = newMasterPasswordHash
-    user.protectedSymmetricKey = newProtectedSymmetricKey
-    user.iv = newIv
-    await user.save()
-
-    response.json({ message: 'Master password updated successfully' })
+    const user = request.user
+    response.json(user.masterPasswordHash)
   } catch (error) {
     next(error)
   }
 }
 
-const getProtectedSymmetricKey = async (request, response) => {
-  const user = request.user
-
-  if (!user.protectedSymmetricKey) {
-    throw ENCRYPTION_ERRORS.PROTECTED_SYMMETRIC_KEY_REQUIRED
+const getProtectedSymmetricKey = async (request, response, next) => {
+  try {
+    const user = request.user
+    response.json(user.protectedSymmetricKey)
+  } catch (error) {
+    next(error)
   }
-
-  response.json({ protectedSymmetricKey: user.protectedSymmetricKey })
 }
 
-const getIv = async (request, response) => {
-  const user = request.user
-
-  response.json({ iv: user.iv })
+const getIv = async (request, response, next) => {
+  try {
+    const user = request.user
+    response.json(user.iv)
+  } catch (error) {
+    next(error)
+  }
 }
 
 module.exports = {
   setup,
   getMasterPasswordHash,
-  update_master_password,
   getProtectedSymmetricKey,
   getIv
 }
