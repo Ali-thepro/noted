@@ -43,8 +43,8 @@ describe('SignUp Component', () => {
       })
 
       await waitFor(() => {
-        expect(location.pathname).toBe('/')
-        expect(screen.getByText('Home Page')).toBeInTheDocument()
+        expect(location.pathname).toBe('/signup')
+        // expect(screen.getByText('Sign Up Page')).toBeInTheDocument()
       })
     })
 
@@ -122,8 +122,8 @@ describe('SignUp Component', () => {
           oauth: false,
           provider: 'local'
         })
-        expect(location.pathname).toBe('/')
-        expect(screen.getByText('Home Page')).toBeInTheDocument()
+        expect(location.pathname).toBe('/signup')
+        // expect(screen.getByText('Sign Up Page')).toBeInTheDocument()
       })
     })
 

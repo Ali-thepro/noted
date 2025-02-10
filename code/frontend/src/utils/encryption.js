@@ -1,9 +1,8 @@
-import argon2 from 'argon2-browser'
+import argon2 from 'argon2-browser/dist/argon2-bundled.min.js'
 
 const ARGON2_MEMORY_COST = 65536
 const ARGON2_TIME_COST = 4
 const ARGON2_PARALLELISM = 3
-const KEY_LENGTH = 32
 
 export class EncryptionService {
   utf8ToArray(str) {
@@ -42,7 +41,7 @@ export class EncryptionService {
       mem: ARGON2_MEMORY_COST,
       time: ARGON2_TIME_COST,
       parallelism: ARGON2_PARALLELISM,
-      hashLen: KEY_LENGTH
+      hashLen: 32
     })
     return result.hash
   }
@@ -55,7 +54,7 @@ export class EncryptionService {
       mem: ARGON2_MEMORY_COST,
       time: ARGON2_TIME_COST,
       parallelism: ARGON2_PARALLELISM,
-      hashLen: KEY_LENGTH
+      hashLen: 32
     })
     return { hash: result.hash, encoded: result.encoded }
   }
@@ -76,7 +75,12 @@ export class EncryptionService {
     )
 
     const derivedKey = await crypto.subtle.deriveBits(
-      { name: 'HKDF', salt: emailHash, info },
+      {
+        name: 'HKDF',
+        hash: 'SHA-256',
+        salt: emailHash,
+        info: info
+      },
       key,
       length * 8
     )
@@ -128,6 +132,7 @@ export class EncryptionService {
     )
     return new Uint8Array(decryptedKey)
   }
+
   async encryptNoteContent(content, noteCipherKey) {
     const iv = new Uint8Array(16)
     crypto.getRandomValues(iv)
