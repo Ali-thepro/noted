@@ -33,9 +33,9 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(cookieParser())
-if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
-}
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
 app.use(middleware.tokenExtractor)
 
 app.use('/api/auth', authRouter)
