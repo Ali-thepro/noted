@@ -7,6 +7,7 @@ import Notification from '../components/Notification'
 import OAuth  from '../components/OAuth'
 import { signupUser } from '../redux/reducers/authReducer'
 import MasterPasswordModal from '../components/Encryption/MasterPasswordModal'
+import { getMasterPasswordHash } from '../services/encryption'
 
 
 const SignUp = () => {
@@ -21,6 +22,19 @@ const SignUp = () => {
   const [redirect, setRedirect] = useState(null)
   const [showMasterPasswordModal, setShowMasterPasswordModal] = useState(false)
 
+  useEffect(() => {
+    const check = async () => {
+      if (!user) {
+        return
+      }
+      const password = await getMasterPasswordHash()
+      if (user && password) {
+        navigate('/')
+        return
+      }
+    }
+    check()
+  }, [user, navigate])
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)

@@ -57,6 +57,9 @@ userSchema.set('toJSON', {
     delete returnedObject._id
     delete returnedObject.__v
     delete returnedObject.passwordHash
+    delete returnedObject.masterPasswordHash
+    delete returnedObject.protectedSymmetricKey
+    delete returnedObject.iv
   }
 })
 

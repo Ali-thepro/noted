@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal, Button, Label, TextInput } from 'flowbite-react'
-import memoryStore from '../memoryStore'
+import memoryStore from '../../utils/memoryStore'
 import { EncryptionService } from '../../utils/encryption'
 import { useDispatch, useSelector } from 'react-redux'
 import { setNotification } from '../../redux/reducers/notificationReducer'
@@ -30,7 +30,8 @@ const UnlockModal = ({ show, onClose, email }) => {
       const passwordHash = await encryptionService.hash(masterPassword)
       const masterKey = await encryptionService.generateMasterKey(masterPassword, emailHash)
       const { encoded } = await encryptionService.generateMasterPasswordHash(masterKey, passwordHash)
-      if (encoded !== masterPasswordHash) {
+      const isCorrect = await encryptionService.secureCompare(encoded, masterPasswordHash)
+      if (!isCorrect) {
         throw new Error('Incorrect master password')
       }
       const stretchedKey = await encryptionService.hkdf(masterKey, emailHash)
@@ -75,7 +76,7 @@ const UnlockModal = ({ show, onClose, email }) => {
             size="md"
           >
             <Modal.Header className="border-b border-gray-200 dark:border-gray-700">
-              Unlock Vault
+              Unlock Noted
             </Modal.Header>
             <form onSubmit={handleSubmit}>
               <Modal.Body>

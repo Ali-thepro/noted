@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { setNotification } from './notificationReducer'
 import { signin, googleAuth, githubAuth, signOutUserFromDB, refreshUserToken, signup } from '../../services/auth'
 import { toast } from 'react-toastify'
-import memoryStore from '../../components/memoryStore'
+import memoryStore from '../../utils/memoryStore'
 
 
 const initialState = {

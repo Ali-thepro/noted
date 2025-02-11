@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { refreshToken } from '../redux/reducers/authReducer'
 import UnlockModal from './Encryption/UnlockModal'
-import memoryStore from './memoryStore'
+import memoryStore from '../utils/memoryStore'
 
 const PrivateRoute = () => {
   const user = useSelector((state) => state.auth.user)

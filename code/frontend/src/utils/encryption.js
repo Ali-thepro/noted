@@ -59,6 +59,38 @@ export class EncryptionService {
     return { hash: result.hash, encoded: result.encoded }
   }
 
+  async secureCompare(a, b) {
+    const arrayA = this.utf8ToArray(a)
+    const arrayB = this.utf8ToArray(b)
+
+    const mac = new Uint8Array(32)
+    crypto.getRandomValues(mac)
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      mac,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    )
+
+    // const signature = await crypto.subtle.sign('HMAC', key, arrayA)
+    // return crypto.subtle.verify('HMAC', key, signature, arrayB)
+
+    const mac1 = new Uint8Array(await crypto.subtle.sign('HMAC', key, arrayA))
+    const mac2 = new Uint8Array(await crypto.subtle.sign('HMAC', key, arrayB))
+
+    if (mac1.length !== mac2.length) {
+      return false
+    }
+    let result = 0
+    for (let i = 0; i < mac1.length; i++) {
+      result |= mac1[i] ^ mac2[i]
+    }
+
+    return result === 0
+
+  }
 
   async hkdf(masterKey, emailHash, length = 32) {
     const info = this.utf8ToArray('encryption')

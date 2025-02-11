@@ -8,7 +8,7 @@ import { setNotification } from '../../redux/reducers/notificationReducer'
 import { setup } from '../../services/encryption'
 import { useNavigate } from 'react-router-dom'
 import Notification from '../Notification'
-import memoryStore from '../memoryStore'
+import memoryStore from '../../utils/memoryStore'
 
 const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong']
 const strengthColors = ['red', 'red', 'yellow', 'lime', 'green']
