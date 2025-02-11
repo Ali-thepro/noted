@@ -118,10 +118,7 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
         }
       } else {
         const noteCipherKey = await encryptionService.generateKey(16)
-        const { protectedKey, iv: keyIv } = await encryptionService.wrapNoteCipherKey(
-          noteCipherKey,
-          symmetricKey
-        )
+        const { protectedKey, iv: keyIv } = await encryptionService.wrapNoteCipherKey(noteCipherKey, symmetricKey)
 
         const { encryptedContent, iv: contentIv } = await encryptionService.encryptNoteContent(
           `# ${title}\n\nStart writing here...`,
