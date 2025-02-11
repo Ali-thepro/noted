@@ -4,7 +4,7 @@ const createError = require('../utils/error')
 
 const createVersion = async (request, response, next) => {
   const { noteId } = request.params
-  const { type, content, metadata, baseVersion, cipherKey, iv } = request.body
+  const { type, content, metadata, baseVersion, cipherKey, cipherIv, contentIv } = request.body
   const user = request.user
 
   try {
@@ -21,7 +21,8 @@ const createVersion = async (request, response, next) => {
         ...metadata,
       },
       cipherKey,
-      iv,
+      cipherIv,
+      contentIv,
       ...(baseVersion && { baseVersion })
     })
 

@@ -6,13 +6,16 @@ import { createNote, editNote } from '../../redux/reducers/noteReducer'
 import { createVersion, getVersions, getVersionChain } from '../../services/version'
 import Notification from '../Notification'
 import PropTypes from 'prop-types'
-import { shouldCreateSnapshot , buildVersionContent } from '../../utils/diff'
-import diff_match_patch from '../../utils/diff'
+import { shouldCreateSnapshot , buildVersionContent, decryptVersionContent, createEncryptedDiff } from '../../utils/diff'
 import { arraysEqual } from '../../utils/util'
 import { toast } from 'react-toastify'
+import { EncryptionService } from '../../utils/encryption'
+import memoryStore from '../../utils/memoryStore'
+
 const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const encryptionService = new EncryptionService()
   const theme = useSelector(state => state.theme)
   const [title, setTitle] = useState('')
   const [tags, setTags] = useState('')
@@ -31,6 +34,11 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
     setIsSubmitting(true)
 
     try {
+      const symmetricKey = memoryStore.get()
+      if (!symmetricKey) {
+        throw new Error('Noted is locked')
+      }
+
       const processedTags = tags
         .split(',')
         .map(tag => tag.trim().toLowerCase())
@@ -56,37 +64,48 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
               if (versions && versions.length > 0) {
                 const latestVersion = versions[0]
                 let versionType = 'diff'
-                let versionContent
                 let baseVersion
+                let encryptedVersionData
 
                 if (shouldCreateSnapshot(latestVersion.metadata.versionNumber)) {
                   versionType = 'snapshot'
-                  versionContent = updatedNote.content
+                  encryptedVersionData = updatedNote.content
                 } else {
                   let baseContent
                   if (latestVersion.type === 'snapshot') {
-                    baseContent = latestVersion.content
+                    baseContent = await decryptVersionContent(latestVersion, encryptionService, symmetricKey)
                   } else {
                     const chain = await getVersionChain(updatedNote.id, latestVersion.createdAt)
-                    baseContent = buildVersionContent(chain)
+                    baseContent = await buildVersionContent(chain, encryptionService, symmetricKey)
                   }
 
-                  const dmp = new diff_match_patch()
-                  const diffs = dmp.diff_main(baseContent, updatedNote.content, false)
-                  dmp.diff_cleanupEfficiency(diffs)
-                  versionContent = dmp.diff_toDelta(diffs)
+                  const decryptedContent = await decryptVersionContent(updatedNote, encryptionService, symmetricKey)
+
+                  encryptedVersionData = await createEncryptedDiff(
+                    baseContent,
+                    decryptedContent,
+                    encryptionService,
+                    symmetricKey,
+                    {
+                      cipherKey: updatedNote.cipherKey,
+                      cipherIv: updatedNote.cipherIv
+                    }
+                  )
                   baseVersion = latestVersion.id
                 }
 
                 await createVersion(updatedNote.id, {
                   type: versionType,
-                  content: versionContent,
+                  content: encryptedVersionData.encryptedContent,
                   baseVersion,
+                  cipherKey: encryptedVersionData.cipherKey,
+                  cipherIv: encryptedVersionData.cipherIv,
+                  contentIv: encryptedVersionData.contentIv,
                   metadata: {
                     title: updatedNote.title,
                     tags: updatedNote.tags,
                     versionNumber: latestVersion.metadata.versionNumber + 1
-                  },
+                  }
                 })
               }
             } catch (error) {
@@ -98,15 +117,31 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           onClose()
         }
       } else {
+        const noteCipherKey = await encryptionService.generateKey(16)
+        const { protectedKey, iv: keyIv } = await encryptionService.wrapNoteCipherKey(
+          noteCipherKey,
+          symmetricKey
+        )
+
+        const { encryptedContent, iv: contentIv } = await encryptionService.encryptNoteContent(
+          `# ${title}\n\nStart writing here...`,
+          noteCipherKey
+        )
         const newNote = await dispatch(createNote({
           title: title.trim(),
-          content: `# ${title}\n\nStart writing here...`,
-          tags: processedTags
+          content: encryptedContent,
+          tags: processedTags,
+          cipherKey: protectedKey,
+          cipherIv: keyIv,
+          contentIv: contentIv,
         }))
         if (newNote) {
           await createVersion(newNote.id, {
             type: 'snapshot',
-            content: newNote.content,
+            content: encryptedContent,
+            cipherKey: protectedKey,
+            cipherIv: keyIv,
+            contentIv: contentIv,
             metadata: {
               title: newNote.title,
               tags: newNote.tags,

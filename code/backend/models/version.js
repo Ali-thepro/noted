@@ -29,7 +29,11 @@ const versionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  iv: {
+  cipherIv: {
+    type: String,
+    required: true
+  },
+  contentIv: {
     type: String,
     required: true
   }

@@ -12,8 +12,8 @@ const PrivateRoute = () => {
   const dispatch = useDispatch()
   const [isChecking, setIsChecking] = useState(true)
   const [showUnlock, setShowUnlock] = useState(false)
+  const [isUnlocked, setIsUnlocked] = useState(false)
   const hasCheckedAuth = useRef(false)
-
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -40,17 +40,24 @@ const PrivateRoute = () => {
     const checkEncryption = async () => {
       if (user) {
         try {
-          if (!memoryStore.get()) {
-            setShowUnlock(true)
-          }
+          const hasKey = !!memoryStore.get()
+          setIsUnlocked(hasKey)
+          setShowUnlock(!hasKey)
         } catch (error) {
           console.error('Failed to check encryption status:', error)
+          setIsUnlocked(false)
+          setShowUnlock(true)
         }
       }
     }
 
     checkEncryption()
   }, [user])
+
+  const handleUnlockSuccess = () => {
+    setShowUnlock(false)
+    setIsUnlocked(true)
+  }
 
   const containerStyle = {
     filter: showUnlock ? 'blur(10px)' : 'none',
@@ -65,16 +72,21 @@ const PrivateRoute = () => {
     return <Navigate to="/signin" />
   }
 
+  if (!isUnlocked) {
+    return (
+      <UnlockModal
+        show={showUnlock}
+        onClose={handleUnlockSuccess}
+        email={user.email}
+      />
+    )
+  }
+
   return (
     <>
       <div style={containerStyle}>
         <Outlet />
       </div>
-      <UnlockModal
-        show={showUnlock}
-        onClose={() => setShowUnlock(false)}
-        email={user.email}
-      />
     </>
   )
 }

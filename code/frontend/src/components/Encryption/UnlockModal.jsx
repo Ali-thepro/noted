@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setNotification } from '../../redux/reducers/notificationReducer'
 import { getMasterPasswordHash, getProtectedSymmetricKey, getIv } from '../../services/encryption'
 import Notification from '../Notification'
-import { signOutUser } from '../../redux/reducers/authReducer'
+import { signOutUser, refreshToken } from '../../redux/reducers/authReducer'
 import PropTypes from 'prop-types'
 
 const UnlockModal = ({ show, onClose, email }) => {
@@ -21,7 +21,12 @@ const UnlockModal = ({ show, onClose, email }) => {
 
     try {
       setLoading(true)
-
+      try {
+        await dispatch(refreshToken())
+      } catch (error) {
+        console.error('Token refresh failed:', error)
+        throw error
+      }
       const masterPasswordHash = await getMasterPasswordHash()
       const protectedSymmetricKey = await getProtectedSymmetricKey()
       const iv = await getIv()
@@ -41,10 +46,10 @@ const UnlockModal = ({ show, onClose, email }) => {
         stretchedKey
       )
       memoryStore.set(symmetricKey)
-      dispatch(setNotification('Vault unlocked successfully', 'success'))
+      dispatch(setNotification('Noted unlocked successfully', 'success'))
       onClose()
     } catch (error) {
-      console.error('Error unlocking vault:', error)
+      console.error('Error unlocking noted:', error)
       dispatch(setNotification('Incorrect master password', 'failure'))
     } finally {
       setLoading(false)

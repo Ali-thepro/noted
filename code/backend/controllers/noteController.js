@@ -58,7 +58,7 @@ const getNote = async (request, response, next) => {
 
 const createNote = async (request, response, next) => {
   const user = request.user
-  const { title, content, tags, cipherKey, iv } = request.body
+  const { title, content, tags, cipherKey, cipherIv, contentIv } = request.body
 
   try {
     const note = new Note({
@@ -66,7 +66,8 @@ const createNote = async (request, response, next) => {
       content,
       tags: tags || [],
       cipherKey,
-      iv,
+      cipherIv,
+      contentIv,
       user: user.id,
     })
 
@@ -103,7 +104,7 @@ const createNote = async (request, response, next) => {
 const updateNote = async (request, response, next) => {
   const { id } = request.params
   const user = request.user
-  const { title, content, tags, cipherKey, iv } = request.body
+  const { title, content, tags, cipherKey, cipherIv, contentIv } = request.body
 
   try {
     const updatedNote = await Note.findOneAndUpdate(
@@ -114,7 +115,8 @@ const updateNote = async (request, response, next) => {
           content,
           tags,
           cipherKey,
-          iv
+          cipherIv,
+          contentIv
         }
       },
       { new: true, runValidators: true }

@@ -74,9 +74,6 @@ export class EncryptionService {
       ['sign']
     )
 
-    // const signature = await crypto.subtle.sign('HMAC', key, arrayA)
-    // return crypto.subtle.verify('HMAC', key, signature, arrayB)
-
     const mac1 = new Uint8Array(await crypto.subtle.sign('HMAC', key, arrayA))
     const mac2 = new Uint8Array(await crypto.subtle.sign('HMAC', key, arrayB))
 
@@ -116,7 +113,7 @@ export class EncryptionService {
     return new Uint8Array(derivedKey)
   }
 
-  async generateSymmetricKey(size = 32) {
+  async generateKey(size = 32) {
     const key = new Uint8Array(size)
     crypto.getRandomValues(key)
     return key

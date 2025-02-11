@@ -6,9 +6,10 @@ import { createVersion, getVersions, getVersionChain } from '../services/version
 import NoteEditor from '../components/Editor/NoteEditor'
 import NotePreview from '../components/Preview/NotePreview'
 import debounce from 'lodash.debounce'
-import diff_match_patch from '../utils/diff'
-import { shouldCreateSnapshot, buildVersionContent } from '../utils/diff'
+import { shouldCreateSnapshot, buildVersionContent, createEncryptedDiff, encryptVersionContent, decryptVersionContent } from '../utils/diff'
 import useVersion from '../hooks/useVersion'
+import { EncryptionService } from '../utils/encryption'
+import memoryStore from '../utils/memoryStore'
 
 const AUTOSAVE_DELAY = 700
 const SETCONTENT_DELAY = 100
@@ -19,6 +20,7 @@ function NotePage() {
   const navigate = useNavigate()
   const { activeNote, viewMode } = useSelector(state => state.note)
   const user = useSelector(state => state.auth.user)
+  const encryptionService = new EncryptionService()
 
   const [content, setContent] = useState(activeNote?.content || '')
   const [previewContent, setPreviewContent] = useState(activeNote?.content || '')
@@ -43,8 +45,6 @@ function NotePage() {
         const versions = await getVersions(activeNote.id)
         if (versions && versions.length > 0) {
           setLatestVersion(versions[0])
-          setContent(activeNote.content)
-          setPreviewContent(activeNote.content)
         }
       } catch (error) {
         console.error('Failed to initialize note:', error)
@@ -54,23 +54,78 @@ function NotePage() {
     initializeNote()
   }, [activeNote])
 
+  useEffect(() => {
+    const decryptNote = async () => {
+      if (!activeNote?.content || !activeNote?.cipherKey || !activeNote?.cipherIv || !activeNote?.contentIv) {
+        return
+      }
 
-  const debouncedSave = useMemo(() => debounce((newContent) => {
-    if (activeNote?.id) {
-      dispatch(editNote(activeNote.id, { ...activeNote, content: newContent }))
+      try {
+        const symmetricKey = memoryStore.get()
+        if (!symmetricKey) {
+          throw new Error('Noted is locked')
+        }
+
+        const noteCipherKey = await encryptionService.unwrapNoteCipherKey(
+          activeNote.cipherKey,
+          activeNote.cipherIv,
+          symmetricKey
+        )
+
+        const decrypted = await encryptionService.decryptNoteContent(
+          activeNote.content,
+          activeNote.contentIv,
+          noteCipherKey
+        )
+
+        setContent(decrypted)
+        setPreviewContent(decrypted)
+      } catch (error) {
+        console.error('Failed to decrypt note:', error)
+
+      }
     }
-  }, AUTOSAVE_DELAY), [dispatch, activeNote])
+
+    decryptNote()
+  }, [activeNote]) // eslint-disable-line
+
+
+  const debouncedSave = useMemo(() => debounce(async (newContent) => {
+    if (activeNote?.id) {
+      try {
+        const symmetricKey = memoryStore.get()
+        if (!symmetricKey) {
+          throw new Error('Noted is locked')
+        }
+
+        const noteCipherKey = await encryptionService.unwrapNoteCipherKey(activeNote.cipherKey, activeNote.cipherIv, symmetricKey)
+        const { encryptedContent, iv: contentIv } = await encryptionService.encryptNoteContent(newContent, noteCipherKey)
+
+        await dispatch(editNote(activeNote.id, {
+          ...activeNote,
+          content: encryptedContent,
+          contentIv: contentIv
+        }))
+      } catch (error) {
+        console.error('Failed to encrypt note:', error)
+      }
+    }
+  }, AUTOSAVE_DELAY), [dispatch, activeNote]) // eslint-disable-line
 
   const createVersionHandler = useCallback(async (newContent) => {
     if (!activeNote?.id || !latestVersion) return null
 
     try {
+      const symmetricKey = memoryStore.get()
+      if (!symmetricKey) {
+        throw new Error('Noted is locked')
+      }
       let baseContent
       if (latestVersion.type === 'snapshot') {
-        baseContent = latestVersion.content
+        baseContent = await decryptVersionContent(latestVersion, encryptionService, symmetricKey)
       } else {
         const chain = await getVersionChain(activeNote.id, latestVersion.createdAt)
-        baseContent = buildVersionContent(chain)
+        baseContent = await buildVersionContent(chain, encryptionService, symmetricKey)
       }
 
       if (baseContent === newContent) {
@@ -80,24 +135,39 @@ function NotePage() {
       const nextVersionNumber = latestVersion.metadata.versionNumber + 1
 
       let versionType = 'diff'
-      let versionContent
-      let baseVersion
+      let encryptedVersionData
 
       if (shouldCreateSnapshot(latestVersion)) {
         versionType = 'snapshot'
-        versionContent = newContent
+        encryptedVersionData = await encryptVersionContent(
+          newContent,
+          encryptionService,
+          symmetricKey,
+          {
+            cipherKey: activeNote.cipherKey,
+            cipherIv: activeNote.cipherIv
+          }
+        )
       } else {
-        const dmp = new diff_match_patch()
-        const diffs = dmp.diff_main(baseContent, newContent, false)
-        dmp.diff_cleanupEfficiency(diffs)
-        versionContent = dmp.diff_toDelta(diffs)
-        baseVersion = latestVersion.id
+        encryptedVersionData = await createEncryptedDiff(
+          baseContent,
+          newContent,
+          encryptionService,
+          symmetricKey,
+          {
+            cipherKey: activeNote.cipherKey,
+            cipherIv: activeNote.cipherIv
+          }
+        )
       }
 
       const newVersion = await createVersion(activeNote.id, {
         type: versionType,
-        content: versionContent,
-        baseVersion,
+        content: encryptedVersionData.encryptedContent,
+        baseVersion: versionType === 'diff' ? latestVersion.id : undefined,
+        cipherKey: encryptedVersionData.cipherKey,
+        cipherIv: encryptedVersionData.cipherIv,
+        contentIv: encryptedVersionData.contentIv,
         metadata: {
           title: activeNote.title,
           tags: activeNote.tags,
@@ -105,15 +175,13 @@ function NotePage() {
         }
       })
 
-      await dispatch(editNote(activeNote.id, { ...activeNote, content: newContent }))
-
       setLatestVersion(newVersion)
     } catch (error) {
       console.error('Failed to create version:', error)
     }
-  }, [activeNote, latestVersion, dispatch])
+  }, [activeNote, latestVersion, dispatch]) // eslint-disable-line
 
-  const { maybeCreateVersion } = useVersion(createVersionHandler, 10 * 60 * 1000)
+  const { maybeCreateVersion } = useVersion(createVersionHandler, 10 * 1000)
 
   const debouncedSetContent = useMemo(() => debounce((newContent) => {
     setContent(newContent)

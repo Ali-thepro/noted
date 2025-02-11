@@ -51,7 +51,7 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
       const masterKey = await encryptionService.generateMasterKey(masterPassword, emailHash)
       const { encoded: masterPasswordHash } = await encryptionService.generateMasterPasswordHash(masterKey, passwordHash)
       const stretchedKey = await encryptionService.hkdf(masterKey, emailHash)
-      const symmetricKey = await encryptionService.generateSymmetricKey()
+      const symmetricKey = await encryptionService.generateKey()
       const { encryptedKey, iv } = await encryptionService.encryptSymmetricKey(symmetricKey, stretchedKey)
       memoryStore.set(symmetricKey)
       await setup({
@@ -117,7 +117,6 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
         </Modal.Body>
         <Modal.Footer>
           <Button type="submit" disabled={loading} className="focus:ring-0">
-            {console.log(loading)}
             {loading ? 'Setting up...' : 'Set Password'}
           </Button>
           <Button color="gray" onClick={onClose} className="focus:ring-0">
