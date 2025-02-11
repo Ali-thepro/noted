@@ -34,6 +34,7 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
     if (masterPassword !== confirmPassword) {
       dispatch(setNotification('Passwords do not match', 'failure'))
       return
@@ -45,7 +46,6 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
     }
 
     try {
-      setLoading(true)
       const emailHash = await encryptionService.hash(email)
       const passwordHash = await encryptionService.hash(masterPassword)
       const masterKey = await encryptionService.generateMasterKey(masterPassword, emailHash)
@@ -117,6 +117,7 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
         </Modal.Body>
         <Modal.Footer>
           <Button type="submit" disabled={loading} className="focus:ring-0">
+            {console.log(loading)}
             {loading ? 'Setting up...' : 'Set Password'}
           </Button>
           <Button color="gray" onClick={onClose} className="focus:ring-0">
