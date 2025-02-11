@@ -48,8 +48,8 @@ export class EncryptionService {
 
   async generateMasterPasswordHash(masterKey, masterPassword) {
     const result = await argon2.hash({
-      pass: masterPassword,
-      salt: masterKey,
+      pass: masterKey,
+      salt: masterPassword,
       type: argon2.ArgonType.Argon2id,
       mem: ARGON2_MEMORY_COST,
       time: ARGON2_TIME_COST,
@@ -59,10 +59,6 @@ export class EncryptionService {
     return { hash: result.hash, encoded: result.encoded }
   }
 
-  async verifyMasterPasswordHash(masterPasswordHash, masterPassword) {
-    await argon2.verify(masterPasswordHash, masterPassword)
-    return true
-  }
 
   async hkdf(masterKey, emailHash, length = 32) {
     const info = this.utf8ToArray('encryption')

@@ -8,6 +8,7 @@ import { setNotification } from '../../redux/reducers/notificationReducer'
 import { setup } from '../../services/encryption'
 import { useNavigate } from 'react-router-dom'
 import Notification from '../Notification'
+import memoryStore from '../memoryStore'
 
 const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong']
 const strengthColors = ['red', 'red', 'yellow', 'lime', 'green']
@@ -33,7 +34,6 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (masterPassword !== confirmPassword) {
       dispatch(setNotification('Passwords do not match', 'failure'))
       return
@@ -47,11 +47,13 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
     try {
       setLoading(true)
       const emailHash = await encryptionService.hash(email)
+      const passwordHash = await encryptionService.hash(masterPassword)
       const masterKey = await encryptionService.generateMasterKey(masterPassword, emailHash)
-      const { encoded: masterPasswordHash } = await encryptionService.generateMasterPasswordHash(masterKey, masterPassword)
+      const { encoded: masterPasswordHash } = await encryptionService.generateMasterPasswordHash(masterKey, passwordHash)
       const stretchedKey = await encryptionService.hkdf(masterKey, emailHash)
       const symmetricKey = await encryptionService.generateSymmetricKey()
       const { encryptedKey, iv } = await encryptionService.encryptSymmetricKey(symmetricKey, stretchedKey)
+      memoryStore.set(symmetricKey)
       await setup({
         masterPasswordHash,
         protectedSymmetricKey: encryptedKey,
