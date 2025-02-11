@@ -66,18 +66,9 @@ function NotePage() {
           throw new Error('Noted is locked')
         }
 
-        const noteCipherKey = await encryptionService.unwrapNoteCipherKey(
-          activeNote.cipherKey,
-          activeNote.cipherIv,
-          symmetricKey
-        )
-
-        const decrypted = await encryptionService.decryptNoteContent(
-          activeNote.content,
-          activeNote.contentIv,
-          noteCipherKey
-        )
-
+        const noteCipherKey = await encryptionService.unwrapNoteCipherKey(activeNote.cipherKey, activeNote.cipherIv, symmetricKey)
+        const decrypted = await encryptionService.decryptNoteContent(activeNote.content, activeNote.contentIv, noteCipherKey)
+        
         setContent(decrypted)
         setPreviewContent(decrypted)
       } catch (error) {
