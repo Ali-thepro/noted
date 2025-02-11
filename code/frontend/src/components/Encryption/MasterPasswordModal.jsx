@@ -119,9 +119,6 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
           <Button type="submit" disabled={loading} className="focus:ring-0">
             {loading ? 'Setting up...' : 'Set Password'}
           </Button>
-          <Button color="gray" onClick={onClose} className="focus:ring-0">
-            Cancel
-          </Button>
         </Modal.Footer>
       </form>
     </Modal>

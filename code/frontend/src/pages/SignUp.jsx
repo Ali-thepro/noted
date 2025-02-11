@@ -22,19 +22,6 @@ const SignUp = () => {
   const [redirect, setRedirect] = useState(null)
   const [showMasterPasswordModal, setShowMasterPasswordModal] = useState(false)
 
-  useEffect(() => {
-    const check = async () => {
-      if (!user) {
-        return
-      }
-      const password = await getMasterPasswordHash()
-      if (user && password) {
-        navigate('/')
-        return
-      }
-    }
-    check()
-  }, [user, navigate])
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)
@@ -74,6 +61,14 @@ const SignUp = () => {
       dispatch(setNotification('Redirecting...', 'success'))
       window.location.replace(result.redirectUrl)
       return
+    }
+  }
+
+  const handleMasterPasswordModalClose = async () => {
+    const password = await getMasterPasswordHash()
+    if (user && password) {
+      setShowMasterPasswordModal(false)
+      navigate('/')
     }
   }
 
@@ -165,9 +160,7 @@ const SignUp = () => {
 
       <MasterPasswordModal
         show={showMasterPasswordModal}
-        onClose={() => {
-          setShowMasterPasswordModal(false)
-        }}
+        onClose={handleMasterPasswordModalClose}
         email={formData.email}
       />
     </>
