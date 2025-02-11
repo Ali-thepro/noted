@@ -68,7 +68,7 @@ function NotePage() {
 
         const noteCipherKey = await encryptionService.unwrapNoteCipherKey(activeNote.cipherKey, activeNote.cipherIv, symmetricKey)
         const decrypted = await encryptionService.decryptNoteContent(activeNote.content, activeNote.contentIv, noteCipherKey)
-        
+
         setContent(decrypted)
         setPreviewContent(decrypted)
       } catch (error) {
