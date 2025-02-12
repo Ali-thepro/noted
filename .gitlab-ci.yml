@@ -26,14 +26,15 @@ report-frontend:
     - frontend
   script:
     - echo "Frontend Coverage Report"
-    - cat code/frontend/coverage/coverage-final.json
+    - grep -o 'class="strong">[0-9.]*' code/frontend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
   cache:
     key: "$CI_COMMIT_REF_SLUG-reports"
     paths:
       - code/frontend/coverage/coverage-final.json
       - code/frontend/coverage/junit.xml
+      - code/frontend/coverage/index.html
     policy: pull
-  coverage: /All files\s*\|\s*([\d.]+)/
+  coverage: /^([\d.]+)$/
   artifacts:
     reports:
       coverage_report:

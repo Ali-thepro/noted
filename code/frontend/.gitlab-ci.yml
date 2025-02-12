@@ -35,3 +35,4 @@ test:
     paths:
       - code/frontend/coverage/coverage-final.json
       - code/frontend/coverage/junit.xml
+      - code/frontend/coverage/index.html
