@@ -20,5 +20,11 @@ lint:
 
 .test:
   stage: test
+  coverage: /Lines\s*:\s*([0-9.]+)%/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
   script:
-    - npm run test
+    - npm run coverage:c8
