@@ -33,9 +33,7 @@ test:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/coverage-final.json
-    paths:
-      - coverage/
+        path: code/frontend/coverage/coverage-final.json
   script:
     - npm run test
     - npm run coverage
