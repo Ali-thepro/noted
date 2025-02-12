@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./coverage/junit.xml"
   },
   "dependencies": {
     "@codemirror/commands": "^6.8.0",
