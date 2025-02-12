@@ -34,9 +34,6 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage-final.json
-      junit:
-        report:
-          coverage/junit.xml
     paths:
       - coverage/
   script:

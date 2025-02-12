@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="108" failures="0" errors="0" time="20.366416085">
+    <testsuite name="tests/components/EditorStatusBar.test.jsx" timestamp="2025-02-12T21:41:02.254Z" hostname="Ali-Laptop" tests="1" failures="0" errors="0" skipped="0" time="0.12387988">
+        <testcase classname="tests/components/EditorStatusBar.test.jsx" name="EditorStatusBar &gt; Rendering &gt; renders all editor options" time="0.120026708">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/Header.test.jsx" timestamp="2025-02-12T21:41:02.256Z" hostname="Ali-Laptop" tests="10" failures="0" errors="0" skipped="0" time="1.91780304">
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Theme Toggle &gt; toggles theme between light and dark" time="0.362703872">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Navigation &gt; navigates to correct routes when clicking nav links" time="0.17321635">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Authentication State &gt; shows sign in button when user is not authenticated" time="0.086518634">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Authentication State &gt; shows logout button and handles logout when user is authenticated" time="0.168027762">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Note Creation Modal &gt; opens note creation modal when authenticated user clicks new note" time="0.202794144">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Note Creation Modal &gt; redirects to signin when unauthenticated user clicks new note" time="0.064425482">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; View Mode Controls &gt; shows view mode controls only on note pages" time="0.082504237">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; View Mode Controls &gt; changes view mode when clicking view mode buttons" time="0.091326892">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Version History &gt; shows version history button only on note pages with active note" time="0.044158691">
+        </testcase>
+        <testcase classname="tests/components/Header.test.jsx" name="Header Component &gt; Version History &gt; Version History &gt; opens version history modal when clicking history button" time="0.628341344">
+            <system-err>
+TypeError: textRange(...).getClientRects is not a function
+    at textCoords [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:891:43[90m)[39m
+    at TextView.coordsAt [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:797:16[90m)[39m
+    at coordsInChildren [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:1085:23[90m)[39m
+    at LineView.coordsAt [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:1569:20[90m)[39m
+    at DocView.coordsAt [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:3116:28[90m)[39m
+    at EditorView.coordsAtPos [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:8074:33[90m)[39m
+    at Function.forRange [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:8816:28[90m)[39m
+    at Object.markers [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:9081:51[90m)[39m
+    at LayerView.measure [90m(file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:8973:27[90m)[39m
+    at [90mfile:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/[39mnode_modules/[4m@codemirror[24m/view/dist/index.js:7745:34
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/NoteCard.test.jsx" timestamp="2025-02-12T21:41:02.262Z" hostname="Ali-Laptop" tests="8" failures="0" errors="0" skipped="0" time="1.292648739">
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; Rendering &gt; renders basic note information correctly" time="0.256051296">
+            <system-err>
+Warning: Failed prop type: The prop `onDelete` is marked as required in `NoteCard`, but its value is `undefined`.
+    at NoteCard (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/Notes/NoteCard.jsx:8:21)
+
+            </system-err>
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; renders initial tags with &quot;more&quot; button when there are more than MAX_VISIBLE_TAGS" time="0.051234696">
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; renders all tags when note has fewer than MAX_VISIBLE_TAGS" time="0.019529332">
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; Interactions &gt; calls onClick when clicking the card" time="0.062011396">
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; Interactions &gt; calls onTagClick when clicking a tag" time="0.043355587">
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; Interactions &gt; opens edit modal when clicking edit button" time="0.267261043">
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; Interactions &gt; shows and hides all tags modal" time="0.19402959">
+        </testcase>
+        <testcase classname="tests/components/NoteCard.test.jsx" name="NoteCard Component &gt; Interactions &gt; prevents event propagation when clicking interactive elements" time="0.395076853">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/NoteModal.test.jsx" timestamp="2025-02-12T21:41:02.267Z" hostname="Ali-Laptop" tests="8" failures="0" errors="0" skipped="0" time="2.242368237">
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Create Mode &gt; renders create note form correctly" time="0.313679261">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Create Mode &gt; handles title input" time="0.094541491">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Create Mode &gt; handles tags input" time="0.131322799">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Create Mode &gt; enables submit button when title is provided" time="0.136496543">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Edit Mode &gt; renders edit note form correctly" time="0.103005637">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Edit Mode &gt; pre-fills form with note data" time="0.121744429">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Edit Mode &gt; updates form fields correctly" time="0.227493858">
+        </testcase>
+        <testcase classname="tests/components/NoteModal.test.jsx" name="NoteModal Component &gt; Form Submission &gt; handles create note submission" time="1.108466461">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/NotePreview.test.jsx" timestamp="2025-02-12T21:41:02.269Z" hostname="Ali-Laptop" tests="7" failures="0" errors="0" skipped="0" time="0.577862122">
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Markdown Rendering &gt; renders basic markdown elements correctly" time="0.197056454">
+        </testcase>
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Markdown Rendering &gt; renders task lists correctly" time="0.185588573">
+        </testcase>
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Markdown Rendering &gt; renders inline code correctly" time="0.010713282">
+        </testcase>
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Markdown Rendering &gt; renders links correctly" time="0.038660241">
+        </testcase>
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Markdown Rendering &gt; renders tables correctly" time="0.042640029">
+        </testcase>
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Advanced Markdown Features &gt; renders strikethrough text" time="0.047144527">
+        </testcase>
+        <testcase classname="tests/components/NotePreview.test.jsx" name="NotePreview Component &gt; Advanced Markdown Features &gt; renders definition lists" time="0.052565846">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/OAuth.test.jsx" timestamp="2025-02-12T21:41:02.271Z" hostname="Ali-Laptop" tests="6" failures="0" errors="0" skipped="0" time="0.489106298">
+        <testcase classname="tests/components/OAuth.test.jsx" name="OAuth Component &gt; renders OAuth buttons" time="0.249826852">
+        </testcase>
+        <testcase classname="tests/components/OAuth.test.jsx" name="OAuth Component &gt; handles Google OAuth redirect without CLI mode" time="0.067644483">
+        </testcase>
+        <testcase classname="tests/components/OAuth.test.jsx" name="OAuth Component &gt; handles GitHub OAuth redirect without CLI mode" time="0.04474041">
+        </testcase>
+        <testcase classname="tests/components/OAuth.test.jsx" name="OAuth Component &gt; handles Google OAuth redirect with CLI mode" time="0.061269872">
+        </testcase>
+        <testcase classname="tests/components/OAuth.test.jsx" name="OAuth Component &gt; handles GitHub OAuth redirect with CLI mode" time="0.04916339">
+        </testcase>
+        <testcase classname="tests/components/OAuth.test.jsx" name="OAuth Component &gt; preserves query parameters across route changes" time="0.013442249">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/SearchBar.test.jsx" timestamp="2025-02-12T21:41:02.274Z" hostname="Ali-Laptop" tests="5" failures="0" errors="0" skipped="0" time="0.372175358">
+        <testcase classname="tests/components/SearchBar.test.jsx" name="SearchBar Component &gt; Rendering &gt; renders both search inputs correctly" time="0.071879187">
+        </testcase>
+        <testcase classname="tests/components/SearchBar.test.jsx" name="SearchBar Component &gt; Rendering &gt; renders with initial values" time="0.009616424">
+        </testcase>
+        <testcase classname="tests/components/SearchBar.test.jsx" name="SearchBar Component &gt; Interactions &gt; calls onKeywordChange when typing in keyword search" time="0.200217957">
+        </testcase>
+        <testcase classname="tests/components/SearchBar.test.jsx" name="SearchBar Component &gt; Interactions &gt; calls onTagChange when typing in tag search" time="0.062273285">
+        </testcase>
+        <testcase classname="tests/components/SearchBar.test.jsx" name="SearchBar Component &gt; Interactions &gt; handles empty input values" time="0.023561736">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/SortControls.test.jsx" timestamp="2025-02-12T21:41:02.276Z" hostname="Ali-Laptop" tests="4" failures="0" errors="0" skipped="0" time="0.38430684">
+        <testcase classname="tests/components/SortControls.test.jsx" name="SortControls Component &gt; renders all sort buttons" time="0.23702366">
+        </testcase>
+        <testcase classname="tests/components/SortControls.test.jsx" name="SortControls Component &gt; highlights active sort button" time="0.02858626">
+        </testcase>
+        <testcase classname="tests/components/SortControls.test.jsx" name="SortControls Component &gt; calls onSortByChange when clicking sort buttons" time="0.069480263">
+        </testcase>
+        <testcase classname="tests/components/SortControls.test.jsx" name="SortControls Component &gt; calls onSortOrderChange when clicking order toggle" time="0.046119254">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/ThemeProvider.test.jsx" timestamp="2025-02-12T21:41:02.277Z" hostname="Ali-Laptop" tests="4" failures="0" errors="0" skipped="0" time="0.082934225">
+        <testcase classname="tests/components/ThemeProvider.test.jsx" name="ThemeProvider &gt; Theme Application &gt; applies light theme by default" time="0.055254784">
+        </testcase>
+        <testcase classname="tests/components/ThemeProvider.test.jsx" name="ThemeProvider &gt; Theme Application &gt; applies dark theme when selected" time="0.005791596">
+        </testcase>
+        <testcase classname="tests/components/ThemeProvider.test.jsx" name="ThemeProvider &gt; Content Rendering &gt; renders children correctly" time="0.00987995">
+        </testcase>
+        <testcase classname="tests/components/ThemeProvider.test.jsx" name="ThemeProvider &gt; Content Rendering &gt; applies correct background and text colors" time="0.009336114">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/Toolbar.test.jsx" timestamp="2025-02-12T21:41:02.279Z" hostname="Ali-Laptop" tests="2" failures="0" errors="0" skipped="0" time="1.23974949">
+        <testcase classname="tests/components/Toolbar.test.jsx" name="Toolbar &gt; Basic Rendering &gt; renders basic formatting buttons" time="0.567836275">
+        </testcase>
+        <testcase classname="tests/components/Toolbar.test.jsx" name="Toolbar &gt; Basic Actions &gt; handles bold button click" time="0.601176055">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/components/VersionHistoryModal.test.jsx" timestamp="2025-02-12T21:41:02.280Z" hostname="Ali-Laptop" tests="5" failures="0" errors="0" skipped="0" time="1.755175979">
+        <testcase classname="tests/components/VersionHistoryModal.test.jsx" name="VersionHistoryModal &gt; Loading States &gt; shows loading state initially" time="0.522951683">
+        </testcase>
+        <testcase classname="tests/components/VersionHistoryModal.test.jsx" name="VersionHistoryModal &gt; Loading States &gt; loads and displays versions when modal is shown" time="0.374660707">
+        </testcase>
+        <testcase classname="tests/components/VersionHistoryModal.test.jsx" name="VersionHistoryModal &gt; handles version comparison" time="0.314064914">
+        </testcase>
+        <testcase classname="tests/components/VersionHistoryModal.test.jsx" name="Modal Controls &gt; calls onClose when close button is clicked" time="0.181953524">
+        </testcase>
+        <testcase classname="tests/components/VersionHistoryModal.test.jsx" name="Modal Controls &gt; Version Interaction &gt; handles version comparison" time="0.358501328">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/pages/About.test.jsx" timestamp="2025-02-12T21:41:02.282Z" hostname="Ali-Laptop" tests="1" failures="0" errors="0" skipped="0" time="0.087678693">
+        <testcase classname="tests/pages/About.test.jsx" name="About Component &gt; renders the welcome and features paragraphs" time="0.084876153">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/pages/DemoPage.test.jsx" timestamp="2025-02-12T21:41:02.282Z" hostname="Ali-Laptop" tests="4" failures="0" errors="0" skipped="0" time="0.109114817">
+        <testcase classname="tests/pages/DemoPage.test.jsx" name="DemoPage &gt; Rendering &gt; renders editor in edit mode" time="0.074373305">
+        </testcase>
+        <testcase classname="tests/pages/DemoPage.test.jsx" name="DemoPage &gt; Rendering &gt; renders preview in preview mode" time="0.014004092">
+        </testcase>
+        <testcase classname="tests/pages/DemoPage.test.jsx" name="DemoPage &gt; Rendering &gt; renders both editor and preview in split mode" time="0.007808931">
+        </testcase>
+        <testcase classname="tests/pages/DemoPage.test.jsx" name="DemoPage &gt; Rendering &gt; applies correct layout classes in split mode" time="0.007414287">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/pages/NotFound.test.jsx" timestamp="2025-02-12T21:41:02.284Z" hostname="Ali-Laptop" tests="3" failures="0" errors="0" skipped="0" time="0.089734506">
+        <testcase classname="tests/pages/NotFound.test.jsx" name="NotFound Component &gt; Rendering &gt; renders 404 page elements correctly" time="0.072995349">
+        </testcase>
+        <testcase classname="tests/pages/NotFound.test.jsx" name="NotFound Component &gt; Routing &gt; shows NotFound when accessing an unregistered route" time="0.006514978">
+        </testcase>
+        <testcase classname="tests/pages/NotFound.test.jsx" name="NotFound Component &gt; Routing &gt; does not show NotFound for registered routes" time="0.00691796">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/pages/NotePage.test.jsx" timestamp="2025-02-12T21:41:02.285Z" hostname="Ali-Laptop" tests="6" failures="0" errors="0" skipped="0" time="3.345983521">
+        <testcase classname="tests/pages/NotePage.test.jsx" name="NotePage &gt; NotePage Authentication &gt; Authentication Protection &gt; redirects to signin when user is not authenticated" time="1.125625569">
+        </testcase>
+        <testcase classname="tests/pages/NotePage.test.jsx" name="NotePage &gt; NotePage Authentication &gt; Authentication Protection &gt; allows access when user is authenticated" time="0.975941888">
+        </testcase>
+        <testcase classname="tests/pages/NotePage.test.jsx" name="NotePage &gt; Version Control &gt; initializes with latest version" time="0.603189473">
+        </testcase>
+        <testcase classname="tests/pages/NotePage.test.jsx" name="NotePage &gt; View Mode Rendering &gt; renders editor only in edit mode" time="0.23855868">
+            <system-err>
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+
+            </system-err>
+        </testcase>
+        <testcase classname="tests/pages/NotePage.test.jsx" name="NotePage &gt; View Mode Rendering &gt; renders both editor and preview in split mode" time="0.280674732">
+            <system-err>
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+
+            </system-err>
+        </testcase>
+        <testcase classname="tests/pages/NotePage.test.jsx" name="NotePage &gt; View Mode Rendering &gt; renders preview only in preview mode" time="0.077031347">
+            <system-err>
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+Warning: An update to NotePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at NotePage (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/pages/NotePage.jsx:16:53)
+    at RenderedRoute (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4355:26)
+    at Routes (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:5042:3)
+    at div
+    at div
+    at ThemeProvider (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/src/components/ThemeProvider.jsx:4:26)
+    at Router (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4985:13)
+    at MemoryRouter (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-router/dist/development/chunk-K6AXKMTT.mjs:4907:3)
+    at Provider (file:///home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/node_modules/react-redux/dist/react-redux.mjs:875:11)
+    at Wrapper (/home/aliahmad/2025-csc1049-ahmada5-noted/code/frontend/tests/test-utils.jsx:42:22)
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/pages/SignIn.test.jsx" timestamp="2025-02-12T21:41:02.289Z" hostname="Ali-Laptop" tests="9" failures="0" errors="0" skipped="0" time="2.680193726">
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Rendering &gt; renders all form elements correctly" time="0.290783499">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Rendering &gt; includes OAuth component" time="0.065916367">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Navigation &gt; redirects to home when user is already authenticated" time="0.032727887">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Navigation &gt; redirects to signup page with CLI parameters" time="0.108667295">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Form Submission &gt; shows error when submitting empty form" time="0.106523134">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Form Submission &gt; handles successful login and redirects to home" time="0.809851266">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Form Submission &gt; handles CLI mode login correctly" time="0.622498172">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Form Submission &gt; handles failed login attempt" time="0.558263108">
+        </testcase>
+        <testcase classname="tests/pages/SignIn.test.jsx" name="SignIn Component &gt; Loading State &gt; shows loading spinner when submitting form" time="0.077811966">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/pages/SignUp.test.jsx" timestamp="2025-02-12T21:41:02.292Z" hostname="Ali-Laptop" tests="9" failures="0" errors="0" skipped="0" time="3.565155986">
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Rendering &gt; renders all form elements correctly" time="0.277417662">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Rendering &gt; includes OAuth component" time="0.062812987">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Navigation &gt; redirects to home when user is already authenticated" time="0.047308737">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Navigation &gt; redirects to signin page with CLI parameters" time="0.128559071">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Form Submission &gt; shows error when submitting empty form" time="0.112034495">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Form Submission &gt; handles successful registration and redirects to home" time="1.239503669">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Form Submission &gt; handles CLI mode registration correctly" time="0.897172225">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Form Submission &gt; handles failed registration attempt" time="0.747231358">
+        </testcase>
+        <testcase classname="tests/pages/SignUp.test.jsx" name="SignUp Component &gt; Loading State &gt; shows loading spinner when submitting form" time="0.047757419">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/utils/diff.test.js" timestamp="2025-02-12T21:41:02.295Z" hostname="Ali-Laptop" tests="16" failures="0" errors="0" skipped="0" time="0.010544628">
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_toDelta &gt; handles basic insertions" time="0.001334258">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_toDelta &gt; handles basic deletions" time="0.00025532">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_toDelta &gt; handles basic equality" time="0.000138757">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_toDelta &gt; handles special characters" time="0.000178455">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_fromDelta &gt; handles basic insertions" time="0.0010102">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_fromDelta &gt; handles basic deletions" time="0.00025984">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_fromDelta &gt; handles basic equality" time="0.000267786">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_fromDelta &gt; handles mixed operations" time="0.000179266">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_fromDelta &gt; throws error on invalid delta" time="0.000945297">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="diff_match_patch delta extensions &gt; diff_fromDelta &gt; throws error on invalid length" time="0.000292197">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="Version control utilities &gt; shouldCreateSnapshot &gt; returns true for version numbers divisible by 10" time="0.000177874">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="Version control utilities &gt; shouldCreateSnapshot &gt; returns false for version numbers not divisible by 10" time="0.000125484">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="Version control utilities &gt; buildVersionContent &gt; returns empty string for empty chain" time="0.000200581">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="Version control utilities &gt; buildVersionContent &gt; returns snapshot content when chain only contains snapshot" time="0.000110525">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="Version control utilities &gt; buildVersionContent &gt; applies diffs correctly" time="0.000836941">
+        </testcase>
+        <testcase classname="tests/utils/diff.test.js" name="Version control utilities &gt; buildVersionContent &gt; returns empty string when chain doesn&apos;t start with snapshot" time="0.001023592">
+            <system-err>
+Warning: Chain doesn&apos;t start with snapshot (starts with diff)
+
+            </system-err>
+        </testcase>
+    </testsuite>
+</testsuites>
