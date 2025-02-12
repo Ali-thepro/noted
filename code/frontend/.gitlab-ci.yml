@@ -28,12 +28,10 @@ build:
 
 test:
   stage: test
-  coverage: /All files\s*\|\s*([\d.]+)/
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: code/frontend/coverage/coverage-final.json
   script:
-    - npm run test
     - npm run coverage
+  cache:
+    - key: "$CI_COMMIT_REF_SLUG-reports"
+    paths:
+      - code/frontend/coverage/coverage-final.json
+      - code/frontend/coverage/junit.xml
