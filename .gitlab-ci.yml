@@ -28,7 +28,7 @@ report-frontend:
     - echo "Frontend Coverage Report"
     - cat code/frontend/coverage/coverage-final.json
   cache:
-    - key: "$CI_COMMIT_REF_SLUG-reports"
+    key: "$CI_COMMIT_REF_SLUG-reports"
     paths:
       - code/frontend/coverage/coverage-final.json
       - code/frontend/coverage/junit.xml
