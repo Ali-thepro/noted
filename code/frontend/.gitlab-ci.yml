@@ -33,7 +33,12 @@ test:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
+        path: coverage/coverage-final.json
+      junit:
+        report:
+          coverage/junit.xml
+    paths:
+      - coverage/
   script:
     - npm run test
     - npm run coverage
