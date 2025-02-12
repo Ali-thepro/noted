@@ -67,9 +67,14 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
                 let baseVersion
                 let encryptedVersionData
 
-                if (shouldCreateSnapshot(latestVersion.metadata.versionNumber)) {
+                if (shouldCreateSnapshot(latestVersion.metadata.versionNumber + 1)) {
                   versionType = 'snapshot'
-                  encryptedVersionData = updatedNote.content
+                  encryptedVersionData = {
+                    encryptedContent: updatedNote.content,
+                    cipherKey: updatedNote.cipherKey,
+                    cipherIv: updatedNote.cipherIv,
+                    contentIv: updatedNote.contentIv
+                  }
                 } else {
                   let baseContent
                   if (latestVersion.type === 'snapshot') {
@@ -80,7 +85,6 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
                   }
 
                   const decryptedContent = await decryptVersionContent(updatedNote, encryptionService, symmetricKey)
-
                   encryptedVersionData = await createEncryptedDiff(
                     baseContent,
                     decryptedContent,
@@ -220,9 +224,11 @@ NoteModal.propTypes = {
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string),
-    user: PropTypes.string,
-    content: PropTypes.string,
-    lastVisited: PropTypes.string,
+    user: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
+    cipherKey: PropTypes.string.isRequired,
+    cipherIv: PropTypes.string.isRequired,
+    contentIv: PropTypes.string.isRequired,
     updatedAt: PropTypes.string.isRequired,
   })
 }

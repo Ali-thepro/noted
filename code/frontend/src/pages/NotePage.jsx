@@ -128,7 +128,7 @@ function NotePage() {
       let versionType = 'diff'
       let encryptedVersionData
 
-      if (shouldCreateSnapshot(latestVersion)) {
+      if (shouldCreateSnapshot(nextVersionNumber)) {
         versionType = 'snapshot'
         encryptedVersionData = await encryptVersionContent(
           newContent,
@@ -172,7 +172,7 @@ function NotePage() {
     }
   }, [activeNote, latestVersion, dispatch]) // eslint-disable-line
 
-  const { maybeCreateVersion } = useVersion(createVersionHandler, 10 * 1000)
+  const { maybeCreateVersion } = useVersion(createVersionHandler, 10 * 60 * 1000)
 
   const debouncedSetContent = useMemo(() => debounce((newContent) => {
     setContent(newContent)
