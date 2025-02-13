@@ -66,7 +66,7 @@ cli:
 report-client:
   stage: report
   dependencies:
-    - client
+    - cli
   script:
     - echo "Client Coverage Report"
     - cat code/client/coverage.txt
