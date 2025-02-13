@@ -26,4 +26,5 @@ lint:
     key: "$CI_COMMIT_REF_SLUG-reports"
     paths:
       - code/backend/coverage/cobertura-coverage.xml
+      - code/backend/coverage/junit.xml
       - code/backend/coverage/index.html

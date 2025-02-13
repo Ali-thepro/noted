@@ -74,8 +74,9 @@ export default defineConfig({
         'src/index.css',
         'src/components/PrivateRoute.jsx',
         'src/components/pages/OAuthCallback.jsx',
-
-      ]
+      ],
+      reporter: ['cobertura', 'html', 'text'],
+      reportsDirectory: './coverage'
     }
   }
 })

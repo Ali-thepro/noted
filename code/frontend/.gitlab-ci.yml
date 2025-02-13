@@ -33,6 +33,6 @@ test:
   cache:
     key: "$CI_COMMIT_REF_SLUG-reports"
     paths:
-      - code/frontend/coverage/coverage-final.json
+      - code/frontend/coverage/cobertura-coverage.xml
       - code/frontend/coverage/junit.xml
       - code/frontend/coverage/index.html

@@ -39,7 +39,7 @@ cli:
 #     reports:
 #       coverage_report:
 #         coverage_format: cobertura
-#         path: code/frontend/coverage/coverage-final.json
+#         path: code/frontend/coverage/cobertura-coverage.xml
 #       junit: code/frontend/coverage/junit.xml
 
 
@@ -54,6 +54,7 @@ cli:
 #     key: "$CI_COMMIT_REF_SLUG-reports"
 #     paths:
 #       - code/backend/coverage/cobertura-coverage.xml
+#       - code/backend/coverage/junit.xml
 #       - code/backend/coverage/index.html
 #     policy: pull
 #   coverage: /^([\d.]+)$/
@@ -62,6 +63,8 @@ cli:
 #       coverage_report:
 #         coverage_format: cobertura
 #         path: code/backend/coverage/cobertura-coverage.xml
+#       junit: code/backend/coverage/junit.xml
+
 
 # report-cli:
 #   stage: report
