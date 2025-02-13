@@ -25,3 +25,6 @@ fmt:
 
 vet:
 	go vet ./...
+
+test:
+	go test -v -race -coverprofile=coverage.out ./...
