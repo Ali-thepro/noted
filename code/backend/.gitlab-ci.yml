@@ -20,11 +20,10 @@ lint:
 
 .test:
   stage: test
-  coverage: /All files\s*\|\s*([\d.]+)/
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
   script:
     - npm run coverage:c8
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-reports"
+    paths:
+      - code/backend/coverage/cobertura-coverage.xml
+      - code/backend/coverage/index.html

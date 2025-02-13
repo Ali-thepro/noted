@@ -41,3 +41,23 @@ report-frontend:
         coverage_format: cobertura
         path: code/frontend/coverage/coverage-final.json
       junit: code/frontend/coverage/junit.xml
+
+
+report-backend:
+  stage: report
+  dependencies:
+    - backend
+  script:
+    - echo "Backend Coverage Report"
+    - grep -o 'class="strong">[0-9.]*' code/backend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-reports"
+    paths:
+      - code/backend/coverage/cobertura-coverage.xml
+      - code/backend/coverage/index.html
+  coverage: /^([\d.]+)$/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: code/backend/coverage/cobertura-coverage.xml
