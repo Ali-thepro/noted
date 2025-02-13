@@ -39,7 +39,7 @@ build:
     - make build
     - test -x noted
 
-.test:
+test:
   stage: test
   script:
     - make test
