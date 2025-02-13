@@ -2,17 +2,17 @@ stages:
   - build
   - report
 
-# frontend:
-#   stage: build
-#   trigger:
-#     include: code/frontend/.gitlab-ci.yml
-#     strategy: depend
+frontend:
+  stage: build
+  trigger:
+    include: code/frontend/.gitlab-ci.yml
+    strategy: depend
 
-# backend:
-#   stage: build
-#   trigger:
-#     include: code/backend/.gitlab-ci.yml
-#     strategy: depend
+backend:
+  stage: build
+  trigger:
+    include: code/backend/.gitlab-ci.yml
+    strategy: depend
 
 cli:
   stage: build
@@ -63,24 +63,24 @@ cli:
 #         coverage_format: cobertura
 #         path: code/backend/coverage/cobertura-coverage.xml
 
-report-client:
-  stage: report
-  dependencies:
-    - cli
-  script:
-    - echo "Client Coverage Report"
-    - cat code/client/coverage.txt
-  cache:
-    key: "$CI_COMMIT_REF_SLUG-reports"
-    paths:
-      - code/client/coverage.txt
-      - code/client/cobertura.xml
-      - code/client/report.xml
-    policy: pull
-  coverage: /total:.*\s(\d+(?:\.\d+)?%)/
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: code/client/cobertura.xml
-      junit: code/client/report.xml
+# report-cli:
+#   stage: report
+#   dependencies:
+#     - cli
+#   script:
+#     - echo "Client Coverage Report"
+#     - cat code/client/coverage.txt
+#   cache:
+#     key: "$CI_COMMIT_REF_SLUG-reports"
+#     paths:
+#       - code/client/coverage.txt
+#       - code/client/cobertura.xml
+#       - code/client/report.xml
+#     policy: pull
+#   coverage: /total:.*\s(\d+(?:\.\d+)?%)/
+#   artifacts:
+#     reports:
+#       coverage_report:
+#         coverage_format: cobertura
+#         path: code/client/cobertura.xml
+#       junit: code/client/report.xml
