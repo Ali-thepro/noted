@@ -55,10 +55,10 @@ func TestGetMe(t *testing.T) {
 
 				// Write response body if successful case
 				if tt.serverResponse != nil {
-					json.NewEncoder(w).Encode(tt.serverResponse)
+					json.NewEncoder(w).Encode(tt.serverResponse) //nolint:errcheck 
 				}
 			}))
-			defer server.Close()
+			defer server.Close() //nolint:errcheck
 
 			// Create client pointing to test server
 			client := &Client{
@@ -67,7 +67,7 @@ func TestGetMe(t *testing.T) {
 			}
 
 			// Make request
-			user, err := client.GetMe()
+			user, err := client.GetMe() 
 
 			// Check error expectation
 			if tt.expectError && err == nil {

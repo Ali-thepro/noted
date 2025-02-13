@@ -59,7 +59,7 @@ func TestClient_GetMe(t *testing.T) {
 				// Send response
 				w.WriteHeader(tt.serverStatus)
 				if tt.serverResponse != nil {
-					json.NewEncoder(w).Encode(tt.serverResponse)
+					json.NewEncoder(w).Encode(tt.serverResponse) //nolint:errcheck
 				}
 			}))
 			defer server.Close()
