@@ -14,19 +14,19 @@ test('test', async ({ page }) => {
   
   // Create a new note
   await page.getByRole('button', { name: 'New Note' }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('Version Control Test');
+  await page.getByRole('textbox', { name: 'Title' }).fill('Revert Test');
   await page.getByRole('button', { name: 'Create Note' }).click();
   
   // Edit the note
-  await page.getByText('# Version Control TestStart').click();
+  await page.getByText('# Revert TestStart writing').click();
   await page.getByRole('link', { name: 'Noted' }).click();
-  await page.locator('div').filter({ hasText: /^Version Control Testa few seconds ago14 Feb 2025$/ }).getByLabel('Edit Note').click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('Version Control Test V2');
+  await page.locator('div').filter({ hasText: /^Revert Testa few seconds ago14 Feb 2025$/ }).first().locator('button[aria-label="Edit Note"]').click();
+  await page.getByRole('textbox', { name: 'Title' }).fill('Revert Test V2');
   await page.getByRole('button', { name: 'Save Changes' }).click();
-  await page.locator('div').filter({ hasText: /^Version Control Test V2$/ }).first().click();
+  
+  // Revert changes
+  await page.locator('div').filter({ hasText: /^Revert Test V2$/ }).click();
   await page.getByRole('button', { name: 'Edit View' }).click();
-  await page.getByRole('button', { name: 'Revert' }).click();
-  await page.waitForTimeout(5000);
-  await page.getByRole('button', { name: 'Version Control Test' }).first().click();
-  await page.getByRole('button', { name: 'Revert' }).click();
+  await page.getByRole('button', { name: 'Revert Test v1 Feb 14, 2025 5' }).click();
+  await page.getByRole('button', { name: 'Revert', exact: true }).click();
 });
