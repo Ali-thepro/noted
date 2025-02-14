@@ -79,7 +79,7 @@ const signup = async (request, response, next) => {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '30d' })
       return response.status(201).json({
         user: savedUser,
-        redirectUrl: `${redirect}?token=${token}`
+        redirectUrl: `${redirect}?token=${token}&createMasterPassword=true`
       })
     } else {
       const accessToken = createAccessToken(savedUser)
@@ -276,7 +276,7 @@ const google = async (request, response, next) => {
 
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
-      response.redirect(`${redirect}?token=${token}`)
+      response.redirect(genMasterPassword ? `${redirect}?token=${token}&createMasterPassword=true` : `${redirect}?token=${token}`)
     } else {
       const accessToken = createAccessToken(user)
       const refreshToken = createRefreshToken(user)
@@ -397,7 +397,7 @@ const github = async (request, response, next) => {
 
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
-      return response.redirect(`${redirect}?token=${token}`)
+      return response.redirect(genMasterPassword ? `${redirect}?token=${token}&createMasterPassword=true` : `${redirect}?token=${token}`)
     } else {
       const accessToken = createAccessToken(user)
       const refreshToken = createRefreshToken(user)

@@ -21,7 +21,7 @@ const toolbarItems = [
   { action: 'highlight', icon: <FaHighlighter />, tooltip: 'Highlight', prefix: '==', suffix: '==' },
   { action: 'link', icon: <FaLink />, tooltip: 'Insert Link', prefix: '[', suffix: '](url)' },
   { action: 'image', icon: <FaImage />, tooltip: 'Upload Image', prefix: '![', suffix: '](url)' },
-  { action: 'upload', icon: <FaUpload />, tooltip: 'Upload File' },
+  { action: 'upload', icon: <FaUpload />, tooltip: 'Upload Image File' },
   { action: 'ul', icon: <FaListUl />, tooltip: 'Unordered List', prefix: '- ', suffix: '' },
   { action: 'ol', icon: <FaListOl />, tooltip: 'Ordered List', prefix: '1. ', suffix: '' },
   { action: 'checklist', icon: <FaCheckSquare />, tooltip: 'Checklist', prefix: '- [ ] ', suffix: '' },

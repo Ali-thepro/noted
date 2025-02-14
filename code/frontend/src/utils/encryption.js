@@ -27,8 +27,8 @@ export class EncryptionService {
     return new Uint8Array([...atob(str)].map(c => c.charCodeAt(0)))
   }
 
-  async hash(email) {
-    const salt = this.utf8ToArray(email.toLowerCase())
+  async hash(value) {
+    const salt = this.utf8ToArray(value.toLowerCase())
     const buffer = await crypto.subtle.digest('SHA-256', salt)
     return new Uint8Array(buffer)
   }
@@ -120,7 +120,7 @@ export class EncryptionService {
   }
 
   async encryptSymmetricKey(symmetricKey, stretchedKey) {
-    const iv = new Uint8Array(16)
+    const iv = new Uint8Array(12)
     crypto.getRandomValues(iv)
     const key = await crypto.subtle.importKey(
       'raw',
@@ -159,7 +159,7 @@ export class EncryptionService {
   }
 
   async encryptNoteContent(content, noteCipherKey) {
-    const iv = new Uint8Array(16)
+    const iv = new Uint8Array(12)
     crypto.getRandomValues(iv)
     const key = await crypto.subtle.importKey(
       'raw',
@@ -200,7 +200,7 @@ export class EncryptionService {
   }
 
   async wrapNoteCipherKey(noteCipherKey, symmetricKey) {
-    const iv = new Uint8Array(16)
+    const iv = new Uint8Array(12)
     crypto.getRandomValues(iv)
     const key = await crypto.subtle.importKey(
       'raw',

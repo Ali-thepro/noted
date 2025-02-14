@@ -68,9 +68,9 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		headerFmt := fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
-		fmt.Printf(headerFmt, "Ver", "Type", "Created", "Title", "Tags")
-		fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+36))
+		headerFmt := fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
+		fmt.Printf(headerFmt, "Ver", "Created", "Title", "Tags")
+		fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+28))
 
 		for _, v := range versions {
 			tags := strings.Join(v.Metadata.Tags, ", ")
@@ -78,9 +78,8 @@ var listCmd = &cobra.Command{
 				tags = "none"
 			}
 
-			fmt.Printf(fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
+			fmt.Printf(fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
 				fmt.Sprintf("#%d", v.Metadata.VersionNumber),
-				v.Type,
 				v.CreatedAt.Format("2006-01-02 15:04:05"),
 				v.Metadata.Title,
 				tags,

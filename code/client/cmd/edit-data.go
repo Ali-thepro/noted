@@ -9,7 +9,6 @@ import (
 	"noted/internal/storage"
 	"noted/internal/utils"
 	"strings"
-
 )
 
 var editDataCmd = &cobra.Command{

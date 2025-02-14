@@ -28,10 +28,9 @@ func selectVersion(versions []*api.Version) (*api.Version, error) {
 			maxTagsLen = tagsLen
 		}
 	}
-
-	headerFmt := fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
-	fmt.Printf(headerFmt, "Ver", "Type", "Created", "Title", "Tags")
-	fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+36))
+	headerFmt := fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
+	fmt.Printf(headerFmt, "Ver", "Created", "Title", "Tags")
+	fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+28))
 
 	length := len(versions)
 	for i := length - 1; i >= 0; i-- {
@@ -41,9 +40,8 @@ func selectVersion(versions []*api.Version) (*api.Version, error) {
 			tags = "none"
 		}
 
-		fmt.Printf(fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
+		fmt.Printf(fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
 			fmt.Sprintf("#%d", v.Metadata.VersionNumber),
-			v.Type,
 			v.CreatedAt.Format("2006-01-02 15:04:05"),
 			v.Metadata.Title,
 			tags,
