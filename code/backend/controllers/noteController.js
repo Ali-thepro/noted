@@ -7,6 +7,10 @@ const getNotes = async (request, response, next) => {
   const { tag, search } = request.query
   const user = request.user
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const filter = {
       user: user.id,
@@ -44,6 +48,10 @@ const getNote = async (request, response, next) => {
   const { id } = request.params
   const user = request.user
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const note = await Note.findOne({ _id: id, user: user.id })
     if (!note) {
@@ -59,6 +67,10 @@ const getNote = async (request, response, next) => {
 const createNote = async (request, response, next) => {
   const user = request.user
   const { title, content, tags, cipherKey, cipherIv, contentIv } = request.body
+
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
 
   try {
     const note = new Note({
@@ -106,6 +118,10 @@ const updateNote = async (request, response, next) => {
   const user = request.user
   const { title, content, tags, cipherKey, cipherIv, contentIv } = request.body
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const updatedNote = await Note.findOneAndUpdate(
       { _id: id, user: user.id },
@@ -137,6 +153,10 @@ const deleteNote = async (request, response, next) => {
   const { id } = request.params
   const user = request.user
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const note = await Note.findOne({ _id: id, user: user.id })
     if (!note) {
@@ -160,6 +180,10 @@ const getNoteMetadata = async (request, response, next) => {
   const user = request.user
   const { since } = request.query
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const filter = {
       user: user.id,
@@ -182,6 +206,10 @@ const getBulkNotes = async (request, response, next) => {
   const user = request.user
   const { ids } = request.body
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   if (!Array.isArray(ids)) {
     return next(createError('Invalid request : ids must be an array', 400))
   }
@@ -200,6 +228,10 @@ const getBulkNotes = async (request, response, next) => {
 const getDeletedNotes = async (request, response, next) => {
   const user = request.user
   const { since } = request.query
+
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
 
   try {
     const filter = {

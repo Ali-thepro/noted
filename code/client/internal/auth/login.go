@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"golang.org/x/term"
+	"github.com/nbutton23/zxcvbn-go"
 	"net/http"
 	"noted/internal/api"
 	"noted/internal/encryption"
@@ -35,7 +36,7 @@ func HandleLogin() error {
 
 	// https://stackoverflow.com/questions/18106749/golang-catch-signals
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
 
 	select {
 	case token := <-tokenChan:
@@ -43,6 +44,14 @@ func HandleLogin() error {
 	case err := <-errChan:
 		return fmt.Errorf("failed to authenticate: %w", err)
 	case <-sigChan:
+		stdin := int(syscall.Stdin)
+		oldState, err := term.GetState(stdin)
+		if err != nil {
+			return fmt.Errorf("failed to get terminal state: %w", err)
+		}
+		term.Restore(stdin, oldState)
+		signal.Reset(syscall.SIGTSTP)
+		syscall.Kill(syscall.Getpid(), syscall.SIGTSTP)
 		return fmt.Errorf("authentication cancelled")
 	}
 
@@ -127,16 +136,31 @@ func SetupEncryption() error {
     fmt.Println("This password will be used to encrypt your notes and cannot be recovered if lost.")
     fmt.Println("Make sure to use a strong password that you can remember.")
 
+    stdin := int(syscall.Stdin)
+    oldState, err := term.GetState(stdin)
+    if err != nil {
+        return fmt.Errorf("failed to get terminal state: %w", err)
+    }
+    sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
+    defer signal.Stop(sigChan)
+
+    go func() {
+        for range sigChan {
+            term.Restore(stdin, oldState)
+			os.Exit(1)
+        }
+    }()
 	for {
 		fmt.Print("Enter master password: ")
-		password, err := term.ReadPassword(int(syscall.Stdin))
+		password, err := term.ReadPassword(stdin)
 		if err != nil {
 			return fmt.Errorf("failed to read password: %w", err)
 		}
 		fmt.Println()
 	
 		fmt.Print("Confirm master password: ")
-		confirmPassword, err := term.ReadPassword(int(syscall.Stdin))
+		confirmPassword, err := term.ReadPassword(stdin)
 		if err != nil {
 			return fmt.Errorf("failed to read confirmation password: %w", err)
 		}
@@ -155,6 +179,13 @@ func SetupEncryption() error {
 		user, err := client.GetMe()
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
+		}
+
+		userInput := []string{user.Email, user.Username}
+		result := zxcvbn.PasswordStrength(string(password), userInput)
+		if result.Score < 2 {
+			fmt.Println("\nPassword is too weak. Please try again.")
+			continue
 		}
 	
 		emailHash, err := e.Hash(user.Email)
@@ -210,6 +241,23 @@ func SetupEncryption() error {
 
 func EncryptionLogin() error {
 	e := encryption.NewEncryptionService()
+
+    stdin := int(syscall.Stdin)
+    oldState, err := term.GetState(stdin)
+    if err != nil {
+        return fmt.Errorf("failed to get terminal state: %w", err)
+    }
+	sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
+    defer signal.Stop(sigChan)
+
+    go func() {
+        for range sigChan {
+            term.Restore(stdin, oldState)
+			os.Exit(1)
+        }
+    }()
+
 	for {
 		fmt.Print("Enter master password: ")
 		password, err := term.ReadPassword(int(syscall.Stdin))
@@ -268,7 +316,7 @@ func EncryptionLogin() error {
 			return fmt.Errorf("failed to compare master password hash: %w", err)
 		}
 		if !isCorrect {
-			fmt.Println("Incorrect master password")
+			fmt.Println("\nIncorrect master password")
 			continue
 		}
 		stretchedKey, err := e.HKDF(masterKey, emailHash)

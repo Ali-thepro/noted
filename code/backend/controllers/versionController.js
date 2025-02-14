@@ -7,6 +7,10 @@ const createVersion = async (request, response, next) => {
   const { type, content, metadata, baseVersion, cipherKey, cipherIv, contentIv } = request.body
   const user = request.user
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })
     if (!note) {
@@ -37,6 +41,10 @@ const getVersionChain = async (request, response, next) => {
   const { noteId } = request.params
   const { until } = request.query
   const user = request.user
+
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
 
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })
@@ -77,6 +85,10 @@ const getVersionChain = async (request, response, next) => {
 const getVersions = async (request, response, next) => {
   const { noteId } = request.params
   const user = request.user
+
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
 
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })

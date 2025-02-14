@@ -22,8 +22,10 @@ const setup = async (request, response, next) => {
 
 const getMasterPasswordHash = async (request, response, next) => {
   try {
-    const user = request.user
-    response.json(user.masterPasswordHash)
+    if (!request.user.masterPasswordHash) {
+      return next(createError('Please create a master password', 400))
+    }
+    response.json(request.user.masterPasswordHash)
   } catch (error) {
     next(error)
   }
@@ -32,6 +34,9 @@ const getMasterPasswordHash = async (request, response, next) => {
 const getProtectedSymmetricKey = async (request, response, next) => {
   try {
     const user = request.user
+    if (!user.masterPasswordHash) {
+      return next(createError('Please create a master password', 400))
+    }
     response.json(user.protectedSymmetricKey)
   } catch (error) {
     next(error)
@@ -41,6 +46,9 @@ const getProtectedSymmetricKey = async (request, response, next) => {
 const getIv = async (request, response, next) => {
   try {
     const user = request.user
+    if (!user.masterPasswordHash) {
+      return next(createError('Please create a master password', 400))
+    }
     response.json(user.iv)
   } catch (error) {
     next(error)

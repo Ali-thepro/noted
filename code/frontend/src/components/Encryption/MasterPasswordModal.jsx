@@ -17,6 +17,7 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const theme = useSelector(state => state.theme)
+  const user = useSelector(state => state.auth.user)
   const [masterPassword, setMasterPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordStrength, setPasswordStrength] = useState(0)
@@ -25,7 +26,7 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
 
   useEffect(() => {
     if (masterPassword) {
-      const result = zxcvbn(masterPassword)
+      const result = zxcvbn(masterPassword, [user.email, user.username])
       setPasswordStrength(result.score)
     } else {
       setPasswordStrength(0)
