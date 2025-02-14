@@ -31,6 +31,15 @@ const getMasterPasswordHash = async (request, response, next) => {
   }
 }
 
+const encryptionStatus = async (request, response, next) => {
+  try {
+    const masterPasswordSetup = request.user.masterPasswordHash ? true : false
+    response.json(masterPasswordSetup)
+  } catch (error) {
+    next(error)
+  }
+}
+
 const getProtectedSymmetricKey = async (request, response, next) => {
   try {
     const user = request.user
@@ -59,5 +68,6 @@ module.exports = {
   setup,
   getMasterPasswordHash,
   getProtectedSymmetricKey,
-  getIv
+  getIv,
+  encryptionStatus
 }

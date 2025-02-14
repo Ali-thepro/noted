@@ -49,9 +49,13 @@ func HandleLogin() error {
 		if err != nil {
 			return fmt.Errorf("failed to get terminal state: %w", err)
 		}
-		term.Restore(stdin, oldState)
+		if err = term.Restore(stdin, oldState); err != nil {
+			return fmt.Errorf("failed to restore terminal state: %w", err)
+		}
 		signal.Reset(syscall.SIGTSTP)
-		syscall.Kill(syscall.Getpid(), syscall.SIGTSTP)
+		if err = syscall.Kill(syscall.Getpid(), syscall.SIGTSTP); err != nil {
+			return fmt.Errorf("failed to kill process: %w", err)
+		}
 		return fmt.Errorf("authentication cancelled")
 	}
 
@@ -147,7 +151,7 @@ func SetupEncryption() error {
 
     go func() {
         for range sigChan {
-            term.Restore(stdin, oldState)
+            _ = term.Restore(stdin, oldState)
 			os.Exit(1)
         }
     }()
@@ -253,7 +257,7 @@ func EncryptionLogin() error {
 
     go func() {
         for range sigChan {
-            term.Restore(stdin, oldState)
+            _ = term.Restore(stdin, oldState)
 			os.Exit(1)
         }
     }()

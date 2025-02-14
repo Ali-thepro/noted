@@ -67,3 +67,17 @@ func (c *Client) GetIV() (string, error) {
 
 	return iv, nil
 }
+
+func (c *Client) EncryptionStatus() (bool, error) {
+	resp, err := c.doRequest("GET", "/encryption/status", nil)
+	if err != nil {
+		return false, fmt.Errorf("failed to get encryption status: %w", err)
+	}
+
+	var status bool
+	if err := c.handleResponse(resp, &status); err != nil {
+		return false, err
+	}
+
+	return status, nil
+}

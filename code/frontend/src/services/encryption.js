@@ -21,3 +21,8 @@ export const getIv = async () => {
   const response = await axios.get(`${baseUrl}/iv`)
   return response.data
 }
+
+export const encryptionStatus = async () => {
+  const response = await axios.get(`${baseUrl}/status`)
+  return response.data
+}

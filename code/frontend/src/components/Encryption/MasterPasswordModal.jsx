@@ -31,18 +31,20 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
     } else {
       setPasswordStrength(0)
     }
-  }, [masterPassword])
+  }, [masterPassword]) // eslint-disable-line
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     if (masterPassword !== confirmPassword) {
       dispatch(setNotification('Passwords do not match', 'failure'))
+      setLoading(false)
       return
     }
 
     if (passwordStrength < 2) {
       dispatch(setNotification('Please choose a stronger password', 'failure'))
+      setLoading(false)
       return
     }
 
@@ -66,6 +68,7 @@ const MasterPasswordModal = ({ show, onClose, email }) => {
       onClose()
       navigate('/')
     } catch (error) {
+      setLoading(false)
       console.error('Error setting up master password:', error)
       dispatch(setNotification('Failed to set master password', 'failure'))
       setMasterPassword('')
