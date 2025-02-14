@@ -27,7 +27,7 @@ func (c *Client) SetupEncryption(data *EncryptionSetupData) error {
 }
 
 func (c *Client) GetMasterPasswordHash() (string, error) {
-	resp, err := c.doRequest("GET", "/encryption/master-password-hash", nil)
+	resp, err := c.doRequest("GET", "/encryption/password", nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to get master password hash: %w", err)
 	}
@@ -41,7 +41,7 @@ func (c *Client) GetMasterPasswordHash() (string, error) {
 }
 
 func (c *Client) GetProtectedSymmetricKey() (string, error) {
-	resp, err := c.doRequest("GET", "/encryption/protected-symmetric-key", nil)
+	resp, err := c.doRequest("GET", "/encryption/symmetric-key", nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to get protected symmetric key: %w", err)
 	}

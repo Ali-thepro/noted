@@ -59,13 +59,16 @@ func (e *EncryptionService) GenerateMasterPasswordHash(keyHash, masterPasswordHa
 	return encodedHash, nil
 }
 
-func (e *EncryptionService) SecureCompare(password, encodedHash string) (bool, error) {
-	p, salt, hash, err := decodeHash(encodedHash)
+func (e *EncryptionService) SecureCompare(encodedHash, passwordHash string) (bool, error) {
+	_, _, hash, err := decodeHash(encodedHash)
 	if err != nil {
 		return false, err
 	}
 
-	otherHash := argon2.IDKey([]byte(password), salt, p.iterations, p.memory, p.parallelism, p.keyLength)
+	_, _, otherHash, err := decodeHash(passwordHash)
+	if err != nil {
+		return false, err
+	}
 
 	if subtle.ConstantTimeCompare(hash, otherHash) == 1 {
 		return true, nil
