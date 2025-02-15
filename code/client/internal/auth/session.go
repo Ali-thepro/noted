@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func GetSessionKey() ([]byte, error) {
+func GetSymmetricKey() ([]byte, error) {
 	encodedKey := os.Getenv("NOTED_KEY")
 	if encodedKey == "" {
 		return nil, fmt.Errorf("no session key found, please unlock first")

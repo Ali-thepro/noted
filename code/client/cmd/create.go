@@ -5,6 +5,8 @@ import (
 	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
+	"noted/internal/encryption"
+	"noted/internal/auth"
 	"strings"
 )
 
@@ -35,24 +37,44 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
-		note, err := client.CreateNote(api.CreateNoteRequest{
-			Title:   title,
-			Content: fmt.Sprintf("# %s\n\nStart writing here...", title),
-			Tags:    validTags,
-		})
-		if err != nil {
-			return err
-		}
+		symmetricKey, err := auth.GetSymmetricKey()
+        if err != nil {
+            return fmt.Errorf("noted is locked, please unlock first: %w", err)
+        }
 
-		_, err = client.CreateVersion(note.ID, &api.CreateVersionRequest{
-			Type:    "snapshot",
-			Content: note.Content,
-			Metadata: api.VersionMetadata{
-				Title:         note.Title,
-				Tags:          note.Tags,
-				VersionNumber: 1,
-			},
-		})
+		encryptionService := encryption.NewEncryptionService()
+        initialContent := fmt.Sprintf("# %s\n\nStart writing here...", title)
+
+		encrypted, err := encryptionService.EncryptNote(initialContent, symmetricKey)
+        if err != nil {
+            return fmt.Errorf("failed to encrypt note: %w", err)
+        }
+
+
+        note, err := client.CreateNote(api.CreateNoteRequest{
+            Title:     title,
+            Content:   encrypted.Content,
+            ContentIv: encrypted.ContentIv,
+            CipherKey: encrypted.CipherKey,
+            CipherIv:  encrypted.CipherIv,
+            Tags:      validTags,
+        })
+        if err != nil {
+            return err
+        }
+
+        _, err = client.CreateVersion(note.ID, &api.CreateVersionRequest{
+            Type:    "snapshot",
+            Content: encrypted.Content,
+            ContentIv: encrypted.ContentIv,
+            CipherKey: encrypted.CipherKey,
+            CipherIv:  encrypted.CipherIv,
+            Metadata: api.VersionMetadata{
+                Title:         note.Title,
+                Tags:          note.Tags,
+                VersionNumber: 1,
+            },
+        })
 		if err != nil {
 			return fmt.Errorf("failed to create initial version: %w", err)
 		}

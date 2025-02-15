@@ -258,3 +258,27 @@ func (e *EncryptionService) CreateEncryptedDiff(baseContent, newContent string, 
 
 	return encryptedContent, nil
 }
+
+func (e *EncryptionService) EncryptNote(content string, symmetricKey []byte) (*EncryptedContent, error) {
+    noteCipherKey := make([]byte, 32)
+    if _, err := io.ReadFull(rand.Reader, noteCipherKey); err != nil {
+        return nil, fmt.Errorf("failed to generate note cipher key: %w", err)
+    }
+
+    encryptedContent, contentIv, err := e.EncryptNoteContent(content, noteCipherKey)
+    if err != nil {
+        return nil, fmt.Errorf("failed to encrypt note content: %w", err)
+    }
+
+    cipherKey, cipherIv, err := e.WrapNoteCipherKey(noteCipherKey, symmetricKey)
+    if err != nil {
+        return nil, fmt.Errorf("failed to wrap note cipher key: %w", err)
+    }
+
+    return &EncryptedContent{
+        Content:   encryptedContent,
+        ContentIv: contentIv,
+        CipherKey: cipherKey,
+        CipherIv:  cipherIv,
+    }, nil
+}

@@ -22,6 +22,9 @@ type CreateNoteRequest struct {
 	Title   string   `json:"title"`
 	Content string   `json:"content"`
 	Tags    []string `json:"tags"`
+	CipherKey string   `json:"cipherKey"`
+	CipherIv  string   `json:"cipherIv"`
+	ContentIv string   `json:"contentIv"`
 }
 
 type UpdateNoteRequest struct {
