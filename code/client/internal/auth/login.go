@@ -2,8 +2,8 @@ package auth
 
 import (
 	"fmt"
-	"golang.org/x/term"
 	"github.com/nbutton23/zxcvbn-go"
+	"golang.org/x/term"
 	"net/http"
 	"noted/internal/api"
 	"noted/internal/encryption"
@@ -125,10 +125,6 @@ func handleSuccessfullLogin(tokenStr string) error {
 		if err := SetupEncryption(); err != nil {
 			return fmt.Errorf("failed to setup encryption: %w", err)
 		}
-	} else {
-		if err := EncryptionLogin(); err != nil {
-			return fmt.Errorf("failed to login to encryption: %w", err)
-		}
 	}
 	fmt.Println("Successfully logged in")
 	return nil
@@ -136,25 +132,25 @@ func handleSuccessfullLogin(tokenStr string) error {
 
 func SetupEncryption() error {
 	e := encryption.NewEncryptionService()
-    fmt.Println("\nPlease set up your master password.")
-    fmt.Println("This password will be used to encrypt your notes and cannot be recovered if lost.")
-    fmt.Println("Make sure to use a strong password that you can remember.")
+	fmt.Println("\nPlease set up your master password.")
+	fmt.Println("This password will be used to encrypt your notes and cannot be recovered if lost.")
+	fmt.Println("Make sure to use a strong password that you can remember.")
 
-    stdin := int(syscall.Stdin)
-    oldState, err := term.GetState(stdin)
-    if err != nil {
-        return fmt.Errorf("failed to get terminal state: %w", err)
-    }
-    sigChan := make(chan os.Signal, 1)
-    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
-    defer signal.Stop(sigChan)
+	stdin := int(syscall.Stdin)
+	oldState, err := term.GetState(stdin)
+	if err != nil {
+		return fmt.Errorf("failed to get terminal state: %w", err)
+	}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
+	defer signal.Stop(sigChan)
 
-    go func() {
-        for range sigChan {
-            _ = term.Restore(stdin, oldState)
+	go func() {
+		for range sigChan {
+			_ = term.Restore(stdin, oldState)
 			os.Exit(1)
-        }
-    }()
+		}
+	}()
 	for {
 		fmt.Print("Enter master password: ")
 		password, err := term.ReadPassword(stdin)
@@ -162,24 +158,24 @@ func SetupEncryption() error {
 			return fmt.Errorf("failed to read password: %w", err)
 		}
 		fmt.Println()
-	
+
 		fmt.Print("Confirm master password: ")
 		confirmPassword, err := term.ReadPassword(stdin)
 		if err != nil {
 			return fmt.Errorf("failed to read confirmation password: %w", err)
 		}
 		fmt.Println()
-	
+
 		if string(password) != string(confirmPassword) {
 			fmt.Println("\nPasswords do not match. Please try again.")
-            continue
+			continue
 		}
-	
+
 		client, err := api.NewClient()
 		if err != nil {
 			return fmt.Errorf("failed to create client: %w", err)
 		}
-	
+
 		user, err := client.GetMe()
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
@@ -191,12 +187,12 @@ func SetupEncryption() error {
 			fmt.Println("\nPassword is too weak. Please try again.")
 			continue
 		}
-	
+
 		emailHash, err := e.Hash(user.Email)
 		if err != nil {
 			return fmt.Errorf("failed to hash email: %w", err)
 		}
-	
+
 		masterKey, err := e.GenerateMasterKey(string(password), emailHash)
 		if err != nil {
 			return fmt.Errorf("failed to generate master key: %w", err)
@@ -205,22 +201,22 @@ func SetupEncryption() error {
 		if err != nil {
 			return fmt.Errorf("failed to hash password: %w", err)
 		}
-	
+
 		masterPasswordHash, err := e.GenerateMasterPasswordHash(masterKey, passwordHash)
 		if err != nil {
 			return fmt.Errorf("failed to generate master password hash: %w", err)
 		}
-	
+
 		stretchedKey, err := e.HKDF(masterKey, emailHash)
 		if err != nil {
 			return fmt.Errorf("failed to generate stretched key: %w", err)
 		}
-	
+
 		key, err := e.GenerateKey(32)
 		if err != nil {
 			return fmt.Errorf("failed to generate key: %w", err)
 		}
-	
+
 		encryptedKey, iv, err := e.EncryptSymmetricKey(key, stretchedKey)
 		if err != nil {
 			return fmt.Errorf("failed to encrypt symmetric key: %w", err)
@@ -230,110 +226,108 @@ func SetupEncryption() error {
 			ProtectedSymmetricKey: encryptedKey,
 			IV:                    iv,
 		}
-	
+
 		err = client.SetupEncryption(setupData)
 		if err != nil {
 			return fmt.Errorf("failed to setup encryption: %w", err)
 		}
-		fmt.Println("masterPasswordHash:", masterPasswordHash)
-		fmt.Println("Encrypted key:", encryptedKey)
-		fmt.Println("IV:", iv)
-	
+
+		fmt.Println("Encryption setup successfully")
+
 		return nil
 	}
 }
 
-func EncryptionLogin() error {
+func EncryptionLogin() ([]byte, error) {
 	e := encryption.NewEncryptionService()
 
-    stdin := int(syscall.Stdin)
-    oldState, err := term.GetState(stdin)
-    if err != nil {
-        return fmt.Errorf("failed to get terminal state: %w", err)
-    }
+	stdin := int(syscall.Stdin)
+	oldState, err := term.GetState(stdin)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get terminal state: %w", err)
+	}
 	sigChan := make(chan os.Signal, 1)
-    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
-    defer signal.Stop(sigChan)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP)
+	defer signal.Stop(sigChan)
 
-    go func() {
-        for range sigChan {
-            _ = term.Restore(stdin, oldState)
+	go func() {
+		for range sigChan {
+			_ = term.Restore(stdin, oldState)
 			os.Exit(1)
-        }
-    }()
+		}
+	}()
 
 	for {
-		fmt.Print("Enter master password: ")
+		fmt.Fprint(os.Stderr, "Enter master password: ")
 		password, err := term.ReadPassword(int(syscall.Stdin))
 		if err != nil {
-			return fmt.Errorf("failed to read password: %w", err)
+			return nil, fmt.Errorf("failed to read password: %w", err)
 		}
-		fmt.Println()
-	
+		fmt.Fprintln(os.Stderr) // newline after password
+
 		client, err := api.NewClient()
 		if err != nil {
-			return fmt.Errorf("failed to create client: %w", err)
+			return nil, fmt.Errorf("failed to create client: %w", err)
 		}
-	
+
 		user, err := client.GetMe()
 		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
+			return nil, fmt.Errorf("failed to get user: %w", err)
 		}
-	
+
 		masterPasswordHash, err := client.GetMasterPasswordHash()
 		if err != nil {
-			return fmt.Errorf("failed to get master password hash: %w", err)
+			return nil, fmt.Errorf("failed to get master password hash: %w", err)
 		}
-	
+
 		protectedSymmetricKey, err := client.GetProtectedSymmetricKey()
 		if err != nil {
-			return fmt.Errorf("failed to get protected symmetric key: %w", err)
+			return nil, fmt.Errorf("failed to get protected symmetric key: %w", err)
 		}
 
 		iv, err := client.GetIV()
 		if err != nil {
-			return fmt.Errorf("failed to get iv: %w", err)
+			return nil, fmt.Errorf("failed to get iv: %w", err)
 		}
-	
+
 		emailHash, err := e.Hash(user.Email)
 		if err != nil {
-			return fmt.Errorf("failed to hash email: %w", err)
+			return nil, fmt.Errorf("failed to hash email: %w", err)
 		}
-	
+
 		masterKey, err := e.GenerateMasterKey(string(password), emailHash)
 		if err != nil {
-			return fmt.Errorf("failed to generate master key: %w", err)
+			return nil, fmt.Errorf("failed to generate master key: %w", err)
 		}
-	
+
 		passwordHash, err := e.Hash(string(password))
 		if err != nil {
-			return fmt.Errorf("failed to hash password: %w", err)
+			return nil, fmt.Errorf("failed to hash password: %w", err)
 		}
-	
+
 		encodedMasterPasswordHash, err := e.GenerateMasterPasswordHash(masterKey, passwordHash)
 		if err != nil {
-			return fmt.Errorf("failed to generate master password hash: %w", err)
+			return nil, fmt.Errorf("failed to generate master password hash: %w", err)
 		}
 
 		isCorrect, err := e.SecureCompare(encodedMasterPasswordHash, masterPasswordHash)
 		if err != nil {
-			return fmt.Errorf("failed to compare master password hash: %w", err)
+			return nil, fmt.Errorf("failed to compare master password hash: %w", err)
 		}
 		if !isCorrect {
-			fmt.Println("\nIncorrect master password")
+			fmt.Fprint(os.Stderr, "Incorrect master password\n")
 			continue
 		}
 		stretchedKey, err := e.HKDF(masterKey, emailHash)
 		if err != nil {
-			return fmt.Errorf("failed to generate stretched key: %w", err)
+			return nil, fmt.Errorf("failed to generate stretched key: %w", err)
 		}
 
 		symmetricKey, err := e.DecryptSymmetricKey(protectedSymmetricKey, iv, stretchedKey)
 		if err != nil {
-			return fmt.Errorf("failed to decrypt symmetric key: %w", err)
+			return nil, fmt.Errorf("failed to decrypt symmetric key: %w", err)
 		}
 
-		fmt.Println("symmetricKey:", symmetricKey)
-		return nil
+		return symmetricKey, nil
 	}
 }

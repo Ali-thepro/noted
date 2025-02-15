@@ -1,9 +1,24 @@
 .PHONY: build build-linux build-darwin build-windows clean lint fmt vet
 
 BINARY_NAME=noted
-
+INSTALL_DIR=$(HOME)/.noted
 build:
 	go build -o $(BINARY_NAME) main.go
+
+install: build
+	# Create installation directory
+	mkdir -p $(INSTALL_DIR)
+	
+	# Copy binary to install directory
+	cp $(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
+	
+	# Copy wrapper script
+	cp scripts/noted-wrapper.sh $(INSTALL_DIR)/wrapper.sh
+	chmod +x $(INSTALL_DIR)/wrapper.sh
+	
+	@echo "Installation complete!"
+	@echo "Please add this line to your ~/.bashrc or ~/.zshrc:"
+	@echo "source $(INSTALL_DIR)/wrapper.sh"
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux main.go

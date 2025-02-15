@@ -100,6 +100,8 @@ func ClearUserData() error {
 		}
 	}
 
+	os.Unsetenv("NOTED_KEY")
+
 	return nil
 }
 
