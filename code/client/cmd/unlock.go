@@ -10,7 +10,7 @@ import (
 
 var unlockCmd = &cobra.Command{
 	Use:   "unlock",
-	Short: "Unlock noted for the current session",
+	Short: "Unlock noted for a limited time (1 hour)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		symmetricKey, err := auth.EncryptionLogin()
 		if err != nil {

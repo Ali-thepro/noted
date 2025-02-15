@@ -12,8 +12,9 @@ import (
 
 var showCmd = &cobra.Command{
 	Use:   "show [id] [version-number]",
-	Short: "Show a specific version of a note",
-	Long:  `Show a specific version of a note. If version number is not provided, you will be prompted to select one.`,
+	Short: "Show a specific version of a note, required noted to be unlocked",
+	Long:  `Show a specific version of a note. If version number is not provided, you will be prompted to select one.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToShow *storage.Note
 		var err error

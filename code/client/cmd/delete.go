@@ -9,9 +9,10 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete [id]",
-	Short: "Delete a note",
+	Short: "Delete a note, required noted to be unlocked",
 	Long: `Delete a note using either its ID or title. 
-You can specify either the note ID as an argument or use --title flag .`,
+You can specify either the note ID as an argument or use --title flag.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToDelete *storage.Note
 		var err error

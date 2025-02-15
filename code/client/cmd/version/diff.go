@@ -13,9 +13,10 @@ import (
 
 var diffCmd = &cobra.Command{
 	Use:   "diff [id]",
-	Short: "Show differences between versions",
+	Short: "Show differences between versions, required noted to be unlocked",
 	Long: `Show differences between a selected version and its previous version.
-Displays changes in a git-like format with context.`,
+Displays changes in a git-like format with context.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToCompare *storage.Note
 		var err error

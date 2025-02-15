@@ -9,9 +9,10 @@ import (
 
 var syncCmd = &cobra.Command{
 	Use:   "sync",
-	Short: "Synchronize notes with the server",
+	Short: "Synchronize notes with the server, required noted to be unlocked",
 	Long: `Synchronize your local notes with the server.
-This will download new notes and update existing ones.`,
+This will download new notes and update existing ones.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		verbose, _ := cmd.Flags().GetBool("verbose")
 

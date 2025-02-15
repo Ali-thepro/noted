@@ -10,7 +10,7 @@ import (
 
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a new note",
+	Short: "Create a new note, required noted to be unlocked",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		title, err := cmd.Flags().GetString("title")
 		if err != nil {

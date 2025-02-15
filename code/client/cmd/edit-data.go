@@ -13,10 +13,11 @@ import (
 
 var editDataCmd = &cobra.Command{
 	Use:   "edit-data [id]",
-	Short: "Edit note metadata",
+	Short: "Edit note metadata, required noted to be unlocked",
 	Long: `Edit note title and tags. 
 You can specify either the note ID as an argument or use --title flag.
-By default, new tags are appended to existing ones. Use --replace-tags to overwrite instead.`,
+By default, new tags are appended to existing ones. Use --replace-tags to overwrite instead.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToEdit *storage.Note
 		var err error

@@ -127,6 +127,7 @@ func handleSuccessfullLogin(tokenStr string) error {
 		}
 	}
 	fmt.Println("Successfully logged in")
+	fmt.Println("run 'noted unlock' to unlock noted for a limited time (1 hour). Not required for all commands.")
 	return nil
 }
 
