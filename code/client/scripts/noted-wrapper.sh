@@ -14,13 +14,6 @@ noted() {
         return 1
     fi
 
-    if [ "$1" = "lock" ]; then
-        unset NOTED_KEY
-        unset NOTED_EXPIRES_AT
-        ./noted lock
-        return $?
-    fi
-
     current_time=$(date +%s)
 
     if [ "$1" = "unlock" ]; then
