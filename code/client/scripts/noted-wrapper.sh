@@ -14,20 +14,36 @@ noted() {
         return 1
     fi
 
+    if [ "$1" = "lock" ]; then
+        unset NOTED_KEY
+        unset NOTED_EXPIRES_AT
+        ./noted lock
+        return $?
+    fi
+
+    current_time=$(date +%s)
+
+    if [ "$1" = "unlock" ]; then
+        local key=$(./noted unlock 2>/dev/tty)
+        if [ $? -eq 0 ]; then
+            export NOTED_KEY="$key"
+            export NOTED_EXPIRES_AT=$((current_time + NOTED_TIMEOUT))
+        fi
+        return $?
+    fi
+
     case "$1" in
-        "auth"|"edit"|"help"|"image"|"tags"|"preview"|"setup-encryption"|"theme"|"lock")
+        "auth"|"edit"|"help"|"image"|"tags"|"preview"|"setup-encryption"|"theme"|"unlock")
             ./noted "$@"
             return $?
             ;;
     esac
 
-    current_time=$(date +%s)
 
     if [ -z "$NOTED_KEY" ] || [ -z "$NOTED_EXPIRES_AT" ] || [ $current_time -gt $NOTED_EXPIRES_AT ]; then
-        ./noted unlock 2>/dev/tty
+        local key=$(./noted unlock 2>/dev/tty)
         if [ $? -eq 0 ]; then
-            export NOTED_KEY="$NOTED_TEMP_KEY"
-            unset NOTED_TEMP_KEY
+            export NOTED_KEY="$key"
             export NOTED_EXPIRES_AT=$((current_time + NOTED_TIMEOUT))
         else
             return 1

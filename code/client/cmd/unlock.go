@@ -17,9 +17,8 @@ var unlockCmd = &cobra.Command{
 			return err
 		}
 
-		encodedKey := base64.StdEncoding.EncodeToString(symmetricKey)
-		os.Setenv("NOTED_TEMP_KEY", encodedKey)
-		fmt.Fprintln(os.Stdout, "noted unlocked")
+		fmt.Print(base64.StdEncoding.EncodeToString(symmetricKey))
+		fmt.Fprintln(os.Stderr, "noted unlocked")
 		return nil
 	},
 }
