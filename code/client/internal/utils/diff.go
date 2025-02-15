@@ -1,4 +1,4 @@
-package version
+package utils
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func selectVersion(versions []*api.Version) (*api.Version, error) {
+func SelectVersion(versions []*api.Version) (*api.Version, error) {
 	fmt.Println("Available versions:")
 	fmt.Println()
 

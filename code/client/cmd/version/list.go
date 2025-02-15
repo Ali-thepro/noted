@@ -10,9 +10,8 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:   "list [id]",
-	Short: "List versions of a note, required noted to be unlocked",
-	Long:  `List all versions of a note. You can specify either the note ID as an argument or use --title flag.
-Requires noted to be unlocked.`,
+	Short: "List versions of a note",
+	Long:  `List all versions of a note. You can specify either the note ID as an argument or use --title flag.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToList *storage.Note
 		var err error

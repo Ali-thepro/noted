@@ -7,13 +7,14 @@ import (
 	"noted/internal/api"
 	"noted/internal/config"
 	"noted/internal/storage"
+	"noted/internal/utils"
 	"strconv"
 )
 
 var showCmd = &cobra.Command{
 	Use:   "show [id] [version-number]",
 	Short: "Show a specific version of a note, required noted to be unlocked",
-	Long:  `Show a specific version of a note. If version number is not provided, you will be prompted to select one.
+	Long: `Show a specific version of a note. If version number is not provided, you will be prompted to select one.
 Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToShow *storage.Note
@@ -71,7 +72,7 @@ Requires noted to be unlocked.`,
 				return fmt.Errorf("version %d not found", versionNum)
 			}
 		} else {
-			selectedVersion, err = selectVersion(versions)
+			selectedVersion, err = utils.SelectVersion(versions)
 			if err != nil {
 				return err
 			}
@@ -83,7 +84,7 @@ Requires noted to be unlocked.`,
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			content = BuildVersionContent(chain)
+			content = utils.BuildVersionContent(chain)
 		} else {
 			content = selectedVersion.Content
 		}

@@ -8,6 +8,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/hkdf"
 	"io"
@@ -19,6 +20,18 @@ type params struct {
 	iterations  uint32
 	parallelism uint8
 	keyLength   uint32
+}
+
+type NoteKeys struct {
+	CipherKey string
+	CipherIv  string
+}
+
+type EncryptedContent struct {
+	Content   string
+	ContentIv string
+	CipherKey string
+	CipherIv  string
 }
 
 type EncryptionService struct{}
@@ -197,4 +210,51 @@ func (e *EncryptionService) WrapNoteCipherKey(noteCipherKey, symmetricKey []byte
 
 func (e *EncryptionService) UnwrapNoteCipherKey(protectedKeyB64, ivB64 string, symmetricKey []byte) ([]byte, error) {
 	return e.DecryptAESGCM(protectedKeyB64, ivB64, symmetricKey)
+}
+
+func (e *EncryptionService) EncryptVersionContent(content string, noteKeys NoteKeys, symmetricKey []byte) (EncryptedContent, error) {
+	noteCipherKey, err := e.UnwrapNoteCipherKey(noteKeys.CipherKey, noteKeys.CipherIv, symmetricKey)
+	if err != nil {
+		return EncryptedContent{}, fmt.Errorf("failed to unwrap note cipher key: %w", err)
+	}
+
+	encryptedContent, contentIv, err := e.EncryptNoteContent(content, noteCipherKey)
+	if err != nil {
+		return EncryptedContent{}, fmt.Errorf("failed to encrypt content: %w", err)
+	}
+
+	return EncryptedContent{
+		Content:   encryptedContent,
+		ContentIv: contentIv,
+		CipherKey: noteKeys.CipherKey,
+		CipherIv:  noteKeys.CipherIv,
+	}, nil
+}
+
+func (e *EncryptionService) DecryptVersionContent(encryptedContent EncryptedContent, symmetricKey []byte) (string, error) {
+	noteCipherKey, err := e.UnwrapNoteCipherKey(encryptedContent.CipherKey, encryptedContent.CipherIv, symmetricKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to unwrap note cipher key: %w", err)
+	}
+
+	content, err := e.DecryptNoteContent(encryptedContent.Content, encryptedContent.ContentIv, noteCipherKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to decrypt content: %w", err)
+	}
+
+	return content, nil
+}
+
+func (e *EncryptionService) CreateEncryptedDiff(baseContent, newContent string, noteKeys NoteKeys, symmetricKey []byte) (EncryptedContent, error) {
+	dmp := diffmatchpatch.New()
+	diffs := dmp.DiffMain(baseContent, newContent, false)
+	diffs = dmp.DiffCleanupEfficiency(diffs)
+	diffDelta := dmp.DiffToDelta(diffs)
+
+	encryptedContent, err := e.EncryptVersionContent(diffDelta, noteKeys, symmetricKey)
+	if err != nil {
+		return EncryptedContent{}, fmt.Errorf("failed to encrypt diff: %w", err)
+	}
+
+	return encryptedContent, nil
 }

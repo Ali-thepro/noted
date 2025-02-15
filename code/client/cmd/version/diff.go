@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"noted/internal/api"
 	"noted/internal/storage"
+	"noted/internal/utils"
 	"strings"
 )
 
@@ -58,7 +59,7 @@ Requires noted to be unlocked.`,
 			return fmt.Errorf("need at least two versions to compare")
 		}
 
-		selectedVersion, err := selectVersion(versions)
+		selectedVersion, err := utils.SelectVersion(versions)
 		if err != nil {
 			return err
 		}
@@ -85,7 +86,7 @@ Requires noted to be unlocked.`,
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			selectedContent = BuildVersionContent(chain)
+			selectedContent = utils.BuildVersionContent(chain)
 		}
 
 		if prevVersion.Type == "snapshot" {
@@ -95,7 +96,7 @@ Requires noted to be unlocked.`,
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			prevContent = BuildVersionContent(chain)
+			prevContent = utils.BuildVersionContent(chain)
 		}
 
 		fmt.Printf("\nDiff between versions:\n")

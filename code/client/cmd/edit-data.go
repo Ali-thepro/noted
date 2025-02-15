@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
-	"noted/cmd/version"
 	"noted/internal/api"
 	"noted/internal/storage"
 	"noted/internal/utils"
@@ -138,7 +137,7 @@ Requires noted to be unlocked.`,
 					if err != nil {
 						return fmt.Errorf("failed to get version chain: %w", err)
 					}
-					baseContent = version.BuildVersionContent(chain)
+					baseContent = utils.BuildVersionContent(chain)
 				}
 
 				dmp := diffmatchpatch.New()

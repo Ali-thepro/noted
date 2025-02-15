@@ -12,7 +12,7 @@ import (
 var restoreCmd = &cobra.Command{
 	Use:   "restore [id] [version-number]",
 	Short: "Restore a note to a specific version, required noted to be unlocked",
-	Long:  `Restore a note to a specific version. If version number is not provided, you will be prompted to select one.
+	Long: `Restore a note to a specific version. If version number is not provided, you will be prompted to select one.
 Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToRestore *storage.Note
@@ -70,7 +70,7 @@ Requires noted to be unlocked.`,
 				return fmt.Errorf("version %d not found", versionNum)
 			}
 		} else {
-			selectedVersion, err = selectVersion(versions)
+			selectedVersion, err = utils.SelectVersion(versions)
 			if err != nil {
 				return err
 			}
@@ -82,7 +82,7 @@ Requires noted to be unlocked.`,
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			content = BuildVersionContent(chain)
+			content = utils.BuildVersionContent(chain)
 		} else {
 			content = selectedVersion.Content
 		}
