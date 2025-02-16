@@ -212,18 +212,18 @@ func (e *EncryptionService) UnwrapNoteCipherKey(protectedKeyB64, ivB64 string, s
 	return e.DecryptAESGCM(protectedKeyB64, ivB64, symmetricKey)
 }
 
-func (e *EncryptionService) EncryptVersionContent(content string, noteKeys NoteKeys, symmetricKey []byte) (EncryptedContent, error) {
+func (e *EncryptionService) EncryptVersionContent(content string, noteKeys NoteKeys, symmetricKey []byte) (*EncryptedContent, error) {
 	noteCipherKey, err := e.UnwrapNoteCipherKey(noteKeys.CipherKey, noteKeys.CipherIv, symmetricKey)
 	if err != nil {
-		return EncryptedContent{}, fmt.Errorf("failed to unwrap note cipher key: %w", err)
+		return nil, fmt.Errorf("failed to unwrap note cipher key: %w", err)
 	}
 
 	encryptedContent, contentIv, err := e.EncryptNoteContent(content, noteCipherKey)
 	if err != nil {
-		return EncryptedContent{}, fmt.Errorf("failed to encrypt content: %w", err)
+		return nil, fmt.Errorf("failed to encrypt content: %w", err)
 	}
 
-	return EncryptedContent{
+	return &EncryptedContent{
 		Content:   encryptedContent,
 		ContentIv: contentIv,
 		CipherKey: noteKeys.CipherKey,
@@ -245,7 +245,7 @@ func (e *EncryptionService) DecryptVersionContent(encryptedContent EncryptedCont
 	return content, nil
 }
 
-func (e *EncryptionService) CreateEncryptedDiff(baseContent, newContent string, noteKeys NoteKeys, symmetricKey []byte) (EncryptedContent, error) {
+func (e *EncryptionService) CreateEncryptedDiff(baseContent, newContent string, noteKeys NoteKeys, symmetricKey []byte) (*EncryptedContent, error) {
 	dmp := diffmatchpatch.New()
 	diffs := dmp.DiffMain(baseContent, newContent, false)
 	diffs = dmp.DiffCleanupEfficiency(diffs)
@@ -253,32 +253,32 @@ func (e *EncryptionService) CreateEncryptedDiff(baseContent, newContent string, 
 
 	encryptedContent, err := e.EncryptVersionContent(diffDelta, noteKeys, symmetricKey)
 	if err != nil {
-		return EncryptedContent{}, fmt.Errorf("failed to encrypt diff: %w", err)
+		return nil, fmt.Errorf("failed to encrypt diff: %w", err)
 	}
 
 	return encryptedContent, nil
 }
 
 func (e *EncryptionService) EncryptNote(content string, symmetricKey []byte) (*EncryptedContent, error) {
-    noteCipherKey := make([]byte, 32)
-    if _, err := io.ReadFull(rand.Reader, noteCipherKey); err != nil {
-        return nil, fmt.Errorf("failed to generate note cipher key: %w", err)
-    }
+	noteCipherKey := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, noteCipherKey); err != nil {
+		return nil, fmt.Errorf("failed to generate note cipher key: %w", err)
+	}
 
-    encryptedContent, contentIv, err := e.EncryptNoteContent(content, noteCipherKey)
-    if err != nil {
-        return nil, fmt.Errorf("failed to encrypt note content: %w", err)
-    }
+	encryptedContent, contentIv, err := e.EncryptNoteContent(content, noteCipherKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt note content: %w", err)
+	}
 
-    cipherKey, cipherIv, err := e.WrapNoteCipherKey(noteCipherKey, symmetricKey)
-    if err != nil {
-        return nil, fmt.Errorf("failed to wrap note cipher key: %w", err)
-    }
+	cipherKey, cipherIv, err := e.WrapNoteCipherKey(noteCipherKey, symmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to wrap note cipher key: %w", err)
+	}
 
-    return &EncryptedContent{
-        Content:   encryptedContent,
-        ContentIv: contentIv,
-        CipherKey: cipherKey,
-        CipherIv:  cipherIv,
-    }, nil
+	return &EncryptedContent{
+		Content:   encryptedContent,
+		ContentIv: contentIv,
+		CipherKey: cipherKey,
+		CipherIv:  cipherIv,
+	}, nil
 }

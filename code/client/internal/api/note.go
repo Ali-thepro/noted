@@ -16,21 +16,27 @@ type Note struct {
 	Tags      []string `json:"tags"`
 	UpdatedAt string   `json:"updatedAt"`
 	CreatedAt string   `json:"createdAt"`
+	CipherKey string   `json:"cipherKey"`
+	CipherIv  string   `json:"cipherIv"`
+	ContentIv string   `json:"contentIv"`
 }
 
 type CreateNoteRequest struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	Tags    []string `json:"tags"`
+	Title     string   `json:"title"`
+	Content   string   `json:"content"`
+	Tags      []string `json:"tags"`
 	CipherKey string   `json:"cipherKey"`
 	CipherIv  string   `json:"cipherIv"`
 	ContentIv string   `json:"contentIv"`
 }
 
 type UpdateNoteRequest struct {
-	Title   string   `json:"title"`
-	Tags    []string `json:"tags"`
-	Content string   `json:"content"`
+	Title     string   `json:"title"`
+	Tags      []string `json:"tags"`
+	Content   string   `json:"content"`
+	CipherKey string   `json:"cipherKey"`
+	CipherIv  string   `json:"cipherIv"`
+	ContentIv string   `json:"contentIv"`
 }
 
 type UpdateNoteMetadataRequest struct {
@@ -49,6 +55,20 @@ type NoteMetadata struct {
 type DeletedNote struct {
 	ID        string    `json:"noteId"`
 	DeletedAt time.Time `json:"deletedAt"`
+}
+
+func (c *Client) GetNote(id string) (*Note, error) {
+	resp, err := c.doRequest("GET", fmt.Sprintf("/note/get/%s", id), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var note Note
+	if err := c.handleResponse(resp, &note); err != nil {
+		return nil, err
+	}
+
+	return &note, nil
 }
 
 func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {

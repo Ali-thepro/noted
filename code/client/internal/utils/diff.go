@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"noted/internal/api"
+	"noted/internal/encryption"
 	"strings"
 )
 
@@ -59,53 +60,59 @@ func SelectVersion(versions []*api.Version) (*api.Version, error) {
 	return versions[selectedIndex], nil
 }
 
-func BuildVersionContent(chain []*api.Version) string {
+func BuildDecryptedVersionContent(chain []*api.Version, encryptionService *encryption.EncryptionService, symmetricKey []byte) (string, error) {
 	if len(chain) == 0 {
-		return ""
+		return "", fmt.Errorf("empty version chain")
 	}
 
-	if chain[0].Type != "snapshot" {
-		fmt.Printf("Warning: Chain doesn't start with snapshot (starts with %s)\n", chain[0].Type)
-		return ""
+	baseVersion := chain[0]
+	content, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+		Content:   baseVersion.Content,
+		ContentIv: baseVersion.ContentIv,
+		CipherKey: baseVersion.CipherKey,
+		CipherIv:  baseVersion.CipherIv,
+	}, symmetricKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to decrypt base version: %w", err)
 	}
 
 	dmp := diffmatchpatch.New()
-	content := chain[0].Content
 
 	for i := 1; i < len(chain); i++ {
 		version := chain[i]
 		if version.Type != "diff" {
-			fmt.Printf("Warning: Unexpected version type in chain: %s\n", version.Type)
-			continue
+			return "", fmt.Errorf("unexpected version type in chain: %s", version.Type)
+		}
+
+		decryptedDiff, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+			Content:   version.Content,
+			ContentIv: version.ContentIv,
+			CipherKey: version.CipherKey,
+			CipherIv:  version.CipherIv,
+		}, symmetricKey)
+		if err != nil {
+			return "", fmt.Errorf("failed to decrypt diff version #%d: %w", version.Metadata.VersionNumber, err)
 		}
 
 		// Convert delta back to diffs
-		diffs, err := dmp.DiffFromDelta(content, version.Content)
+		diffs, err := dmp.DiffFromDelta(content, decryptedDiff)
 		if err != nil {
-			fmt.Printf("Warning: Failed to parse diff delta for version #%d: %v\n",
+			return "", fmt.Errorf("failed to parse diff delta for version #%d: %w",
 				version.Metadata.VersionNumber, err)
-			continue
 		}
 
 		patches := dmp.PatchMake(content, diffs)
 		newContent, applied := dmp.PatchApply(patches, content)
 
-		allApplied := true
 		for _, wasApplied := range applied {
 			if !wasApplied {
-				allApplied = false
-				break
+				return "", fmt.Errorf("failed to apply patches for version #%d",
+					version.Metadata.VersionNumber)
 			}
-		}
-
-		if !allApplied {
-			fmt.Printf("Warning: Some patches failed to apply for version #%d\n",
-				version.Metadata.VersionNumber)
-			continue
 		}
 
 		content = newContent
 	}
 
-	return content
+	return content, nil
 }

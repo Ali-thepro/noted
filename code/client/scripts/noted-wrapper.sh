@@ -26,7 +26,7 @@ noted() {
     fi
 
     case "$1" in
-        "auth"|"edit"|"help"|"image"|"tags"|"preview"|"setup-encryption"|"theme"|"unlock")
+        "auth"|"edit"|"help"|"image"|"tags"|"preview"|"setup-encryption"|"theme"|"unlock"|"list")
             ./noted "$@"
             return $?
             ;;

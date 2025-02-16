@@ -5,7 +5,9 @@ import (
 	"github.com/charmbracelet/glamour"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
+	"noted/internal/auth"
 	"noted/internal/config"
+	"noted/internal/encryption"
 	"noted/internal/storage"
 	"noted/internal/utils"
 	"strconv"
@@ -19,6 +21,13 @@ Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToShow *storage.Note
 		var err error
+
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
+		encryptionService := encryption.NewEncryptionService()
 
 		if len(args) > 0 {
 			noteToShow, err = storage.GetNoteByID(args[0])
@@ -79,14 +88,26 @@ Requires noted to be unlocked.`,
 		}
 
 		var content string
-		if selectedVersion.Type == "diff" {
+		if selectedVersion.Type == "snapshot" {
+			decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+				Content:   selectedVersion.Content,
+				ContentIv: selectedVersion.ContentIv,
+				CipherKey: selectedVersion.CipherKey,
+				CipherIv:  selectedVersion.CipherIv,
+			}, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to decrypt version content: %w", err)
+			}
+			content = decryptedContent
+		} else {
 			chain, err := client.GetVersionChain(noteToShow.ID, selectedVersion.CreatedAt)
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			content = utils.BuildVersionContent(chain)
-		} else {
-			content = selectedVersion.Content
+			content, err = utils.BuildDecryptedVersionContent(chain, encryptionService, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to build version content: %w", err)
+			}
 		}
 
 		renderer, err := glamour.NewTermRenderer(

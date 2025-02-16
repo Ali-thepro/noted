@@ -7,6 +7,8 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
+	"noted/internal/auth"
+	"noted/internal/encryption"
 	"noted/internal/storage"
 	"noted/internal/utils"
 	"strings"
@@ -21,6 +23,13 @@ Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToCompare *storage.Note
 		var err error
+
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
+		encryptionService := encryption.NewEncryptionService()
 
 		if len(args) > 0 {
 			noteToCompare, err = storage.GetNoteByID(args[0])
@@ -80,23 +89,47 @@ Requires noted to be unlocked.`,
 		prevContent := ""
 
 		if selectedVersion.Type == "snapshot" {
-			selectedContent = selectedVersion.Content
+			decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+				Content:   selectedVersion.Content,
+				ContentIv: selectedVersion.ContentIv,
+				CipherKey: selectedVersion.CipherKey,
+				CipherIv:  selectedVersion.CipherIv,
+			}, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to decrypt version content: %w", err)
+			}
+			selectedContent = decryptedContent
 		} else {
 			chain, err := client.GetVersionChain(noteToCompare.ID, selectedVersion.CreatedAt)
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			selectedContent = utils.BuildVersionContent(chain)
+			selectedContent, err = utils.BuildDecryptedVersionContent(chain, encryptionService, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to build version content: %w", err)
+			}
 		}
 
 		if prevVersion.Type == "snapshot" {
-			prevContent = prevVersion.Content
+			decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+				Content:   prevVersion.Content,
+				ContentIv: prevVersion.ContentIv,
+				CipherKey: prevVersion.CipherKey,
+				CipherIv:  prevVersion.CipherIv,
+			}, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to decrypt version content: %w", err)
+			}
+			prevContent = decryptedContent
 		} else {
 			chain, err := client.GetVersionChain(noteToCompare.ID, prevVersion.CreatedAt)
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			prevContent = utils.BuildVersionContent(chain)
+			prevContent, err = utils.BuildDecryptedVersionContent(chain, encryptionService, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to build version content: %w", err)
+			}
 		}
 
 		fmt.Printf("\nDiff between versions:\n")

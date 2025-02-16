@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
+	"noted/internal/auth"
+	"noted/internal/encryption"
 	"noted/internal/storage"
 	"noted/internal/utils"
 	"strings"
@@ -19,6 +20,13 @@ Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToPush *storage.Note
 		var err error
+
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
+		encryptionService := encryption.NewEncryptionService()
 
 		if len(args) > 0 {
 			noteToPush, err = storage.GetNoteByID(args[0])
@@ -50,63 +58,28 @@ Requires noted to be unlocked.`,
 			return err
 		}
 
-		versions, err := client.GetVersions(noteToPush.ID)
+		note, err := client.GetNote(noteToPush.ID)
 		if err != nil {
-			return fmt.Errorf("failed to get versions: %w", err)
-		}
-		if len(versions) == 0 {
-			return fmt.Errorf("no versions found for note")
+			return fmt.Errorf("failed to get note: %w", err)
 		}
 
-		latestVersion := versions[0]
-
-		var baseContent string
-		if latestVersion.Type == "snapshot" {
-			baseContent = latestVersion.Content
-		} else {
-			chain, err := client.GetVersionChain(noteToPush.ID, latestVersion.CreatedAt)
-			if err != nil {
-				return fmt.Errorf("failed to get version chain: %w", err)
-			}
-			baseContent = utils.BuildVersionContent(chain)
-		}
-
-		if baseContent == content {
-			fmt.Println("No changes detected. Nothing to push.")
-			return nil
-		}
-
-		versionType := "diff"
-		var versionContent string
-		var baseVersion string
-
-		if ShouldCreateSnapshot(latestVersion) {
-			versionType = "snapshot"
-			versionContent = content
-		} else {
-			dmp := diffmatchpatch.New()
-			diffs := dmp.DiffMain(baseContent, content, false)
-			diffs = dmp.DiffCleanupEfficiency(diffs)
-			versionContent = dmp.DiffToDelta(diffs)
-			baseVersion = latestVersion.ID
-		}
-
-		_, err = client.CreateVersion(noteToPush.ID, &api.CreateVersionRequest{
-			Type:        versionType,
-			Content:     versionContent,
-			BaseVersion: baseVersion,
-			Metadata: api.VersionMetadata{
-				Title:         noteToPush.Title,
-				Tags:          noteToPush.Tags,
-				VersionNumber: latestVersion.Metadata.VersionNumber + 1,
-			},
-		})
+		noteCipherKey, err := encryptionService.UnwrapNoteCipherKey(note.CipherKey, note.CipherIv, symmetricKey)
 		if err != nil {
-			return fmt.Errorf("failed to create version: %w", err)
+			return fmt.Errorf("failed to unwrap note cipher key: %w", err)
 		}
 
-		note, err := client.UpdateNote(noteToPush.ID, api.UpdateNoteRequest{
-			Content: content,
+		encryptedNoteContent, iv, err := encryptionService.EncryptNoteContent(content, noteCipherKey)
+		if err != nil {
+			return fmt.Errorf("failed to encrypt note content: %w", err)
+		}
+
+		updatedNote, err := client.UpdateNote(noteToPush.ID, api.UpdateNoteRequest{
+			Title:     noteToPush.Title,
+			Tags:      noteToPush.Tags,
+			Content:   encryptedNoteContent,
+			ContentIv: iv,
+			CipherKey: note.CipherKey,
+			CipherIv:  note.CipherIv,
 		})
 		if err != nil {
 			if err.Error() == "note has already been deleted from the server" {
@@ -119,6 +92,88 @@ Requires noted to be unlocked.`,
 
 		if err := storage.UpdateNote(note); err != nil {
 			return fmt.Errorf("failed to update local note data: %w", err)
+		}
+
+		versions, err := client.GetVersions(noteToPush.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get versions: %w", err)
+		}
+		if len(versions) == 0 {
+			return fmt.Errorf("no versions found for note")
+		}
+
+		latestVersion := versions[0]
+
+		var baseContent string
+		if latestVersion.Type == "snapshot" {
+			decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+				Content:   latestVersion.Content,
+				ContentIv: latestVersion.ContentIv,
+				CipherKey: latestVersion.CipherKey,
+				CipherIv:  latestVersion.CipherIv,
+			}, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to decrypt latest version: %w", err)
+			}
+			baseContent = decryptedContent
+		} else {
+			chain, err := client.GetVersionChain(noteToPush.ID, latestVersion.CreatedAt)
+			if err != nil {
+				return fmt.Errorf("failed to get version chain: %w", err)
+			}
+			baseContent, err = utils.BuildDecryptedVersionContent(chain, encryptionService, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to build version content: %w", err)
+			}
+		}
+
+		if baseContent == content {
+			fmt.Println("No changes detected. Nothing to push.")
+			return nil
+		}
+
+		versionType := "diff"
+		var encryptedVersion *encryption.EncryptedContent
+		var baseVersion string
+
+		if ShouldCreateSnapshot(latestVersion) {
+			versionType = "snapshot"
+			encryptedContent, iv, err := encryptionService.EncryptNoteContent(content, noteCipherKey)
+			if err != nil {
+				return fmt.Errorf("failed to encrypt snapshot: %w", err)
+			}
+			encryptedVersion = &encryption.EncryptedContent{
+				Content:   encryptedContent,
+				ContentIv: iv,
+				CipherKey: updatedNote.CipherKey,
+				CipherIv:  updatedNote.CipherIv,
+			}
+		} else {
+			encryptedVersion, err = encryptionService.CreateEncryptedDiff(baseContent, content, encryption.NoteKeys{
+				CipherKey: updatedNote.CipherKey,
+				CipherIv:  updatedNote.CipherIv,
+			}, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to create encrypted diff: %w", err)
+			}
+			baseVersion = latestVersion.ID
+		}
+
+		_, err = client.CreateVersion(noteToPush.ID, &api.CreateVersionRequest{
+			Type:        versionType,
+			Content:     encryptedVersion.Content,
+			ContentIv:   encryptedVersion.ContentIv,
+			CipherKey:   encryptedVersion.CipherKey,
+			CipherIv:    encryptedVersion.CipherIv,
+			BaseVersion: baseVersion,
+			Metadata: api.VersionMetadata{
+				Title:         updatedNote.Title,
+				Tags:          updatedNote.Tags,
+				VersionNumber: latestVersion.Metadata.VersionNumber + 1,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create version: %w", err)
 		}
 
 		fmt.Printf("Note \"%s\" pushed successfully\n", noteToPush.Title)
