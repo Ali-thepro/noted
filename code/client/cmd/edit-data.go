@@ -151,6 +151,7 @@ Requires noted to be unlocked.`,
 					CipherIv:  note.CipherIv,
 				}
 			} else {
+				versionType = "diff"
 				var baseContent string
 				if latestVersion.Type == "snapshot" {
 					decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{

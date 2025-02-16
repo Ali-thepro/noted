@@ -28,12 +28,13 @@ const getNotes = async (request, response, next) => {
       } : {}),
     }
 
+    const total = await Note.countDocuments(filter)
+
     const startIndex = parseInt(request.query.startIndex) || 0
-    const limit = parseInt(request.query.limit) || 9
+    const limit = parseInt(request.query.limit) || total
     const sortBy = request.query.sortBy || 'updatedAt'
     const sortOrder = request.query.sortOrder === 'asc' ? 1 : -1
 
-    const total = await Note.countDocuments(filter)
     const notes = await Note.find(filter)
       .sort({ [sortBy]: sortOrder })
       .skip(startIndex)

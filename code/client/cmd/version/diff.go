@@ -134,10 +134,10 @@ Requires noted to be unlocked.`,
 
 		fmt.Printf("\nDiff between versions:\n")
 		fmt.Printf("Version #%d (%s) → Version #%d (%s)\n",
-			prevVersion.Metadata.VersionNumber,
-			prevVersion.CreatedAt.Format("2006-01-02 15:04:05"),
 			selectedVersion.Metadata.VersionNumber,
 			selectedVersion.CreatedAt.Format("2006-01-02 15:04:05"),
+			prevVersion.Metadata.VersionNumber,
+			prevVersion.CreatedAt.Format("2006-01-02 15:04:05"),
 		)
 		fmt.Println(strings.Repeat("-", 80))
 

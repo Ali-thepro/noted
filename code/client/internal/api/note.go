@@ -57,6 +57,38 @@ type DeletedNote struct {
 	DeletedAt time.Time `json:"deletedAt"`
 }
 
+type SearchResponse struct {
+	Notes []*Note `json:"notes"`
+	Total int     `json:"total"`
+}
+
+func (c *Client) SearchNotes(search, tag string) (*SearchResponse, error) {
+	query := make(url.Values)
+	if search != "" {
+		query.Set("search", search)
+	}
+	if tag != "" {
+		query.Set("tag", tag)
+	}
+
+	url := "/note/get"
+	if len(query) > 0 {
+		url += "?" + query.Encode()
+	}
+
+	resp, err := c.doRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var searchResp SearchResponse
+	if err := c.handleResponse(resp, &searchResp); err != nil {
+		return nil, err
+	}
+
+	return &searchResp, nil
+}
+
 func (c *Client) GetNote(id string) (*Note, error) {
 	resp, err := c.doRequest("GET", fmt.Sprintf("/note/get/%s", id), nil)
 	if err != nil {

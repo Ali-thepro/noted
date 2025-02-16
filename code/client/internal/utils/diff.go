@@ -29,16 +29,21 @@ func SelectVersion(versions []*api.Version) (*api.Version, error) {
 			maxTagsLen = tagsLen
 		}
 	}
+
+	if maxVerLen < 3 {
+		maxVerLen = 3
+	}
+
 	headerFmt := fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
 	fmt.Printf(headerFmt, "Ver", "Created", "Title", "Tags")
-	fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+28))
+	fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+27))
 
 	length := len(versions)
 	for i := length - 1; i >= 0; i-- {
 		v := versions[i]
 		tags := strings.Join(v.Metadata.Tags, ", ")
 		if tags == "" {
-			tags = "none"
+			tags = "no tags"
 		}
 
 		fmt.Printf(fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),

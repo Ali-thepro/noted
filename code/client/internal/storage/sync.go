@@ -3,9 +3,9 @@ package storage
 import (
 	"fmt"
 	"noted/internal/api"
+	"noted/internal/encryption"
 	"noted/internal/token"
 	"noted/internal/utils"
-	"noted/internal/encryption"
 	"os"
 	"path/filepath"
 	"time"
@@ -24,7 +24,7 @@ func SyncNotes(symmetricKey []byte) (*SyncStats, error) {
 		return nil, fmt.Errorf("failed to load index: %w", err)
 	}
 
-    encryptionService := encryption.NewEncryptionService()
+	encryptionService := encryption.NewEncryptionService()
 
 	client, err := api.NewClient()
 	if err != nil {
@@ -86,25 +86,25 @@ func SyncNotes(symmetricKey []byte) (*SyncStats, error) {
 
 		for _, note := range notes {
 			noteCipherKey, err := encryptionService.UnwrapNoteCipherKey(note.CipherKey, note.CipherIv, symmetricKey)
-            if err != nil {
-                return nil, fmt.Errorf("failed to unwrap note cipher key for note %s: %w", note.ID, err)
-            }
+			if err != nil {
+				return nil, fmt.Errorf("failed to unwrap note cipher key for note %s: %w", note.ID, err)
+			}
 
 			decryptedContent, err := encryptionService.DecryptNoteContent(note.Content, note.ContentIv, noteCipherKey)
-            if err != nil {
-                return nil, fmt.Errorf("failed to decrypt note content for note %s: %w", note.ID, err)
-            }
+			if err != nil {
+				return nil, fmt.Errorf("failed to decrypt note content for note %s: %w", note.ID, err)
+			}
 
 			newNote := &api.Note{
-                ID:        note.ID,
-                Title:     note.Title,
-                Content:   decryptedContent,
-                Tags:      note.Tags,
-                CreatedAt: note.CreatedAt,
-                UpdatedAt: note.UpdatedAt,
-                CipherKey: note.CipherKey,
-                CipherIv:  note.CipherIv,
-                ContentIv: note.ContentIv,
+				ID:        note.ID,
+				Title:     note.Title,
+				Content:   decryptedContent,
+				Tags:      note.Tags,
+				CreatedAt: note.CreatedAt,
+				UpdatedAt: note.UpdatedAt,
+				CipherKey: note.CipherKey,
+				CipherIv:  note.CipherIv,
+				ContentIv: note.ContentIv,
 			}
 			if _, err := AddNoteForSync(newNote, index, idMap); err != nil {
 				return nil, fmt.Errorf("failed to save note %s: %w", note.ID, err)
