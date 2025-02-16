@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"noted/internal/storage"
-
+	"noted/internal/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -14,11 +14,16 @@ var syncCmd = &cobra.Command{
 This will download new notes and update existing ones.
 Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
 		verbose, _ := cmd.Flags().GetBool("verbose")
 
 		fmt.Println("Syncing notes...")
 
-		stats, err := storage.SyncNotes()
+		stats, err := storage.SyncNotes(symmetricKey)
 		if err != nil {
 			return fmt.Errorf("sync failed: %w", err)
 		}
