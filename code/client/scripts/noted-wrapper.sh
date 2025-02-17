@@ -12,6 +12,7 @@ noted() {
     fi
 
     if [[ "${1}" == "completion" ]]; then
+        shift
         "$NOTED_BIN" completion "${@}"
         return $?
     fi
