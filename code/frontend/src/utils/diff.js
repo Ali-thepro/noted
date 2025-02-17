@@ -26,7 +26,6 @@ function unescaper(delta) {
 }
 
 
-
 diff_match_patch.prototype.diff_toDelta = function (diffs) {
   let delta = []
 
@@ -107,7 +106,27 @@ export const shouldCreateSnapshot = (versionNumber) => {
   return versionNumber % 10 === 0
 }
 
-export const buildVersionContent = (chain) => {
+export const decryptVersionContent = async (version, encryptionService, symmetricKey) => {
+  try {
+    const noteCipherKey = await encryptionService.unwrapNoteCipherKey(version.cipherKey, version.cipherIv, symmetricKey)
+    return await encryptionService.decryptNoteContent(version.content, version.contentIv, noteCipherKey)
+  } catch (error) {
+    console.error('Failed to decrypt version content:', error)
+    throw new Error('Failed to decrypt version content')
+  }
+}
+
+export const createEncryptedDiff = async (baseContent, newContent, encryptionService, symmetricKey, noteKeys) => {
+  const dmp = new diff_match_patch()
+
+  const diffs = dmp.diff_main(baseContent, newContent, false)
+  dmp.diff_cleanupEfficiency(diffs)
+  const diffDelta = dmp.diff_toDelta(diffs)
+
+  return await encryptVersionContent(diffDelta, encryptionService, symmetricKey, noteKeys)
+}
+
+export const buildVersionContent = async (chain, encryptionService, symmetricKey) => {
   if (!chain || chain.length === 0) return ''
 
   if (chain[0].type !== 'snapshot') {
@@ -116,7 +135,14 @@ export const buildVersionContent = (chain) => {
   }
 
   const dmp = new diff_match_patch()
-  let content = chain[0].content
+
+  let content
+  try {
+    content = await decryptVersionContent(chain[0], encryptionService, symmetricKey)
+  } catch (error) {
+    console.error('Failed to decrypt initial snapshot:', error)
+    throw new Error('Failed to decrypt initial snapshot')
+  }
 
   for (let i = 1; i < chain.length; i++) {
     const version = chain[i]
@@ -126,24 +152,44 @@ export const buildVersionContent = (chain) => {
     }
 
     try {
-      const diffs = dmp.diff_fromDelta(content, version.content)
+      const decryptedDiff = await decryptVersionContent(version, encryptionService, symmetricKey)
+
+      const diffs = dmp.diff_fromDelta(content, decryptedDiff)
       const patches = dmp.patch_make(content, diffs)
       const [newContent, results] = dmp.patch_apply(patches, content)
 
-      const allApplied = results.every(result => result)
-      if (!allApplied) {
+      if (!results.every(result => result)) {
         console.warn(`Warning: Some patches failed to apply for version #${version.metadata.versionNumber}`)
         continue
       }
 
       content = newContent
     } catch (error) {
-      console.error(`Warning: Failed to parse diff delta for version #${version.metadata.versionNumber}:`, error)
+      console.error(`Warning: Failed to process version #${version.metadata.versionNumber}:`, error)
       continue
     }
   }
 
   return content
 }
+
+export const encryptVersionContent = async (content, encryptionService, symmetricKey, noteKeys) => {
+  try {
+    const noteCipherKey = await encryptionService.unwrapNoteCipherKey(noteKeys.cipherKey, noteKeys.cipherIv, symmetricKey)
+
+    const { encryptedContent, iv: contentIv } = await encryptionService.encryptNoteContent(content, noteCipherKey)
+
+    return {
+      encryptedContent,
+      contentIv,
+      cipherKey: noteKeys.cipherKey,
+      cipherIv: noteKeys.cipherIv
+    }
+  } catch (error) {
+    console.error('Failed to encrypt version content:', error)
+    throw new Error('Failed to encrypt version content')
+  }
+}
+
 
 export default diff_match_patch

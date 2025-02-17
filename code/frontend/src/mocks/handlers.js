@@ -92,5 +92,11 @@ export const handlers = [
         tags: []
       }
     })
+  }),
+
+  http.get(`${hostname}/encryption/password`, () => {
+    return HttpResponse.json({
+      password: 'password123'
+    })
   })
 ]

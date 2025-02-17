@@ -4,6 +4,8 @@ const createError = require('../utils/error')
 const jwt = require('jsonwebtoken')
 const config = require('../utils/config')
 const axios = require('axios')
+const emailService = require('../services/emailService')
+const crypto = require('crypto')
 
 const createAccessToken = (user) => {
   return jwt.sign(
@@ -54,7 +56,7 @@ const signup = async (request, response, next) => {
 
   const existingUser = await User.findOne({ email, provider: 'local' })
   if (existingUser) {
-    return next(createError('An account with this email already exists', 400))
+    return next(createError('An account with this email already exists', 401))
   }
 
   try {
@@ -79,7 +81,7 @@ const signup = async (request, response, next) => {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '30d' })
       return response.status(201).json({
         user: savedUser,
-        redirectUrl: `${redirect}?token=${token}`
+        redirectUrl: `${redirect}?token=${token}&createMasterPassword=true`
       })
     } else {
       const accessToken = createAccessToken(savedUser)
@@ -115,11 +117,11 @@ const signin = async (request, response, next) => {
     return next(createError('Email and password are required', 400))
   }
 
-  const user = await User.findOne({ email })
+  const user = await User.findOne({ email, provider: 'local' })
   const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.passwordHash)
 
   if (!(user && passwordCorrect)) {
-    return next(createError('Invalid email or password', 401))
+    return next(createError('Invalid email or password', 400))
   }
 
   const userForToken = {
@@ -256,7 +258,9 @@ const google = async (request, response, next) => {
     const passwordHash = await bcrypt.hash(generatedPassword, saltRounds)
 
     let user = await User.findOne({ email: userProfile.email, provider: 'google' })
+    let genMasterPassword = false
     if (!user) {
+      genMasterPassword = true
       const username = userProfile.name.replace(/\s+/g, '-') // Replace spaces with hyphens
       user = await User.create({
         email: userProfile.email,
@@ -274,7 +278,7 @@ const google = async (request, response, next) => {
 
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
-      response.redirect(`${redirect}?token=${token}`)
+      response.redirect(genMasterPassword ? `${redirect}?token=${token}&createMasterPassword=true` : `${redirect}?token=${token}`)
     } else {
       const accessToken = createAccessToken(user)
       const refreshToken = createRefreshToken(user)
@@ -292,7 +296,7 @@ const google = async (request, response, next) => {
           secure: true,
           maxAge: 7 * 24 * 60 * 60 * 1000
         })
-      response.redirect(`${config.UI_URI}/oauth/callback`)
+      response.redirect(genMasterPassword ? `${config.UI_URI}/oauth/callback?genMasterPassword=true` : `${config.UI_URI}/oauth/callback`)
     }
 
   } catch (error) {
@@ -376,8 +380,10 @@ const github = async (request, response, next) => {
     const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(generatedPassword, saltRounds)
+    let genMasterPassword = false
     let user = await User.findOne({ email: primaryEmail, provider: 'github' })
     if (!user) {
+      genMasterPassword = true
       user = await User.create({
         email: primaryEmail,
         username: userProfile.login,
@@ -393,7 +399,7 @@ const github = async (request, response, next) => {
 
     if (mode === 'cli') {
       const token = jwt.sign(userForToken, config.ACCESS_SECRET, { expiresIn: '10d' })
-      return response.redirect(`${redirect}?token=${token}`)
+      return response.redirect(genMasterPassword ? `${redirect}?token=${token}&createMasterPassword=true` : `${redirect}?token=${token}`)
     } else {
       const accessToken = createAccessToken(user)
       const refreshToken = createRefreshToken(user)
@@ -411,7 +417,7 @@ const github = async (request, response, next) => {
           secure: true,
           maxAge: 7 * 24 * 60 * 60 * 1000
         })
-      response.redirect(`${config.UI_URI}/oauth/callback`)
+      response.redirect(genMasterPassword ? `${config.UI_URI}/oauth/callback?genMasterPassword=true` : `${config.UI_URI}/oauth/callback`)
     }
 
   } catch (error) {
@@ -440,6 +446,74 @@ const me = async (request, response, next) => {
   }
 }
 
+const requestReset = async (request, response, next) => {
+  const { email } = request.body
+
+  try {
+    const user = await User.findOne({
+      email,
+      provider: 'local'
+    })
+
+    if (!user) {
+      return next(createError('This user does not exist', 400))
+    }
+
+    const passwordResetToken = crypto.randomBytes(32).toString('hex')
+    user.passwordResetToken = passwordResetToken
+    user.passwordResetExpires = Date.now() + 3600000
+
+    await user.save()
+
+    const resetUrl = `${config.UI_URI}/reset-password?token=${passwordResetToken}`
+    await emailService.sendPasswordResetEmail(email, resetUrl)
+
+    response.status(200).json({ message: 'Password reset link sent to email' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const resetPassword = async (request, response, next) => {
+  const { token, password, confirmPassword } = request.body
+
+  try {
+
+    if (password !== confirmPassword) {
+      return next(createError('Passwords do not match', 400))
+    }
+
+    if (
+      !password ||
+      password.length < 8 ||
+      !/\d/.test(password) ||
+      !/[a-zA-Z]/.test(password)
+    ) {
+      return next(createError('Password must be at least 8 characters long and must contain at least one number and one letter',400))
+    }
+
+    const user = await User.findOne({
+      passwordResetToken: token,
+      passwordResetExpires: { $gte: Date.now() }
+    })
+
+    if (!user) {
+      return next(createError('Invalid or expired reset token', 400))
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10)
+    user.passwordHash = passwordHash
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save()
+
+    response.status(200).json({ message: 'Password successfully reset' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
 module.exports = {
   signup,
   signin,
@@ -449,5 +523,7 @@ module.exports = {
   github,
   githubOauth,
   signOut,
-  me
+  me,
+  requestReset,
+  resetPassword
 }

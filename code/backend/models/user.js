@@ -4,7 +4,6 @@ const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      unique: true,
       required: true,
       minlength: [5, 'username must be at least 5 characters long'],
       maxlength: [20, 'username must not be more than 20 characters'],
@@ -36,6 +35,25 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: ['local', 'google', 'github'],
     },
+    masterPasswordHash: {
+      type: String,
+      required: false,
+    },
+    protectedSymmetricKey: {
+      type: String,
+      required: false
+    },
+    iv: {
+      type: String,
+    },
+    passwordResetToken: {
+      type: String,
+      default: null
+    },
+    passwordResetExpires: {
+      type: Date,
+      default: null
+    }
   }
 )
 
@@ -47,6 +65,9 @@ userSchema.set('toJSON', {
     delete returnedObject._id
     delete returnedObject.__v
     delete returnedObject.passwordHash
+    delete returnedObject.masterPasswordHash
+    delete returnedObject.protectedSymmetricKey
+    delete returnedObject.iv
   }
 })
 

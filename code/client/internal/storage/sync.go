@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"noted/internal/api"
+	"noted/internal/encryption"
 	"noted/internal/token"
 	"noted/internal/utils"
 	"os"
@@ -17,22 +18,20 @@ type SyncStats struct {
 	DeletedNotes int
 }
 
-type SyncOptions struct {
-	Tag string
-}
-
-func SyncNotes(opts SyncOptions) (*SyncStats, error) {
+func SyncNotes(symmetricKey []byte) (*SyncStats, error) {
 	index, err := LoadIndex()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load index: %w", err)
 	}
+
+	encryptionService := encryption.NewEncryptionService()
 
 	client, err := api.NewClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
 
-	serverNotes, err := client.GetNoteMetadata(index.LastSync, opts.Tag)
+	serverNotes, err := client.GetNoteMetadata(index.LastSync)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch metadata: %w", err)
 	}
@@ -44,7 +43,7 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
 
 	stats := &SyncStats{}
 
-	deletedNotes, err := client.GetDeletedNotes(index.LastSync, opts.Tag)
+	deletedNotes, err := client.GetDeletedNotes(index.LastSync)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deleted notes: %w", err)
 	}
@@ -86,7 +85,28 @@ func SyncNotes(opts SyncOptions) (*SyncStats, error) {
 		}
 
 		for _, note := range notes {
-			if _, err := AddNoteForSync(note, index, idMap); err != nil {
+			noteCipherKey, err := encryptionService.UnwrapNoteCipherKey(note.CipherKey, note.CipherIv, symmetricKey)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unwrap note cipher key for note %s: %w", note.ID, err)
+			}
+
+			decryptedContent, err := encryptionService.DecryptNoteContent(note.Content, note.ContentIv, noteCipherKey)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decrypt note content for note %s: %w", note.ID, err)
+			}
+
+			newNote := &api.Note{
+				ID:        note.ID,
+				Title:     note.Title,
+				Content:   decryptedContent,
+				Tags:      note.Tags,
+				CreatedAt: note.CreatedAt,
+				UpdatedAt: note.UpdatedAt,
+				CipherKey: note.CipherKey,
+				CipherIv:  note.CipherIv,
+				ContentIv: note.ContentIv,
+			}
+			if _, err := AddNoteForSync(newNote, index, idMap); err != nil {
 				return nil, fmt.Errorf("failed to save note %s: %w", note.ID, err)
 			}
 		}

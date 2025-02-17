@@ -11,6 +11,7 @@ const authRouter = require('./routes/authRouter')
 const imageRouter = require('./routes/imageRouter')
 const noteRouter = require('./routes/noteRouter')
 const versionRouter = require('./routes/versionRouter')
+const encryptionRouter = require('./routes/encryptionRouter')
 
 mongoose.set('strictQuery', false)
 
@@ -44,7 +45,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/image', imageRouter)
 app.use('/api/note', noteRouter)
 app.use('/api/version', versionRouter)
-
+app.use('/api/encryption', encryptionRouter)
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 app.use(middleware.customErrorHandler)

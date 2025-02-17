@@ -38,10 +38,10 @@ var listCmd = &cobra.Command{
 			maxTitleLen = 70
 		}
 
-		headerFmt := fmt.Sprintf("%%-%ds  %%-%ds  %%-%ds\n", maxIDLen, maxTitleLen, 15)
+		headerFmt := fmt.Sprintf("%%-%ds  %%-%ds  %%-%ds\n", 24, maxTitleLen, 15)
 
 		fmt.Printf("\n"+headerFmt, "ID", "TITLE", "UPDATED")
-		fmt.Println(strings.Repeat("-", maxIDLen+maxTitleLen+24))
+		fmt.Println(strings.Repeat("-", 24+maxTitleLen+24))
 
 		sort.Slice(index.Notes, func(i, j int) bool {
 			return index.Notes[i].UpdatedAt.After(index.Notes[j].UpdatedAt)

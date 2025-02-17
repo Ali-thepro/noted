@@ -16,18 +16,27 @@ type Note struct {
 	Tags      []string `json:"tags"`
 	UpdatedAt string   `json:"updatedAt"`
 	CreatedAt string   `json:"createdAt"`
+	CipherKey string   `json:"cipherKey"`
+	CipherIv  string   `json:"cipherIv"`
+	ContentIv string   `json:"contentIv"`
 }
 
 type CreateNoteRequest struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	Tags    []string `json:"tags"`
+	Title     string   `json:"title"`
+	Content   string   `json:"content"`
+	Tags      []string `json:"tags"`
+	CipherKey string   `json:"cipherKey"`
+	CipherIv  string   `json:"cipherIv"`
+	ContentIv string   `json:"contentIv"`
 }
 
 type UpdateNoteRequest struct {
-	Title   string   `json:"title"`
-	Tags    []string `json:"tags"`
-	Content string   `json:"content"`
+	Title     string   `json:"title"`
+	Tags      []string `json:"tags"`
+	Content   string   `json:"content"`
+	CipherKey string   `json:"cipherKey"`
+	CipherIv  string   `json:"cipherIv"`
+	ContentIv string   `json:"contentIv"`
 }
 
 type UpdateNoteMetadataRequest struct {
@@ -46,6 +55,52 @@ type NoteMetadata struct {
 type DeletedNote struct {
 	ID        string    `json:"noteId"`
 	DeletedAt time.Time `json:"deletedAt"`
+}
+
+type SearchResponse struct {
+	Notes []*Note `json:"notes"`
+	Total int     `json:"total"`
+}
+
+func (c *Client) SearchNotes(search, tag string) (*SearchResponse, error) {
+	query := make(url.Values)
+	if search != "" {
+		query.Set("search", search)
+	}
+	if tag != "" {
+		query.Set("tag", tag)
+	}
+
+	url := "/note/get"
+	if len(query) > 0 {
+		url += "?" + query.Encode()
+	}
+
+	resp, err := c.doRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var searchResp SearchResponse
+	if err := c.handleResponse(resp, &searchResp); err != nil {
+		return nil, err
+	}
+
+	return &searchResp, nil
+}
+
+func (c *Client) GetNote(id string) (*Note, error) {
+	resp, err := c.doRequest("GET", fmt.Sprintf("/note/get/%s", id), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var note Note
+	if err := c.handleResponse(resp, &note); err != nil {
+		return nil, err
+	}
+
+	return &note, nil
 }
 
 func (c *Client) CreateNote(req CreateNoteRequest) (*Note, error) {
@@ -114,15 +169,11 @@ func (c *Client) UpdateNoteMetadata(id string, req UpdateNoteMetadataRequest) (*
 	return &note, nil
 }
 
-func (c *Client) GetNoteMetadata(since time.Time, tag string) ([]*NoteMetadata, error) {
+func (c *Client) GetNoteMetadata(since time.Time) ([]*NoteMetadata, error) {
 	query := make(url.Values)
 	if !since.IsZero() {
 		query.Set("since", since.Format(time.RFC3339))
 	}
-	if tag != "" {
-		query.Set("tag", tag)
-	}
-
 	url := "/note/metadata"
 	if len(query) > 0 {
 		url += "?" + query.Encode()
@@ -162,13 +213,10 @@ func (c *Client) GetBulkNotes(ids []string) ([]*Note, error) {
 	return notes, nil
 }
 
-func (c *Client) GetDeletedNotes(since time.Time, tag string) ([]*DeletedNote, error) {
+func (c *Client) GetDeletedNotes(since time.Time) ([]*DeletedNote, error) {
 	query := make(url.Values)
 	if !since.IsZero() {
 		query.Set("since", since.Format(time.RFC3339))
-	}
-	if tag != "" {
-		query.Set("tag", tag)
 	}
 
 	url := "/note/deleted"

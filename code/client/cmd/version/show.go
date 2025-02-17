@@ -5,18 +5,29 @@ import (
 	"github.com/charmbracelet/glamour"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
+	"noted/internal/auth"
 	"noted/internal/config"
+	"noted/internal/encryption"
 	"noted/internal/storage"
+	"noted/internal/utils"
 	"strconv"
 )
 
 var showCmd = &cobra.Command{
 	Use:   "show [id] [version-number]",
-	Short: "Show a specific version of a note",
-	Long:  `Show a specific version of a note. If version number is not provided, you will be prompted to select one.`,
+	Short: "Show a specific version of a note, required noted to be unlocked",
+	Long: `Show a specific version of a note. If version number is not provided, you will be prompted to select one.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToShow *storage.Note
 		var err error
+
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
+		encryptionService := encryption.NewEncryptionService()
 
 		if len(args) > 0 {
 			noteToShow, err = storage.GetNoteByID(args[0])
@@ -70,21 +81,33 @@ var showCmd = &cobra.Command{
 				return fmt.Errorf("version %d not found", versionNum)
 			}
 		} else {
-			selectedVersion, err = selectVersion(versions)
+			selectedVersion, err = utils.SelectVersion(versions)
 			if err != nil {
 				return err
 			}
 		}
 
 		var content string
-		if selectedVersion.Type == "diff" {
+		if selectedVersion.Type == "snapshot" {
+			decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+				Content:   selectedVersion.Content,
+				ContentIv: selectedVersion.ContentIv,
+				CipherKey: selectedVersion.CipherKey,
+				CipherIv:  selectedVersion.CipherIv,
+			}, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to decrypt version content: %w", err)
+			}
+			content = decryptedContent
+		} else {
 			chain, err := client.GetVersionChain(noteToShow.ID, selectedVersion.CreatedAt)
 			if err != nil {
 				return fmt.Errorf("failed to get version chain: %w", err)
 			}
-			content = BuildVersionContent(chain)
-		} else {
-			content = selectedVersion.Content
+			content, err = utils.BuildDecryptedVersionContent(chain, encryptionService, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to build version content: %w", err)
+			}
 		}
 
 		renderer, err := glamour.NewTermRenderer(

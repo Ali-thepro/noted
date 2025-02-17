@@ -3,23 +3,27 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"noted/internal/auth"
 	"noted/internal/storage"
 )
 
 var syncCmd = &cobra.Command{
 	Use:   "sync",
-	Short: "Synchronize notes with the server",
+	Short: "Synchronize notes with the server, required noted to be unlocked",
 	Long: `Synchronize your local notes with the server.
-This will download new notes and update existing ones.`,
+This will download new notes and update existing ones.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tag, _ := cmd.Flags().GetString("tag")
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
 		verbose, _ := cmd.Flags().GetBool("verbose")
 
 		fmt.Println("Syncing notes...")
 
-		stats, err := storage.SyncNotes(storage.SyncOptions{
-			Tag: tag,
-		})
+		stats, err := storage.SyncNotes(symmetricKey)
 		if err != nil {
 			return fmt.Errorf("sync failed: %w", err)
 		}
@@ -51,6 +55,5 @@ This will download new notes and update existing ones.`,
 func init() {
 	rootCmd.AddCommand(syncCmd)
 	syncCmd.Flags().BoolP("force", "f", false, "Force sync all notes")
-	syncCmd.Flags().StringP("tag", "t", "", "Sync only notes with specific tag")
 	syncCmd.Flags().BoolP("verbose", "v", false, "Show detailed sync information")
 }

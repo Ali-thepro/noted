@@ -44,7 +44,7 @@ describe('NoteModal Component', () => {
       renderModal()
       expect(screen.getByText('Create New Note')).toBeInTheDocument()
       expect(screen.getByLabelText('Title')).toBeInTheDocument()
-      expect(screen.getByLabelText('Tags (comma-separated)')).toBeInTheDocument()
+      expect(screen.getByLabelText('Tags (comma-separated, max length 20 characters)')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Create Note' })).toBeInTheDocument()
     })
 
@@ -59,7 +59,7 @@ describe('NoteModal Component', () => {
 
     it('handles tags input', async () => {
       renderModal()
-      const tagsInput = screen.getByLabelText('Tags (comma-separated)')
+      const tagsInput = screen.getByLabelText('Tags (comma-separated, max length 20 characters)')
 
       fireEvent.change(tagsInput, { target: { value: '' } })
       fireEvent.change(tagsInput, { target: { value: 'tag1, tag2, tag3' } })
@@ -93,13 +93,13 @@ describe('NoteModal Component', () => {
     it('pre-fills form with note data', () => {
       renderModal({ isEditing: true, noteData: mockNote })
       expect(screen.getByLabelText('Title')).toHaveValue(mockNote.title)
-      expect(screen.getByLabelText('Tags (comma-separated)')).toHaveValue(mockNote.tags.join(', '))
+      expect(screen.getByLabelText('Tags (comma-separated, max length 20 characters)')).toHaveValue(mockNote.tags.join(', '))
     })
 
     it('updates form fields correctly', async () => {
       renderModal({ isEditing: true, noteData: mockNote })
       const titleInput = screen.getByLabelText('Title')
-      const tagsInput = screen.getByLabelText('Tags (comma-separated)')
+      const tagsInput = screen.getByLabelText('Tags (comma-separated, max length 20 characters)')
 
       fireEvent.change(titleInput, { target: { value: '' } })
       fireEvent.change(titleInput, { target: { value: 'Updated Title' } })
@@ -117,7 +117,7 @@ describe('NoteModal Component', () => {
     it('handles create note submission', async () => {
       renderModal()
       const titleInput = screen.getByLabelText('Title')
-      const tagsInput = screen.getByLabelText('Tags (comma-separated)')
+      const tagsInput = screen.getByLabelText('Tags (comma-separated, max length 20 characters)')
 
       await userEvent.type(titleInput, 'New Note')
       await userEvent.type(tagsInput, 'tag1, tag2')

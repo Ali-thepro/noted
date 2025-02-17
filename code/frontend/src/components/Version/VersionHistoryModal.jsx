@@ -10,14 +10,17 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { EditorView } from '@codemirror/view'
 import { editorThemes } from '../../utils/themes'
-import { buildVersionContent } from '../../utils/diff'
+import { buildVersionContent, decryptVersionContent, encryptVersionContent } from '../../utils/diff'
 import moment from 'moment'
 import { toast } from 'react-toastify'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import { arraysEqual } from '../../utils/util'
+import { EncryptionService } from '../../utils/encryption'
+import memoryStore from '../../utils/memoryStore'
 
 const VersionHistoryModal = ({ show, onClose, note }) => {
   const dispatch = useDispatch()
+  const encryptionService = new EncryptionService(memoryStore)
   const [versions, setVersions] = useState([])
   const [selectedVersion, setSelectedVersion] = useState(null)
   const [versionContent, setVersionContent] = useState('')
@@ -32,19 +35,25 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
   useEffect(() => {
     const fetchVersions = async () => {
       try {
+        const symmetricKey = memoryStore.get()
+        if (!symmetricKey) {
+          throw new Error('Noted is locked')
+        }
+
         const fetchedVersions = await getVersions(note.id)
         setVersions(fetchedVersions)
         if (fetchedVersions.length > 0) {
           setSelectedVersion(fetchedVersions[0])
+          let content
+          if (fetchedVersions[0].type === 'snapshot') {
+            content = await decryptVersionContent(fetchedVersions[0], encryptionService, symmetricKey)
+          } else {
+            const chain = await getVersionChain(note.id, fetchedVersions[0].createdAt)
+            content = await buildVersionContent(chain, encryptionService, symmetricKey)
+          }
+          setVersionContent(content)
         }
-        let content
-        if (fetchedVersions[0].type === 'snapshot') {
-          content = fetchedVersions[0].content
-        } else {
-          const chain = await getVersionChain(note.id, fetchedVersions[0].createdAt)
-          content = buildVersionContent(chain)
-        }
-        setVersionContent(content)
+
         setLoading(false)
       } catch (error) {
         console.error('Failed to fetch versions:', error)
@@ -56,19 +65,25 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
     if (show) {
       fetchVersions()
     }
-  }, [note.id, show])
+  }, [note.id, show]) // eslint-disable-line
 
   const handleVersionSelect = async (version) => {
     setSelectedVersion(version)
     setIsComparing(false)
     try {
+      const symmetricKey = memoryStore.get()
+      if (!symmetricKey) {
+        throw new Error('Noted is locked')
+      }
+
       let content
       if (version.type === 'snapshot') {
-        content = version.content
+        content = await decryptVersionContent(version, encryptionService, symmetricKey)
       } else {
         const chain = await getVersionChain(note.id, version.createdAt)
-        content = buildVersionContent(chain)
+        content = await buildVersionContent(chain, encryptionService, symmetricKey)
       }
+
       setVersionContent(content)
     } catch (error) {
       console.error('Failed to build version content:', error)
@@ -85,6 +100,11 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
     }
 
     try {
+      const symmetricKey = memoryStore.get()
+      if (!symmetricKey) {
+        throw new Error('Noted is locked')
+      }
+
       setLoading(true)
       const currentIndex = versions.findIndex(v => v.id === selectedVersion.id)
       if (currentIndex === -1 || currentIndex === versions.length - 1) {
@@ -93,15 +113,14 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
       }
 
       const prevVersion = versions[currentIndex + 1]
-
       let selectedContent = versionContent
       let prevContent
 
       if (prevVersion.type === 'snapshot') {
-        prevContent = prevVersion.content
+        prevContent = await decryptVersionContent(prevVersion, encryptionService, symmetricKey)
       } else {
         const chain = await getVersionChain(note.id, prevVersion.createdAt)
-        prevContent = buildVersionContent(chain)
+        prevContent = await buildVersionContent(chain, encryptionService, symmetricKey)
       }
 
       setComparisonData({
@@ -121,25 +140,42 @@ const VersionHistoryModal = ({ show, onClose, note }) => {
     if (!selectedVersion || !activeNote) return
 
     try {
-      setRestoring(true)
+      const symmetricKey = memoryStore.get()
+      if (!symmetricKey) {
+        throw new Error('Noted is locked')
+      }
 
+      setRestoring(true)
       if (arraysEqual(activeNote.tags, selectedVersion.metadata.tags) && activeNote.title === selectedVersion.metadata.title && activeNote.content === versionContent) {
         toast.info('Note is already at this version, no restoring needed')
         return
       }
-
+      const encryptedVersionData = await encryptVersionContent(
+        versionContent,
+        encryptionService,
+        symmetricKey,
+        {
+          cipherKey: activeNote.cipherKey,
+          cipherIv: activeNote.cipherIv
+        }
+      )
 
       const updatedNote = await dispatch(editNote(activeNote.id, {
         ...activeNote,
         title: selectedVersion.metadata.title,
-        content: versionContent,
+        content: encryptedVersionData.encryptedContent,
+        contentIv: encryptedVersionData.contentIv,
         tags: selectedVersion.metadata.tags
       }))
+
 
       if (updatedNote) {
         await createVersion(note.id, {
           type: 'snapshot',
-          content: versionContent,
+          content: encryptedVersionData.encryptedContent,
+          cipherKey: encryptedVersionData.cipherKey,
+          cipherIv: encryptedVersionData.cipherIv,
+          contentIv: encryptedVersionData.contentIv,
           metadata: {
             title: selectedVersion.metadata.title,
             tags: selectedVersion.metadata.tags,
