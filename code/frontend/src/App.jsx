@@ -13,6 +13,8 @@ import SignIn from './pages/SignIn'
 import OAuthCallback from './pages/OAuthCallback'
 import DemoPage from './pages/DemoPage'
 import NotePage from './pages/NotePage'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 
 const App = () => {
@@ -41,6 +43,8 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route path="/demo" element={<DemoPage />} />
         <Route path="*" element={<NotFound />} />

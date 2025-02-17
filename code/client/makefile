@@ -19,6 +19,9 @@ install: build
 	@echo "Installation complete!"
 	@echo "Please add this line to your ~/.bashrc or ~/.zshrc:"
 	@echo "source $(INSTALL_DIR)/wrapper.sh"
+	@echo ""
+	@echo "Then either run 'source ~/.bashrc' (or ~/.zshrc) or restart your terminal"
+	rm -f $(BINARY_NAME)
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux main.go
