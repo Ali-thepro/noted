@@ -240,7 +240,7 @@ You can search for a note by typing in the title or tag in the search bar at the
 
 ### 2.1.5 Managing Versions
 
-There are three ways in which a new version of your note is created. The first is when you create a new note. The second is when you change the title or tags of the note. And the third is when you edit teh contents of the note in the editor. While editing, a new version is created every 10 minutes. In order to view the history of the note, simply click on the "History" button in the top right corner of the note. This "History" button will only be visible if you are on the editor page. After clicking on the button, a modal will appear showing the history of the note.
+There are three ways in which a new version of your note is created. The first is when you create a new note. The second is when you change the title or tags of the note. And the third is when you edit the contents of the note in the editor. While editing, a new version is created every 10 minutes. In order to view the history of the note, simply click on the "History" button in the top right corner of the note. This "History" button will only be visible if you are on the editor page. After clicking on the button, a modal will appear showing the history of the note.
 
 ![History](https://i.postimg.cc/ZqVFMYGd/image.png)
 
