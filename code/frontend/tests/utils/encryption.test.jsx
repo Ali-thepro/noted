@@ -7,7 +7,7 @@ vi.mock('axios')
 
 describe('Encryption Service', () => {
   const baseUrl = '/api/encryption'
-  
+
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -24,11 +24,11 @@ describe('Encryption Service', () => {
         iv: 'initVector789'
       }
       const mockResponse = { data: { message: 'Encryption setup successful' } }
-      
+
       axios.post.mockResolvedValueOnce(mockResponse)
 
       const result = await setup(mockData)
-      
+
       expect(axios.post).toHaveBeenCalledWith(`${baseUrl}/setup`, mockData)
       expect(result).toEqual(mockResponse.data)
     })
@@ -48,7 +48,7 @@ describe('Encryption Service', () => {
       axios.get.mockResolvedValueOnce(mockResponse)
 
       const result = await getMasterPasswordHash()
-      
+
       expect(axios.get).toHaveBeenCalledWith(`${baseUrl}/password`)
       expect(result).toEqual(mockResponse.data)
     })
@@ -68,7 +68,7 @@ describe('Encryption Service', () => {
       axios.get.mockResolvedValueOnce(mockResponse)
 
       const result = await getProtectedSymmetricKey()
-      
+
       expect(axios.get).toHaveBeenCalledWith(`${baseUrl}/symmetric-key`)
       expect(result).toEqual(mockResponse.data)
     })
@@ -88,7 +88,7 @@ describe('Encryption Service', () => {
       axios.get.mockResolvedValueOnce(mockResponse)
 
       const result = await getIv()
-      
+
       expect(axios.get).toHaveBeenCalledWith(`${baseUrl}/iv`)
       expect(result).toEqual(mockResponse.data)
     })
@@ -108,7 +108,7 @@ describe('Encryption Service', () => {
       axios.get.mockResolvedValueOnce(mockResponse)
 
       const result = await encryptionStatus()
-      
+
       expect(axios.get).toHaveBeenCalledWith(`${baseUrl}/status`)
       expect(result).toEqual(mockResponse.data)
     })
@@ -121,4 +121,4 @@ describe('Encryption Service', () => {
       expect(axios.get).toHaveBeenCalledWith(`${baseUrl}/status`)
     })
   })
-}) 
+})
