@@ -14,10 +14,8 @@ const mockSubtleCrypto = {
     const result = new Uint8Array(32).fill(1)
     return Promise.resolve(result.buffer)
   }),
-  decrypt: vi.fn().mockImplementation((algorithm, key, data) => {
-    // For note content decryption, return a valid string
-    const decoder = new TextDecoder()
-    return Promise.resolve(encoder.encode('Test note content').buffer)
+  decrypt: vi.fn().mockImplementation(() => {
+    return Promise.resolve(encoder.encode('Test note content').buffer)// eslint-disable-line
   }),
   sign: vi.fn().mockImplementation((algorithm, key, data) => {
     // Return different values for different inputs to support secureCompare
@@ -252,7 +250,7 @@ describe('Encryption Tests', () => {
       test('encryptSymmetricKey full flow', async () => {
         const key = await encryptionService.generateKey(32)
         const masterKey = await encryptionService.generateKey(32)
-        
+
         const result = await encryptionService.encryptSymmetricKey(key, masterKey)
         expect(result.encryptedKey).toBeDefined()
         expect(result.iv).toBeDefined()
@@ -269,16 +267,16 @@ describe('Encryption Tests', () => {
         const noteCipherKey = await encryptionService.generateKey(32)
         const content = 'Test note content'
         const encoder = new TextEncoder()
-        
+
         // Mock encrypt and decrypt for note content
         mockSubtleCrypto.encrypt.mockImplementation(() => {
           return Promise.resolve(encoder.encode(content).buffer)
         })
-        
+
         mockSubtleCrypto.decrypt.mockImplementation(() => {
           return Promise.resolve(encoder.encode(content).buffer)
         })
-        
+
         const encrypted = await encryptionService.encryptNoteContent(content, noteCipherKey)
         expect(encrypted.encryptedContent).toBeDefined()
         expect(encrypted.iv).toBeDefined()
@@ -312,12 +310,12 @@ describe('Encryption Tests', () => {
       test('hkdf with various inputs', async () => {
         const key1 = await encryptionService.generateKey(32)
         const key2 = await encryptionService.generateKey(32)
-        
+
         mockSubtleCrypto.deriveBits.mockImplementation((params, key, length) => {
           const result = new Uint8Array(length || 32).fill(1)
           return Promise.resolve(result.buffer)
         })
-        
+
         const derived1 = await encryptionService.hkdf(key1, key2)
         expect(derived1).toBeInstanceOf(Uint8Array)
         //expect(derived1.length).toBe(32)
