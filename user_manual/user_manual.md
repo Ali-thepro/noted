@@ -184,93 +184,93 @@ noted
 
 ## 2.1 Web Application
 
-### 2.1.1 Login/Signup
+## 2.1.1 Login/Signup
 
 
 Once you first visit the web page, you will be redirected to the login page if you are not already logged in. You can either sign in to an existing account or create a new one. You have three options for signing in: You can either use your email address and password, or sign in via Google or GitHub.
 
-![Login Page](https://i.postimg.cc/CdyBd9q7/image.png)
+![Login Page](images/signin-page.png)
 
 If you are a new user, you can create an account by clicking on the "Sign up" link. If you already have an account, enter your login credentials. Once you have created your account, you will be prompted to create your master password. This is used to encrypt the contents of your notes and ensure that only you can access them. Noted operates with zero-knowledge encryption. This means that Noted has zero knowledge of a way to retrieve or reset your master password. You are in charge of remembering your master password.
 
-![Master Password](https://i.postimg.cc/VkZSCSn5/image.png)
+![Master Password](images/master-password-modal.png)
 
 Once you have created your master password, you will be redirected to the home page.
 
 If you already have an account, and signed in, you will be redirected to the home page where you will be asked to enter your master password.
 
-![Master Password](https://i.postimg.cc/8PjgCjpZ/image.png)
+![Master Password](images/unlock-modal.png)
 
 After successfully entering your master password, you will be be able to view the home page.
 
-![Home Page](https://i.postimg.cc/66bFFtrn/image.png)
+![Home Page](images/home.png)
 
-### 2.1.2 Creating a Note
+## 2.1.2 Creating a Note
 
 To get started with creating a note, you can click on the "New Note" button in the top right corner of the screen. You will then be prompted to enter a title or tags (optional) for your note. After the note is created you will be redirected to the edit note page.
 
-### 2.1.3 Editing a Note
+## 2.1.3 Editing a Note
 
-![image.png](https://i.postimg.cc/WpSJvfzM/image.png)
+![Editor](images/editor.png)
 
 This is where you will be able to edit your note using Markdown. If you are new to Markdown, you can visit the "about page" on the navigation bar to learn some of the basics and advanced features that Noted supports. As shown in the image above, there is a toolbar that allows you to format your text using Markdown for you. Some Markdown features that deal with formatting text such as bold and italic will wrap around any selected text. If no text is selected it will insert a sample bolded sentence at the current cursor position. Other features such as headings and lists will insert the appropriate Markdown syntax at the start of the line. As you write your Markdown note, you will be able to see a live preview of your note on the right hand side.
 
 In the top left corner you will have the option to change the view of your note. You can choose just to choose the editor, the preview or both, which is the default option. The status bar is at the bottom of the editor. From here you can see your line and column number and have the option to change the theme, font style, and font size. You can also change the keyboard mapping. The available options are: Vim, Emacs, Sublime and the default option. Also available is the option to change the tab indent size and a toggle button to swap between indenting using tabs or spaces. Your configuration for your editor will be saved every time you make a change to it.
 
-### 2.1.3.1 Uploading an Image
+## 2.1.3.1 Uploading an Image
 
-![Uploading an Image](https://i.postimg.cc/SsYqvRnT/image.png)
+![Uploading an Image](images/image-upload.png)
 
 You can upload an image to your note by clicking on the "Upload Image" button in the toolbar. You will then be prompted to select an image to upload. Once you have selected an image, the URL for the image will then be inserted into where your cursor is in the editor.
 
-### 2.1.4 Managing Notes
+## 2.1.4 Managing Notes
 
-### 2.1.4.1 Editing and Deleting Notes
+## 2.1.4.1 Editing and Deleting Notes
 
 If you need to edit the title, tags or delete a note, you will be able to do so by going back to the home page.
 
-![Managing Notes](https://i.postimg.cc/mrwFgdVf/image.png)
+![Managing Notes](images/home-with-notes.png)
 
 Each note has an edit and delete button at the top right corner. By clicking on the edit button you will be able to edit the title and tags, if any. By clicking on the delete button, you will be able to delete the note.
 
-### 2.1.4.2 Searching and Filtering Notes
+## 2.1.4.2 Searching and Filtering Notes
 
 You can search for a note by typing in the title or tag in the search bar at the top of the home page. This will then filter the notes displayed based on your search query. You can also sort the notes by updated date or by title and furthermore you can sort resulting notes in ascending or descending order. By default the notes are sorted by updated date. 
 
 
-### 2.1.5 Managing Versions
+## 2.1.5 Managing Versions
 
 There are three ways in which a new version of your note is created. The first is when you create a new note. The second is when you change the title or tags of the note. And the third is when you edit the contents of the note in the editor. While editing, a new version is created every 10 minutes. In order to view the history of the note, simply click on the "History" button in the top right corner of the note. This "History" button will only be visible if you are on the editor page. After clicking on the button, a modal will appear showing the history of the note.
 
-![History](https://i.postimg.cc/ZqVFMYGd/image.png)
+![History](images/version-modal.png)
 
 Here you will be to select different versions of your note. It will also display the Markdown content of the note in a read only display.
 
 At the bottom of the modal, you will have the option to compare the selected version with the version before it.
 
-![Compare Versions](https://i.postimg.cc/W4HS4b5P/image.png)
+![Compare Versions](images/compare.png)
 
 This will show you the changes that were made to the note between the two versions. Any new changes would be highlighted in green and any removed changes would be highlighted in red. Any content note changes would be highlighted in gray. To go back to the original display of the selected version, click the same button, now called "Show Content" again.
 
 In order to restore your note to a selected versionhttps://i.postimg.cc/zDxn8T1M/image.png, click on the "Restore" button at the bottom right of the modal. This will restore your note to the selected version.
 
-### 2.1.5 Changing the Theme
+## 2.1.5 Changing the Theme
 
 In order to change switch the theme between light and dark mode, you can click the sun or moon icon in the top right corner of the navigation bar.
 
-### 2.1.6 Logging out/Forgetting your password
+## 2.1.6 Logging out/Forgetting your password
 
 To logout of Noted, click on the "Logout" button in the top right corner of the navigation bar. This will be on the right side of the theme toggle button. After clicking on the button, you will be logged out and redirected to the login page.
 
 If you forgot your password (the password for your account and not your master password), you can click on the "Reset it here" link in the login page.
 
-![Forgot Password](https://i.postimg.cc/vTBVxWTq/image.png)
+![Forgot Password](images/signin-page.png)
 
 This will redirect you to the forgot password page, where you will be asked to enter your email address. Once you have entered your email address, a notification will appear saying that a password reset email has been sent to your email address.
 
 After opening your email inbox, you will see an email with a link to reset your password. You may need to check your spam folder. After clicking on the link, you will be redirected to the reset password page.
 
-![Reset Password](https://i.postimg.cc/ryQb6MkM/image.png)
+![Reset Password](images/reset-password.png)
 
 This will redirect you to the reset password page, where you will be asked to enter your new password. Once you have entered and confirmed your new password, you will be redirected to the login page.
 
@@ -335,7 +335,7 @@ The following commands require an active internet connection:
 
 The rest of the commands do not require an active internet connection.
 
-### 2.2.1 Login/Signup
+## 2.2.1 Login/Signup
 
 In order to login or signup using the CLI, you can use the command `noted auth login`.
 This will redirect you to the login page of the web application. From here you can login to an existing account or create a new account. 
@@ -344,11 +344,11 @@ After you login or signup, you will be redirected to a different page that will 
 
 If for whatever reason you fail to enter your master password, you can use the command `noted setup-encryption`. This will prompt you to set your master password.
 
-![Login/Signup](https://i.postimg.cc/m2v7q8T3/image.png)
+![Login/Signup](images/cli-login.png)
 
 If you created an account, once you return back to CLI, you will be asked to enter and confirm your master password. As mentioned above, Noted operates with zero-knowledge encryption. This means that Noted has zero knowledge of a way to retrieve or reset your master password. You are in charge of remembering your master password.
 
-### 2.2.2 Unlocking Noted on the CLI
+## 2.2.2 Unlocking Noted on the CLI
 
 Some commands on the CLI requires Noted to be unlocked. To unlock Noted, you can use the command `noted unlock`. This will prompt you to enter your master password. This will unlock Noted for a limited time (1 hour).
 
@@ -365,7 +365,7 @@ The commands that require Noted to be unlocked are:
 
 By entering any of these commands if Noted is locked, you will be prompted to enter your master password.
 
-### 2.2.3 Creating a Note
+## 2.2.3 Creating a Note
 
 To create a new note, you can use the command `noted create`. This will command takes in a title and an optional tag flag. 
 
@@ -381,7 +381,7 @@ noted create -t "My Note" --tag "Work"
 ```
 
 
-### 2.2.4 Editing a Note
+## 2.2.4 Editing a Note
 
 To edit a note, you can use the command `noted edit`. This command accepts a note id as an argument or a title flag.
 
@@ -407,7 +407,7 @@ Choose a number:
 ```
 
 
-### 2.2.5 Preview a Note
+## 2.2.5 Preview a Note
 
 To preview a note, you can use the command `noted preview`. This command accepts a note id as an argument or a title flag.
 
@@ -417,9 +417,9 @@ noted preview -t "My Note"
 
 This command will render your note in the terminal to give you a web like experience.
 
-![Preview](https://i.postimg.cc/zDxn8T1M/image.png)
+![Preview](images/terminal-render.png)
 
-### 2.2.6 Change the preview theme
+## 2.2.6 Change the preview theme
 
 To change the preview theme, you can use the command `noted theme`. This command a theme as an argument.
 
@@ -439,7 +439,7 @@ To change the theme to "dark", you can use the following command:
 noted theme dark
 ```
 
-### 2.2.7 Push a Note to the Server
+## 2.2.7 Push a Note to the Server
 
 To push a note to the server, you can use the command `noted push`. This command accepts a note id as an argument or a title flag.
 
@@ -447,7 +447,7 @@ To push a note to the server, you can use the command `noted push`. This command
 noted push -t "My Note"
 ```
 
-### 2.2.8 Delete a Note
+## 2.2.8 Delete a Note
 
 To delete a note, you can use the command `noted delete`. This command accepts a note id as an argument or a title flag.
 
@@ -455,7 +455,7 @@ To delete a note, you can use the command `noted delete`. This command accepts a
 noted delete -t "My Note"
 ```
 
-### 2.2.9 Edit Note Title and Tags
+## 2.2.9 Edit Note Title and Tags
 
 To edit the title or tags of a note, you can use the command `noted edit-data`. This command accepts a note id as an argument or a title flag. It also accepts a new title flag, new tags flag and a replace flag.
 
@@ -470,7 +470,7 @@ noted edit-data -t "My Note" -n "New Title" --tags "New Tag" -r
 
 By having the replace flag set it will replace the existing tags with the new tags. If the replace flag is not set, the new tags will be added to the existing tags.
 
-### 2.2.10 List all Notes
+## 2.2.10 List all Notes
 
 To list all notes, you can use the command `noted list`. This command will list all notes in the order of the most recently updated note.
 
@@ -478,7 +478,7 @@ To list all notes, you can use the command `noted list`. This command will list 
 noted list
 ```
 
-### 2.2.11 Get the tags of a Note
+## 2.2.11 Get the tags of a Note
 
 To get the tags of a note, you can use the command `noted tags`. This command accepts a note id as an argument or a title flag.
 
@@ -486,7 +486,7 @@ To get the tags of a note, you can use the command `noted tags`. This command ac
 noted tags -t "My Note"
 ```
 
-### 2.2.12 Search for a Note
+## 2.2.12 Search for a Note
 
 To search for a note, you can use the command `noted search`. This command accepts a title or tag flag.
 
@@ -497,7 +497,7 @@ noted search -t "My Note" --tag "Work"
 This command will display all notes with the title "My Note" and the tag "Work".
 
 
-### 2.2.13 Synchronize Notes with the Server
+## 2.2.13 Synchronize Notes with the Server
 
 In the case where you have edited a note on the web application and you want to synchronize the changes to the local machine, you can use the command `noted sync`.
 
@@ -513,7 +513,7 @@ It also takes an optional verbose flag to show more details on what was created,
 noted sync --verbose
 ```
 
-### 2.2.14 Upload an Image
+## 2.2.14 Upload an Image
 
 To upload an image to a note, you can use the command `noted upload image`. This takes in as an argument the file path of the image you want to upload.
 
@@ -528,9 +528,9 @@ If you want to copy the image straight to your clipboard, you can use the `--cop
 noted upload image /path/to/image.png --copy 
 ```
 
-### 2.2.15 Versions
+## 2.2.15 Versions
 
-### 2.2.15.1 List Versions
+## 2.2.15.1 List Versions
 
 To list the versions of a note, you can use the command `noted version list`. This command accepts a note id as an argument or a title flag.
 
@@ -540,7 +540,7 @@ noted version list -t "My Note"
 
 This command will display all the versions of the note with the title "My Note".
 
-### 2.2.15.2 Compare Versions
+## 2.2.15.2 Compare Versions
 
 This command will compare the selected version with the version before it and prettily display the changes.
 
@@ -559,10 +559,10 @@ Ver  Created               Title    Tags
 
 Choose a number (1-2):
 ```
-![Compare Versions](https://i.postimg.cc/0NNztBzy/image.png)
+![Compare Versions](images/terminal-diff.png)
 
 
-### 2.2.15.3 Show a Version
+## 2.2.15.3 Show a Version
 
 To show a version, you can use the command `noted version show`. This command accepts a note id as an argument or a title flag.
 
@@ -573,7 +573,7 @@ noted version show -t "My Note"
 A selection menu will be displayed to you to select the version you want to show.
 This will then render the selected version in the terminal.
 
-### 2.2.15.4 Restore a Note to a Version
+## 2.2.15.4 Restore a Note to a Version
 
 To restore a note to a version, you can use the command `noted version restore`. This command accepts a note id as an argument or a title flag.
 
@@ -582,7 +582,7 @@ noted version restore -t "My Note"
 ```
 
 
-### 2.2.16 Get Help
+## 2.2.16 Get Help
 
 To get help for a command, you can use the command `noted help`. This command accepts a command as an argument.
 
@@ -590,7 +590,7 @@ To get help for a command, you can use the command `noted help`. This command ac
 noted help version
 ```
 
-### 2.2.17 Completion
+## 2.2.17 Completion
 
 To generate the autocompletion script for your shell, you can use the command `noted completion`. This command accepts a shell as an argument.
 
@@ -605,7 +605,7 @@ noted completion bash
 ```
 
 
-### 2.2.17.1 Setting Up in Bash
+## 2.2.17.1 Setting Up in Bash
 
 1. **Generate the Script**  
    ```bash
@@ -631,9 +631,8 @@ noted completion bash
    ```
    You should now have autocompletion for `noted` in Bash!
 
----
 
-### 2.2.17.2 Setting Up in Zsh
+## 2.2.17.2 Setting Up in Zsh
 
 1. **Generate the Script**  
    ```bash
@@ -666,9 +665,8 @@ noted completion bash
    ```
    Autocompletion for `noted` should now work in Zsh.
 
----
 
-### 2.2.17.3 Setting Up in Fish
+## 2.2.17.3 Setting Up in Fish
 
 1. **Generate the Script**  
    ```bash
@@ -689,14 +687,13 @@ noted completion bash
    ```
    Now `noted` completions will be available in Fish!
 
----
 
-### 2.2.17.4 Setting Up in PowerShell
+## 2.2.17.4 Setting Up in PowerShell
 
 Noted does not support Powershell, as this application was testing on a Linux machine.
 
 
-### 2.2.19 Logging Out
+## 2.2.19 Logging Out
 
 To log out, you can use the command `noted auth logout`. This command will log you out of your current session.
 
@@ -706,7 +703,7 @@ noted auth logout
 
 When you log out, your notes will not be deleted locally. They will be deleted if you choose to log back in with a different account. 
 
-### 2.2.20 Get Current User
+## 2.2.20 Get Current User
 
 To get the current user, you can use the command `noted auth me`. This command will display the current user.
 
