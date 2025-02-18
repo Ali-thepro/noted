@@ -252,7 +252,7 @@ At the bottom of the modal, you will have the option to compare the selected ver
 
 This will show you the changes that were made to the note between the two versions. Any new changes would be highlighted in green and any removed changes would be highlighted in red. Any content note changes would be highlighted in gray. To go back to the original display of the selected version, click the same button, now called "Show Content" again.
 
-In order to restore your note to a selected versionhttps://i.postimg.cc/zDxn8T1M/image.png, click on the "Restore" button at the bottom right of the modal. This will restore your note to the selected version.
+In order to restore your note to a selected version, click on the "Restore" button at the bottom right of the modal. This will restore your note to the selected version.
 
 ## 2.1.5 Changing the Theme
 
