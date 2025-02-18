@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const assert = require('node:assert')
 const { test, describe, beforeEach, after } = require('node:test')
-const { api, clearDatabase, initialVersions, initialUsers, initialNotes } = require('./test_helper')
+const { api, clearDatabase, initialVersions, initialNotes, setupTestUser } = require('./test_helper')
 
 describe('Version API', () => {
   let authCookie
@@ -11,8 +11,7 @@ describe('Version API', () => {
   beforeEach(async () => {
     await clearDatabase()
 
-    const response = await api.post('/api/auth/signup').send(initialUsers[0])
-    authCookie = response.headers['set-cookie']
+    authCookie = await setupTestUser()
 
     const noteResponse = await api
       .post('/api/note/create')
@@ -35,7 +34,10 @@ describe('Version API', () => {
         metadata: {
           title: 'Updated title',
           tags: ['new', 'tags']
-        }
+        },
+        cipherKey: 'dummyCipherKey',
+        cipherIv: 'dummyCipherIv',
+        contentIv: 'dummyContentIv'
       }
 
       const response = await api
@@ -58,7 +60,10 @@ describe('Version API', () => {
         metadata: {
           title: 'Updated title',
           tags: ['new', 'tags']
-        }
+        },
+        cipherKey: 'dummyCipherKey',
+        cipherIv: 'dummyCipherIv',
+        contentIv: 'dummyContentIv'
       }
 
       const response = await api
@@ -86,7 +91,10 @@ describe('Version API', () => {
     test('fails with invalid version type', async () => {
       const invalidVersion = {
         type: 'invalid',
-        content: 'Some content'
+        content: 'Some content',
+        cipherKey: 'dummyCipherKey',
+        cipherIv: 'dummyCipherIv',
+        contentIv: 'dummyContentIv'
       }
 
       const response = await api
@@ -159,8 +167,7 @@ describe('Version API', () => {
     test('fails when no versions exist', async () => {
       await clearDatabase()
 
-      const signupResponse = await api.post('/api/auth/signup').send(initialUsers[0])
-      authCookie = signupResponse.headers['set-cookie']
+      const authCookie = await setupTestUser()
 
       const noteResponse = await api
         .post('/api/note/create')

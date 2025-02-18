@@ -30,10 +30,8 @@ const uploadImage = async (req, res) => {
 
   s3.upload(params, (err, data) => {
     if (err) {
-      console.log(err)
       return res.status(500).json({ error: 'Upload to S3 failed' })
     }
-    console.log(data)
     fs.unlinkSync(filePath)
     return res.status(200).json({ imageUrl: data.Location })
   })

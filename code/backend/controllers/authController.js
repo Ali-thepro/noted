@@ -56,7 +56,7 @@ const signup = async (request, response, next) => {
 
   const existingUser = await User.findOne({ email, provider: 'local' })
   if (existingUser) {
-    return next(createError('An account with this email already exists', 401))
+    return next(createError('An account with this email already exists', 400))
   }
 
   try {
@@ -121,7 +121,7 @@ const signin = async (request, response, next) => {
   const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.passwordHash)
 
   if (!(user && passwordCorrect)) {
-    return next(createError('Invalid email or password', 400))
+    return next(createError('Invalid email or password', 401))
   }
 
   const userForToken = {
@@ -181,9 +181,8 @@ const refreshToken = async (request, response, next) => {
         maxAge: 15 * 60 * 1000,
       })
       .json(user)
-  } catch (error) {
-    console.error('Error during token refresh:', error)
-    return next(createError('Invalid refresh token', 403))
+  } catch (error) { // eslint-disable-line
+    return next(createError('Invalid refresh token', 401))
   }
 }
 
@@ -299,8 +298,7 @@ const google = async (request, response, next) => {
       response.redirect(genMasterPassword ? `${config.UI_URI}/oauth/callback?genMasterPassword=true` : `${config.UI_URI}/oauth/callback`)
     }
 
-  } catch (error) {
-    console.error('Error during Google OAuth callback:', error)
+  } catch (error) { // eslint-disable-line
     return next(createError('Error during Google OAuth callback', 500))
   }
 }
@@ -420,8 +418,7 @@ const github = async (request, response, next) => {
       response.redirect(genMasterPassword ? `${config.UI_URI}/oauth/callback?genMasterPassword=true` : `${config.UI_URI}/oauth/callback`)
     }
 
-  } catch (error) {
-    console.error('Error during GitHub OAuth callback:', error)
+  } catch (error) { // eslint-disable-line
     return next(createError('Error during GitHub OAuth callback', 500))
   }
 }
@@ -437,9 +434,6 @@ const signOut = async (request, response) => {
 const me = async (request, response, next) => {
   try {
     const user = request.user
-    if (!user) {
-      return next(createError('Unauthorised', 401))
-    }
     response.json(user)
   } catch (error) {
     next(error)

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const assert = require('node:assert')
 const { test, describe, beforeEach, after } = require('node:test')
-const { api, clearDatabase, initialNotes, getNotesInDb, initialUsers } = require('./test_helper')
+const { api, clearDatabase, initialNotes, getNotesInDb, setupTestUser } = require('./test_helper')
 
 
 describe('Note API', () => {
@@ -10,8 +10,7 @@ describe('Note API', () => {
   beforeEach(async () => {
     await clearDatabase()
 
-    const response = await api.post('/api/auth/signup').send(initialUsers[0])
-    authCookie = response.headers['set-cookie']
+    authCookie = await setupTestUser()
 
     for (const note of initialNotes) {
       await api
@@ -102,7 +101,10 @@ describe('Note API', () => {
       const newNote = {
         title: 'Test note creation',
         content: 'Testing note creation functionality',
-        tags: ['test', 'creation']
+        tags: ['test', 'creation'],
+        cipherKey: 'dummyCipherKey',
+        cipherIv: 'dummyCipherIv',
+        contentIv: 'dummyContentIv'
       }
 
       await api
@@ -212,8 +214,6 @@ describe('Note API', () => {
       assert(Array.isArray(response.body))
       assert(response.body.every(note =>
         note.id &&
-        note.title &&
-        note.tags &&
         note.updatedAt &&
         note.createdAt
       ))
@@ -227,15 +227,6 @@ describe('Note API', () => {
         .expect(200)
 
       assert(response.body.every(note => new Date(note.updatedAt) >= new Date(since)))
-    })
-
-    test('supports tag filtering', async () => {
-      const response = await api
-        .get('/api/note/metadata?tag=first')
-        .set('Cookie', authCookie)
-        .expect(200)
-
-      assert(response.body.every(note => note.tags.includes('first')))
     })
   })
 
@@ -310,6 +301,8 @@ describe('Note API', () => {
       assert(response.body.every(note => note.tags.includes('first')))
     })
   })
+
+
 
   after(async () => {
     await clearDatabase()

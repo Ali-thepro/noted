@@ -68,8 +68,7 @@ const verifyUser = async (request, response, next) => {
 
     request.user = user
     next()
-  } catch (error) {
-    console.error('Token verification error:', error)
+  } catch (error) { // eslint-disable-line
     return next(createError('Unauthorised - Token verification failed', 401))
   }
 }
