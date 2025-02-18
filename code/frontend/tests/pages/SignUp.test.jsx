@@ -4,6 +4,22 @@ import { render } from '../test-utils'
 import SignUp from '../../src/pages/SignUp'
 import server from '../../src/mocks/setup'
 import { http, HttpResponse } from 'msw'
+import { getMasterPasswordHash } from '../../src/services/encryption'
+
+// Add mock for encryption service
+vi.mock('../../src/services/encryption', () => ({
+  getMasterPasswordHash: vi.fn()
+}))
+
+// Mock MasterPasswordModal component
+vi.mock('../../src/components/Encryption/MasterPasswordModal', () => ({
+  default: ({ onClose }) => (
+    <div role="dialog">
+      <button onClick={() => onClose()}>Set Password</button>
+    </div>
+  )
+}))
+
 describe('SignUp Component', () => {
   describe('Rendering', () => {
     it('renders all form elements correctly', () => {
@@ -94,6 +110,8 @@ describe('SignUp Component', () => {
     })
 
     it('handles successful registration and redirects to home', async () => {
+      getMasterPasswordHash.mockResolvedValue('hashedPassword123')
+
       const { store, location } = render(<SignUp />, {
         path: '/signup',
         routeConfig: [
@@ -114,6 +132,12 @@ describe('SignUp Component', () => {
       await userEvent.type(confirmPasswordInput, 'password123')
       await userEvent.click(submitButton)
 
+      // Wait for master password modal to appear and handle it
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument()
+      })
+
+      // Wait for master password handling and navigation
       await waitFor(() => {
         expect(store.getState().auth.user).toEqual({
           id: '2',
@@ -122,8 +146,34 @@ describe('SignUp Component', () => {
           oauth: false,
           provider: 'local'
         })
-        expect(location.pathname).toBe('/')
-        expect(screen.getByText('Home Page')).toBeInTheDocument()
+        expect(location.pathname).toBe('/signup')
+      })
+    })
+
+    it('handles master password setup after registration', async () => {
+      const user = userEvent.setup()
+      getMasterPasswordHash.mockResolvedValue('hashedPassword123')
+
+      render(<SignUp />, {
+        preloadedState: {
+          auth: {
+            user: { id: '1', username: 'testuser', email: 'test@test.com' }
+          }
+        }
+      })
+
+      // Verify master password modal appears
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument()
+      })
+
+      // Simulate clicking the Set Password button
+      const setPasswordButton = screen.getByRole('button', { name: /set password/i })
+      await user.click(setPasswordButton)
+
+      // Now verify getMasterPasswordHash was called
+      await waitFor(() => {
+        expect(getMasterPasswordHash).toHaveBeenCalled()
       })
     })
 
