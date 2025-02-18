@@ -1,13 +1,42 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
+import { forwardRef } from 'react'
 import Header from '../../src/components/Header'
 import server from '../../src/mocks/setup' // eslint-disable-line
 import { getVersions } from '../../src/services/version'
+//import memoryStore from '../../src/utils/memoryStore'
+
+// Add mocks
+vi.mock('../../src/utils/memoryStore', () => ({
+  default: {
+    get: vi.fn(() => 'mockSymmetricKey')
+  }
+}))
 
 vi.mock('../../src/services/version', () => ({
   getVersions: vi.fn(),
   getVersionChain: vi.fn()
+}))
+
+// Mock encryption service
+// vi.mock('../../src/utils/encryption', () => ({
+//   EncryptionService: class {
+//     decryptNoteContent = vi.fn().mockResolvedValue('decrypted content')
+//     unwrapNoteCipherKey = vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]))
+//   }
+// }))
+
+vi.mock('@uiw/react-codemirror', () => ({
+  default: forwardRef(function CodeMirrorMock({ value }, ref) { // eslint-disable-line
+    return (
+      <div ref={ref} data-testid="editor">
+        {value}
+      </div>
+    )
+  }),
+  markdown: () => [],
+  EditorView: { theme: () => [], lineWrapping: true }
 }))
 
 describe('Header Component', () => {
@@ -162,54 +191,47 @@ describe('Header Component', () => {
   })
 
   describe('Version History', () => {
-    it('shows version history button only on note pages with active note', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+      getVersions.mockResolvedValue([{
+        id: 'v1',
+        type: 'snapshot',
+        content: '# Initial Content',
+        metadata: { versionNumber: 1 },
+        createdAt: new Date().toISOString()
+      }])
+    })
+
+    it('opens version history modal when clicking history button', async () => {
+      const user = userEvent.setup()
+
       render(<Header />, {
         path: '/notes/123',
         preloadedState: {
-          auth: { user: null },
+          auth: { user: { id: '1' } },
           theme: 'light',
           note: {
             viewMode: 'edit',
-            activeNote: { id: '123', title: 'Test Note' }
+            activeNote: {
+              id: '123',
+              title: 'Test Note',
+              cipherKey: 'testKey',
+              cipherIv: 'testIv',
+              contentIv: 'testContentIv'
+            }
           }
         }
       })
 
       const historyButton = screen.getByText('History').closest('button')
-      expect(historyButton).toBeInTheDocument()
-    })
+      await user.click(historyButton)
 
-    describe('Version History', () => {
-      beforeEach(() => {
-        vi.clearAllMocks()
-        getVersions.mockResolvedValue([{
-          id: 'v1',
-          type: 'snapshot',
-          content: '# Initial Content',
-          metadata: { versionNumber: 1 },
-          createdAt: new Date().toISOString()
-        }])
+      await waitFor(() => {
+        expect(getVersions).toHaveBeenCalledWith('123')
       })
 
-      it('opens version history modal when clicking history button', async () => {
-        render(<Header />, {
-          path: '/notes/123',
-          preloadedState: {
-            auth: { user: null },
-            theme: 'light',
-            note: {
-              viewMode: 'edit',
-              activeNote: { id: '123', title: 'Test Note' }
-            }
-          }
-        })
-
-        const historyButton = screen.getByText('History').closest('button')
-        await userEvent.click(historyButton)
-        await waitFor(() => {
-          expect(getVersions).toHaveBeenCalledWith('123')
-        })
-      })
+      // Verify modal is shown
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
   })
 })

@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { forwardRef } from 'react'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '../test-utils'
 import userEvent from '@testing-library/user-event'//eslint-disable-line
 import NotePage from '../../src/pages/NotePage'
@@ -111,16 +111,18 @@ describe('NotePage', () => {
   })
 
   describe('View Mode Rendering', () => {
-    it('renders editor only in edit mode', () => {
-      render(<NotePage />, {
-        path: '/notes/123',
-        preloadedState: {
-          auth: { user: { id: '1' } },
-          note: {
-            activeNote: { id: '123', content: '# Test' },
-            viewMode: 'edit'
+    it('renders editor only in edit mode', async () => {
+      await act(async () => {
+        render(<NotePage />, {
+          path: '/notes/123',
+          preloadedState: {
+            auth: { user: { id: '1' } },
+            note: {
+              activeNote: { id: '123', content: '# Test' },
+              viewMode: 'edit'
+            }
           }
-        }
+        })
       })
 
       expect(screen.getByTestId('editor')).toBeInTheDocument()
