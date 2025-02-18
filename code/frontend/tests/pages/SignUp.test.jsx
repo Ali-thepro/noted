@@ -238,7 +238,6 @@ describe('SignUp Component', () => {
           auth: { loading: true }
         }
       })
-
       expect(screen.getByText('Loading...')).toBeInTheDocument()
       expect(screen.getByRole('status')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /loading/i })).toBeDisabled()
