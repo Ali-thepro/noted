@@ -80,6 +80,7 @@ export default defineConfig({
         'src/services/auth.js',
         'src/services/note.js',
         'src/services/image.js',
+        'src/components/Editor/ImageUploader.jsx',
       ],
       reporter: ['cobertura', 'html', 'text'],
       reportsDirectory: './coverage'

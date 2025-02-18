@@ -11,7 +11,7 @@ vi.mock('../../src/services/auth', () => ({
 
 describe('ForgotPassword', () => {
   const mockNavigate = vi.fn()
-  
+
   const preloadedState = {
     theme: 'light'
   }
@@ -42,12 +42,12 @@ describe('ForgotPassword', () => {
   test('successfully sends reset link', async () => {
     const successMessage = 'Password reset link sent to your email'
     requestPasswordReset.mockResolvedValueOnce({ message: successMessage })
-    
+
     renderWithRouter()
 
     const emailInput = screen.getByPlaceholderText(/name@company.com/i)
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    
+
     const submitButton = screen.getByRole('button', { name: /send reset link/i })
     fireEvent.click(submitButton)
 
@@ -60,17 +60,17 @@ describe('ForgotPassword', () => {
 
   test('shows error message on request failure', async () => {
     const errorMessage = 'Email not found'
-    requestPasswordReset.mockRejectedValueOnce({ 
-      response: { 
-        data: { error: errorMessage } 
-      } 
+    requestPasswordReset.mockRejectedValueOnce({
+      response: {
+        data: { error: errorMessage }
+      }
     })
-    
+
     renderWithRouter()
 
     const emailInput = screen.getByPlaceholderText(/name@company.com/i)
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    
+
     const submitButton = screen.getByRole('button', { name: /send reset link/i })
     fireEvent.click(submitButton)
 
@@ -82,12 +82,12 @@ describe('ForgotPassword', () => {
 
   test('shows loading state while submitting', async () => {
     requestPasswordReset.mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 100)))
-    
+
     renderWithRouter()
 
     const emailInput = screen.getByPlaceholderText(/name@company.com/i)
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    
+
     const submitButton = screen.getByRole('button', { name: /send reset link/i })
     fireEvent.click(submitButton)
 
@@ -99,8 +99,7 @@ describe('ForgotPassword', () => {
     renderWithRouter()
 
     const emailInput = screen.getByPlaceholderText(/name@company.com/i)
-    const submitButton = screen.getByRole('button', { name: /send reset link/i })
     expect(emailInput).toHaveAttribute('type', 'email')
-    expect(emailInput).toHaveAttribute('required')
+    expect(emailInput).toBeRequired()
   })
-}) 
+})
