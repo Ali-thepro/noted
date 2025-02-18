@@ -4,6 +4,12 @@ import { render } from '../test-utils'
 import NoteModal from '../../src/components/Notes/NoteModal'
 import server from '../../src/mocks/setup' // eslint-disable-line
 
+vi.mock('../../src/utils/memoryStore', () => ({
+  default: {
+    get: vi.fn(() => 'mockSymmetricKey')
+  }
+}))
+
 describe('NoteModal Component', () => {
   const mockNote = {
     id: '123',

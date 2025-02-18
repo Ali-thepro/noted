@@ -5,9 +5,7 @@ import { render } from '../test-utils'
 import VersionHistoryModal from '../../src/components/Version/VersionHistoryModal'
 import { getVersions, getVersionChain } from '../../src/services/version'
 import userEvent from '@testing-library/user-event'
-//import memoryStore from '../../src/utils/memoryStore'
 
-// Mock memoryStore
 vi.mock('../../src/utils/memoryStore', () => ({
   default: {
     get: vi.fn(() => 'mockSymmetricKey')

@@ -5,9 +5,7 @@ import { forwardRef } from 'react'
 import Header from '../../src/components/Header'
 import server from '../../src/mocks/setup' // eslint-disable-line
 import { getVersions } from '../../src/services/version'
-//import memoryStore from '../../src/utils/memoryStore'
 
-// Add mocks
 vi.mock('../../src/utils/memoryStore', () => ({
   default: {
     get: vi.fn(() => 'mockSymmetricKey')
