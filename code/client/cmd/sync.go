@@ -9,7 +9,7 @@ import (
 
 var syncCmd = &cobra.Command{
 	Use:   "sync",
-	Short: "Synchronize notes with the server, required noted to be unlocked",
+	Short: "Synchronize notes with the server, requires noted to be unlocked",
 	Long: `Synchronize your local notes with the server.
 This will download new notes and update existing ones.
 Requires noted to be unlocked.`,

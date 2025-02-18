@@ -12,7 +12,7 @@ import (
 
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a new note, required noted to be unlocked",
+	Short: "Create a new note, requires noted to be unlocked",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		symmetricKey, err := auth.GetSymmetricKey()
 		if err != nil {

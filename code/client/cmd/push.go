@@ -13,7 +13,7 @@ import (
 
 var pushCmd = &cobra.Command{
 	Use:   "push [id]",
-	Short: "Push note changes to server, required noted to be unlocked",
+	Short: "Push note changes to server, requires noted to be unlocked",
 	Long: `Push note changes to the server. 
 You can specify either the note ID as an argument or use --title flag.
 Requires noted to be unlocked.`,

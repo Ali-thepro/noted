@@ -726,11 +726,11 @@ Second Term
                   <p className='text-sm text-gray-600 dark:text-gray-400 mb-2'>Rendered Output:</p>
                   <div className='bg-gray-50 dark:bg-gray-900 p-4 rounded-lg'>
                     <nav className="toc">
-                      <ul className="space-y-1">
+                      <ul className="space-y-1 list-disc">
                         <li><a href="#introduction" className="text-blue-600 dark:text-blue-400 hover:underline">Introduction</a>
-                          <ul className="ml-4 space-y-1">
+                          <ul className="ml-4 space-y-1 list-disc">
                             <li><a href="#getting-started" className="text-blue-600 dark:text-blue-400 hover:underline">Getting Started</a>
-                              <ul className="ml-4 space-y-1">
+                              <ul className="ml-4 space-y-1 list-disc">
                                 <li><a href="#installation" className="text-blue-600 dark:text-blue-400 hover:underline">Installation</a></li>
                                 <li><a href="#configuration" className="text-blue-600 dark:text-blue-400 hover:underline">Configuration</a></li>
                               </ul>
@@ -738,10 +738,10 @@ Second Term
                           </ul>
                         </li>
                         <li><a href="#features" className="text-blue-600 dark:text-blue-400 hover:underline">Features</a>
-                          <ul className="ml-4 space-y-1">
+                          <ul className="ml-4 space-y-1 list-disc">
                             <li><a href="#basic-features" className="text-blue-600 dark:text-blue-400 hover:underline">Basic Features</a></li>
                             <li><a href="#advanced-features" className="text-blue-600 dark:text-blue-400 hover:underline">Advanced Features</a>
-                              <ul className="ml-4 space-y-1">
+                              <ul className="ml-4 space-y-1 list-disc">
                                 <li><a href="#custom-plugins" className="text-blue-600 dark:text-blue-400 hover:underline">Custom Plugins</a></li>
                                 <li><a href="#api-reference" className="text-blue-600 dark:text-blue-400 hover:underline">API Reference</a></li>
                               </ul>

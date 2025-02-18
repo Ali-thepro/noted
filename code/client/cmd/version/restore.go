@@ -12,8 +12,8 @@ import (
 )
 
 var restoreCmd = &cobra.Command{
-	Use:   "restore [id] [version-number]",
-	Short: "Restore a note to a specific version, required noted to be unlocked",
+	Use:   "restore [id]",
+	Short: "Restore a note to a specific version, requires noted to be unlocked",
 	Long: `Restore a note to a specific version. If version number is not provided, you will be prompted to select one.
 Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

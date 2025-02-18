@@ -6,7 +6,7 @@ import (
 
 var VersionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Manage note versions, required noted to be unlocked",
+	Short: "Manage note versions, requires noted to be unlocked",
 	Long: `Manage note versions - list, show, restore and diff versions of notes.
 Requires noted to be unlocked.`,
 }

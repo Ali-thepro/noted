@@ -212,8 +212,8 @@ func SelectNote(title string) (*Note, error) {
 		for i, note := range matches {
 			fmt.Printf("[%d] %s %s  (created: %s, updated: %s)\n",
 				i+1,
-				note.ID,
 				note.Title,
+				note.ID,
 				note.CreatedAt.Format("2006-01-02 15:04:05"),
 				note.UpdatedAt.Format("2006-01-02 15:04:05"),
 			)
