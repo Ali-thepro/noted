@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import diff_match_patch, { buildVersionContent, shouldCreateSnapshot } from '../../src/utils/diff'
+
+// Mock encryption service
+const mockEncryptionService = {
+  unwrapNoteCipherKey: vi.fn(),
+  decryptNoteContent: vi.fn()
+}
 
 describe('diff_match_patch delta extensions', () => {
   const dmp = new diff_match_patch()
@@ -105,39 +111,79 @@ describe('Version control utilities', () => {
   })
 
   describe('buildVersionContent', () => {
-    it('returns empty string for empty chain', () => {
-      expect(buildVersionContent([])).toBe('')
+    beforeEach(() => {
+      vi.clearAllMocks()
+      mockEncryptionService.unwrapNoteCipherKey.mockResolvedValue(new Uint8Array([1, 2, 3]))
+      mockEncryptionService.decryptNoteContent.mockImplementation((content) => Promise.resolve(content))
     })
 
-    it('returns snapshot content when chain only contains snapshot', () => {
+    it('returns empty string for empty chain', async () => {
+      const result = await buildVersionContent([], mockEncryptionService, 'mockKey')
+      expect(result).toBe('')
+    })
+
+    it('returns snapshot content when chain only contains snapshot', async () => {
       const chain = [{
         type: 'snapshot',
-        content: 'hello world'
+        content: 'hello world',
+        cipherKey: 'key123',
+        cipherIv: 'iv123',
+        contentIv: 'contentIv123'
       }]
-      expect(buildVersionContent(chain)).toBe('hello world')
+
+      const result = await buildVersionContent(chain, mockEncryptionService, 'mockKey')
+      expect(result).toBe('hello world')
     })
 
-    it('applies diffs correctly', () => {
+    it('applies diffs correctly', async () => {
       const chain = [
         {
           type: 'snapshot',
-          content: 'hello cruel world'
+          content: 'hello cruel world',
+          cipherKey: 'key123',
+          cipherIv: 'iv123',
+          contentIv: 'contentIv123'
         },
         {
           type: 'diff',
           content: '=6\t-6\t+wonderful \t=5',
+          cipherKey: 'key456',
+          cipherIv: 'iv456',
+          contentIv: 'contentIv456',
           metadata: { versionNumber: 2 }
         }
       ]
-      expect(buildVersionContent(chain)).toBe('hello wonderful world')
+
+      const result = await buildVersionContent(chain, mockEncryptionService, 'mockKey')
+      expect(result).toBe('hello wonderful world')
     })
 
-    it('returns empty string when chain doesn\'t start with snapshot', () => {
+    it('returns empty string when chain doesn\'t start with snapshot', async () => {
       const chain = [{
         type: 'diff',
-        content: '+hello'
+        content: '+hello',
+        cipherKey: 'key123',
+        cipherIv: 'iv123',
+        contentIv: 'contentIv123'
       }]
-      expect(buildVersionContent(chain)).toBe('')
+
+      const result = await buildVersionContent(chain, mockEncryptionService, 'mockKey')
+      expect(result).toBe('')
+    })
+
+    it('handles decryption errors gracefully', async () => {
+      mockEncryptionService.decryptNoteContent.mockRejectedValue(new Error('Decryption failed'))
+
+      const chain = [{
+        type: 'snapshot',
+        content: 'encrypted content',
+        cipherKey: 'key123',
+        cipherIv: 'iv123',
+        contentIv: 'contentIv123'
+      }]
+
+      await expect(buildVersionContent(chain, mockEncryptionService, 'mockKey'))
+        .rejects.toThrow('Failed to decrypt initial snapshot')
     })
   })
 })
