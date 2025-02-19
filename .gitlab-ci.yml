@@ -20,27 +20,27 @@ cli:
     include: code/client/.gitlab-ci.yml
     strategy: depend
 
-# report-frontend:
-#   stage: report
-#   dependencies:
-#     - frontend
-#   script:
-#     - echo "Frontend Coverage Report"
-#     - grep -o 'class="strong">[0-9.]*' code/frontend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
-#   cache:
-#     key: "$CI_COMMIT_REF_SLUG-reports"
-#     paths:
-#       - code/frontend/coverage/coverage-final.json
-#       - code/frontend/coverage/junit.xml
-#       - code/frontend/coverage/index.html
-#     policy: pull
-#   coverage: /^([\d.]+)$/
-#   artifacts:
-#     reports:
-#       coverage_report:
-#         coverage_format: cobertura
-#         path: code/frontend/coverage/cobertura-coverage.xml
-#       junit: code/frontend/coverage/junit.xml
+report-frontend:
+  stage: report
+  dependencies:
+    - frontend
+  script:
+    - echo "Frontend Coverage Report"
+    - grep -o 'class="strong">[0-9.]*' code/frontend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-reports"
+    paths:
+      - code/frontend/coverage/coverage-final.json
+      - code/frontend/coverage/junit.xml
+      - code/frontend/coverage/index.html
+    policy: pull
+  coverage: /^([\d.]+)$/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: code/frontend/coverage/cobertura-coverage.xml
+      junit: code/frontend/coverage/junit.xml
 
 
 # report-backend:
