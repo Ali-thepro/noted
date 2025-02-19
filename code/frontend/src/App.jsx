@@ -13,6 +13,8 @@ import SignIn from './pages/SignIn'
 import OAuthCallback from './pages/OAuthCallback'
 import DemoPage from './pages/DemoPage'
 import NotePage from './pages/NotePage'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 
 const App = () => {
@@ -34,16 +36,18 @@ const App = () => {
         draggable={true}
       />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="*" element={<NotFound />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/notes/:id" element={<NotePage />} />
+        </Route>
         <Route path="/about" element={<About />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route path="/demo" element={<DemoPage />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/notes/:id" element={<NotePage />} />
-        </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   )

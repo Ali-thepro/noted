@@ -61,26 +61,29 @@ var listCmd = &cobra.Command{
 			}
 			tagsLen := len(strings.Join(v.Metadata.Tags, ", "))
 			if tagsLen == 0 {
-				tagsLen = 4
+				tagsLen = 6
 			}
 			if tagsLen > maxTagsLen {
 				maxTagsLen = tagsLen
 			}
 		}
 
-		headerFmt := fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
-		fmt.Printf(headerFmt, "Ver", "Type", "Created", "Title", "Tags")
-		fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+36))
+		if maxVerLen < 3 {
+			maxVerLen = 3
+		}
+
+		headerFmt := fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen)
+		fmt.Printf(headerFmt, "Ver", "Created", "Title", "Tags")
+		fmt.Println(strings.Repeat("-", maxVerLen+maxTitleLen+maxTagsLen+27))
 
 		for _, v := range versions {
 			tags := strings.Join(v.Metadata.Tags, ", ")
 			if tags == "" {
-				tags = "none"
+				tags = "no tags"
 			}
 
-			fmt.Printf(fmt.Sprintf("%%-%ds  %%-8s  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
+			fmt.Printf(fmt.Sprintf("%%-%ds  %%-20s  %%-%ds  %%-%ds\n", maxVerLen, maxTitleLen, maxTagsLen),
 				fmt.Sprintf("#%d", v.Metadata.VersionNumber),
-				v.Type,
 				v.CreatedAt.Format("2006-01-02 15:04:05"),
 				v.Metadata.Title,
 				tags,

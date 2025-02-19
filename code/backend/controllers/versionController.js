@@ -4,8 +4,12 @@ const createError = require('../utils/error')
 
 const createVersion = async (request, response, next) => {
   const { noteId } = request.params
-  const { type, content, metadata, baseVersion } = request.body
+  const { type, content, metadata, baseVersion, cipherKey, cipherIv, contentIv } = request.body
   const user = request.user
+
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
 
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })
@@ -19,8 +23,10 @@ const createVersion = async (request, response, next) => {
       content,
       metadata: {
         ...metadata,
-        // versionNumber: nextVersionNumber
       },
+      cipherKey,
+      cipherIv,
+      contentIv,
       ...(baseVersion && { baseVersion })
     })
 
@@ -35,6 +41,10 @@ const getVersionChain = async (request, response, next) => {
   const { noteId } = request.params
   const { until } = request.query
   const user = request.user
+
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
 
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })
@@ -76,6 +86,10 @@ const getVersions = async (request, response, next) => {
   const { noteId } = request.params
   const user = request.user
 
+  if (!user.masterPasswordHash) {
+    return next(createError('Please create a master password', 400))
+  }
+
   try {
     const note = await Note.findOne({ _id: noteId, user: user.id })
     if (!note) {
@@ -84,7 +98,6 @@ const getVersions = async (request, response, next) => {
 
     const versions = await Version.find({ noteId })
       .sort({ createdAt: -1 })
-      // .select('-content')
 
     response.json(versions)
   } catch (error) {

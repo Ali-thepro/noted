@@ -1,8 +1,41 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '../test-utils'
+import { forwardRef } from 'react'
 import Header from '../../src/components/Header'
 import server from '../../src/mocks/setup' // eslint-disable-line
+import { getVersions } from '../../src/services/version'
+
+vi.mock('../../src/utils/memoryStore', () => ({
+  default: {
+    get: vi.fn(() => 'mockSymmetricKey')
+  }
+}))
+
+vi.mock('../../src/services/version', () => ({
+  getVersions: vi.fn(),
+  getVersionChain: vi.fn()
+}))
+
+// Mock encryption service
+// vi.mock('../../src/utils/encryption', () => ({
+//   EncryptionService: class {
+//     decryptNoteContent = vi.fn().mockResolvedValue('decrypted content')
+//     unwrapNoteCipherKey = vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]))
+//   }
+// }))
+
+vi.mock('@uiw/react-codemirror', () => ({
+  default: forwardRef(function CodeMirrorMock({ value }, ref) { // eslint-disable-line
+    return (
+      <div ref={ref} data-testid="editor">
+        {value}
+      </div>
+    )
+  }),
+  markdown: () => [],
+  EditorView: { theme: () => [], lineWrapping: true }
+}))
 
 describe('Header Component', () => {
   describe('Theme Toggle', () => {
@@ -43,8 +76,6 @@ describe('Header Component', () => {
       expect(location.pathname).toBe('/about')
       expect(screen.getByText('About Page')).toBeInTheDocument()
     })
-
-
   })
 
   describe('Authentication State', () => {
@@ -154,6 +185,51 @@ describe('Header Component', () => {
       await userEvent.click(splitButton)
 
       expect(store.getState().note.viewMode).toBe('split')
+    })
+  })
+
+  describe('Version History', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+      getVersions.mockResolvedValue([{
+        id: 'v1',
+        type: 'snapshot',
+        content: '# Initial Content',
+        metadata: { versionNumber: 1 },
+        createdAt: new Date().toISOString()
+      }])
+    })
+
+    it('opens version history modal when clicking history button', async () => {
+      const user = userEvent.setup()
+
+      render(<Header />, {
+        path: '/notes/123',
+        preloadedState: {
+          auth: { user: { id: '1' } },
+          theme: 'light',
+          note: {
+            viewMode: 'edit',
+            activeNote: {
+              id: '123',
+              title: 'Test Note',
+              cipherKey: 'testKey',
+              cipherIv: 'testIv',
+              contentIv: 'testContentIv'
+            }
+          }
+        }
+      })
+
+      const historyButton = screen.getByText('History').closest('button')
+      await user.click(historyButton)
+
+      await waitFor(() => {
+        expect(getVersions).toHaveBeenCalledWith('123')
+      })
+
+      // Verify modal is shown
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
   })
 })

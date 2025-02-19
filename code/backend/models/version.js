@@ -24,6 +24,18 @@ const versionSchema = new mongoose.Schema({
     title: String,
     tags: [String],
     versionNumber: Number,
+  },
+  cipherKey: {
+    type: String,
+    required: true
+  },
+  cipherIv: {
+    type: String,
+    required: true
+  },
+  contentIv: {
+    type: String,
+    required: true
   }
 }, { timestamps: true })
 

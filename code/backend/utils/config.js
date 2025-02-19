@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const MONGODB_URI = process.env.NODE_ENV === 'test'
+const MONGODB_URI = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'test-no-morgan'
   ? process.env.TEST_MONGODB_URI
   : process.env.MONGODB_URI
 
@@ -19,6 +19,8 @@ const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME
 const AWS_BUCKET_REGION = process.env.AWS_BUCKET_REGION
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY
+const EMAIL_USER = process.env.EMAIL_USER
+const EMAIL_PASS = process.env.EMAIL_PASS
 
 
 module.exports = {
@@ -37,5 +39,7 @@ module.exports = {
   AWS_BUCKET_NAME,
   AWS_BUCKET_REGION,
   AWS_ACCESS_KEY_ID,
-  AWS_SECRET_KEY
+  AWS_SECRET_KEY,
+  EMAIL_USER,
+  EMAIL_PASS
 }

@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./coverage/junit.xml"
   },
   "dependencies": {
     "@codemirror/commands": "^6.8.0",
@@ -27,6 +27,7 @@
     "@uiw/codemirror-extensions-langs": "^4.23.7",
     "@uiw/codemirror-themes-all": "^4.23.7",
     "@uiw/react-codemirror": "^4.23.7",
+    "argon2-browser": "^1.18.0",
     "axios": "^1.7.9",
     "diff-match-patch": "^1.0.5",
     "dompurify": "^3.2.3",
@@ -59,7 +60,8 @@
     "react-toastify": "^11.0.2",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
-    "redux-persist-expire": "^1.1.1"
+    "redux-persist-expire": "^1.1.1",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

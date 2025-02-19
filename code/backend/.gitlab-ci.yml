@@ -21,4 +21,10 @@ lint:
 .test:
   stage: test
   script:
-    - npm run test
+    - npm run coverage:c8
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-reports"
+    paths:
+      - code/backend/coverage/cobertura-coverage.xml
+      - code/backend/coverage/junit.xml
+      - code/backend/coverage/index.html

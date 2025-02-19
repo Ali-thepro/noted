@@ -6,10 +6,8 @@ describe('About Component', () => {
   it('renders the welcome and features paragraphs', () => {
     render(<About />)
 
-    expect(screen.getByText(/Welcome to Noted! This platform is designed for students, professionals/i))
+    expect(screen.getByText(/A powerful Markdown note-taking application with advanced features, encryption and version control./i))
       .toBeInTheDocument()
 
-    expect(screen.getByText(/Noted empowers users with Markdown-based notes, real-time collaboration/i))
-      .toBeInTheDocument()
   })
 })

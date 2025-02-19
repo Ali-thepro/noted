@@ -63,15 +63,27 @@ export default defineConfig({
         'src/utils/fonts.js',
         'src/utils/themes.js',
         'src/utils/chainIcon.js',
+        'src/utils/find-language.js',
         'src/mocks/setup.js',
         'src/redux/store.js',
         'src/services/axiosConfig.js',
         'eslint.config.js',
-        'App.jsx',
-        'src/hooks/useDebounce.js',
-        'src/hooks/useVersion.js',
+        'src/App.jsx',
+        'src/hooks/useDebounce.jsx',
+        'src/hooks/useVersion.jsx',
         'src/components/ScrollToTop.jsx',
-      ]
+        'src/index.css',
+        'src/components/PrivateRoute.jsx',
+        'src/pages/OAuthCallback.jsx',
+        'src/services/version.js',
+        'src/services/encryption.js',
+        'src/services/auth.js',
+        'src/services/note.js',
+        'src/services/image.js',
+        'src/components/Editor/ImageUploader.jsx',
+      ],
+      reporter: ['cobertura', 'html', 'text'],
+      reportsDirectory: './coverage'
     }
   }
 })

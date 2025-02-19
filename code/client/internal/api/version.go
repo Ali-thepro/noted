@@ -21,6 +21,9 @@ type Version struct {
 	BaseVersion string          `json:"baseVersion,omitempty"`
 	Metadata    VersionMetadata `json:"metadata"`
 	CreatedAt   time.Time       `json:"createdAt"`
+	CipherKey   string          `json:"cipherKey"`
+	CipherIv    string          `json:"cipherIv"`
+	ContentIv   string          `json:"contentIv"`
 }
 
 type CreateVersionRequest struct {
@@ -28,6 +31,9 @@ type CreateVersionRequest struct {
 	Content     string          `json:"content"`
 	BaseVersion string          `json:"baseVersion,omitempty"`
 	Metadata    VersionMetadata `json:"metadata"`
+	CipherKey   string          `json:"cipherKey"`
+	CipherIv    string          `json:"cipherIv"`
+	ContentIv   string          `json:"contentIv"`
 }
 
 func (c *Client) CreateVersion(noteID string, req *CreateVersionRequest) (*Version, error) {

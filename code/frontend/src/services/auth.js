@@ -50,3 +50,17 @@ export const me = async () => {
   const response = await axiosInstance.get(`${BASE_URL}/me`)
   return response.data
 }
+
+export const requestPasswordReset = async (email) => {
+  const response = await axiosInstance.post(`${BASE_URL}/request-reset`, { email })
+  return response.data
+}
+
+export const resetPassword = async (token, password, confirmPassword) => {
+  const response = await axiosInstance.post(`${BASE_URL}/reset-password`, {
+    token,
+    password,
+    confirmPassword
+  })
+  return response.data
+}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"noted/internal/api"
+	"noted/internal/encryption"
 	"noted/internal/token"
 	"noted/internal/utils"
 	"os"
@@ -135,7 +136,7 @@ func VerifyUser() error {
 	return nil
 }
 
-func AddNote(note *api.Note) (*Note, error) {
+func AddNote(note *api.Note, symmetricKey []byte) (*Note, error) {
 	index, err := LoadIndex()
 	if err != nil {
 		return nil, err
@@ -168,11 +169,23 @@ func AddNote(note *api.Note) (*Note, error) {
 		return nil, fmt.Errorf("failed to get config directory: %w", err)
 	}
 
+	encryptionService := encryption.NewEncryptionService()
+
+	decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+		Content:   note.Content,
+		ContentIv: note.ContentIv,
+		CipherKey: note.CipherKey,
+		CipherIv:  note.CipherIv,
+	}, symmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt note content: %w", err)
+	}
+
 	// Simply append the new note
 	index.Notes = append(index.Notes, newNote)
 
 	notePath := filepath.Join(dir, filename)
-	if err := os.WriteFile(notePath, []byte(note.Content), 0600); err != nil {
+	if err := os.WriteFile(notePath, []byte(decryptedContent), 0600); err != nil {
 		return nil, fmt.Errorf("failed to write note file: %w", err)
 	}
 
@@ -199,8 +212,8 @@ func SelectNote(title string) (*Note, error) {
 		for i, note := range matches {
 			fmt.Printf("[%d] %s %s  (created: %s, updated: %s)\n",
 				i+1,
-				note.ID,
 				note.Title,
+				note.ID,
 				note.CreatedAt.Format("2006-01-02 15:04:05"),
 				note.UpdatedAt.Format("2006-01-02 15:04:05"),
 			)

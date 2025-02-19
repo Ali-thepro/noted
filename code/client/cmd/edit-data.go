@@ -2,26 +2,33 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
-	"noted/cmd/version"
 	"noted/internal/api"
+	"noted/internal/auth"
+	"noted/internal/encryption"
 	"noted/internal/storage"
 	"noted/internal/utils"
 	"strings"
-
 )
 
 var editDataCmd = &cobra.Command{
 	Use:   "edit-data [id]",
-	Short: "Edit note metadata",
+	Short: "Edit note metadata, requires noted to be unlocked",
 	Long: `Edit note title and tags. 
 You can specify either the note ID as an argument or use --title flag.
-By default, new tags are appended to existing ones. Use --replace-tags to overwrite instead.`,
+By default, new tags are appended to existing ones. Use --replace-tags to overwrite instead.
+Requires noted to be unlocked.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var noteToEdit *storage.Note
 		var err error
 		var newFilename string
+
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
+		encryptionService := encryption.NewEncryptionService()
 
 		if len(args) > 0 {
 			noteToEdit, err = storage.GetNoteByID(args[0])
@@ -117,8 +124,8 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 			}
 
 			latestVersion := versions[0]
-			versionType := "diff"
-			var versionContent string
+			var encryptedVersion *encryption.EncryptedContent
+			var versionType string
 			var baseVersion string
 
 			content, err := storage.ReadNoteContent(newFilename)
@@ -126,31 +133,64 @@ By default, new tags are appended to existing ones. Use --replace-tags to overwr
 				return fmt.Errorf("failed to read note content: %w", err)
 			}
 
+			noteCipherKey, err := encryptionService.UnwrapNoteCipherKey(note.CipherKey, note.CipherIv, symmetricKey)
+			if err != nil {
+				return fmt.Errorf("failed to unwrap note cipher key: %w", err)
+			}
+
 			if ShouldCreateSnapshot(latestVersion) {
 				versionType = "snapshot"
-				versionContent = content
+				encryptedContent, iv, err := encryptionService.EncryptNoteContent(content, noteCipherKey)
+				if err != nil {
+					return fmt.Errorf("failed to encrypt snapshot: %w", err)
+				}
+				encryptedVersion = &encryption.EncryptedContent{
+					Content:   encryptedContent,
+					ContentIv: iv,
+					CipherKey: note.CipherKey,
+					CipherIv:  note.CipherIv,
+				}
 			} else {
+				versionType = "diff"
 				var baseContent string
 				if latestVersion.Type == "snapshot" {
-					baseContent = latestVersion.Content
+					decryptedContent, err := encryptionService.DecryptVersionContent(encryption.EncryptedContent{
+						Content:   latestVersion.Content,
+						ContentIv: latestVersion.ContentIv,
+						CipherKey: latestVersion.CipherKey,
+						CipherIv:  latestVersion.CipherIv,
+					}, symmetricKey)
+					if err != nil {
+						return fmt.Errorf("failed to decrypt latest version: %w", err)
+					}
+					baseContent = decryptedContent
 				} else {
 					chain, err := client.GetVersionChain(noteToEdit.ID, latestVersion.CreatedAt)
 					if err != nil {
 						return fmt.Errorf("failed to get version chain: %w", err)
 					}
-					baseContent = version.BuildVersionContent(chain)
+					baseContent, err = utils.BuildDecryptedVersionContent(chain, encryptionService, symmetricKey)
+					if err != nil {
+						return fmt.Errorf("failed to build version content: %w", err)
+					}
 				}
 
-				dmp := diffmatchpatch.New()
-				diffs := dmp.DiffMain(baseContent, content, false)
-				diffs = dmp.DiffCleanupEfficiency(diffs)
-				versionContent = dmp.DiffToDelta(diffs)
+				encryptedVersion, err = encryptionService.CreateEncryptedDiff(baseContent, content, encryption.NoteKeys{
+					CipherKey: note.CipherKey,
+					CipherIv:  note.CipherIv,
+				}, symmetricKey)
+				if err != nil {
+					return fmt.Errorf("failed to create encrypted diff: %w", err)
+				}
 				baseVersion = latestVersion.ID
 			}
 
 			_, err = client.CreateVersion(noteToEdit.ID, &api.CreateVersionRequest{
 				Type:        versionType,
-				Content:     versionContent,
+				Content:     encryptedVersion.Content,
+				ContentIv:   encryptedVersion.ContentIv,
+				CipherKey:   encryptedVersion.CipherKey,
+				CipherIv:    encryptedVersion.CipherIv,
 				BaseVersion: baseVersion,
 				Metadata: api.VersionMetadata{
 					Title:         note.Title,

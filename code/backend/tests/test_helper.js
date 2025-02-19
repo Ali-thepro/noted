@@ -12,13 +12,13 @@ const initialUsers = [
     username: 'testuser',
     email: 'test@test.com',
     password: 'Password123',
-    confirmPassword: 'Password123'
+    confirmPassword: 'Password123',
   },
   {
     username: 'anotheruser',
     email: 'another@test.com',
     password: 'Password456',
-    confirmPassword: 'Password456'
+    confirmPassword: 'Password456',
   }
 ]
 
@@ -26,12 +26,18 @@ const initialNotes = [
   {
     title: 'First test note',
     content: 'Content of first note',
-    tags: ['test', 'first']
+    tags: ['test', 'first'],
+    cipherKey: 'Password123',
+    cipherIv: 'Password123',
+    contentIv: 'Password123'
   },
   {
     title: 'Second test note',
     content: 'Content of second note',
-    tags: ['test', 'second']
+    tags: ['test', 'second'],
+    cipherKey: 'Password456',
+    cipherIv: 'Password456',
+    contentIv: 'Password456'
   }
 ]
 
@@ -43,7 +49,10 @@ const initialVersions = [
       title: 'First test note',
       tags: ['test', 'first'],
       versionNumber: 1
-    }
+    },
+    cipherKey: 'Password123',
+    cipherIv: 'Password123',
+    contentIv: 'Password123'
   },
   {
     type: 'diff',
@@ -52,7 +61,10 @@ const initialVersions = [
       title: 'First test note updated',
       tags: ['test', 'first', 'updated'],
       versionNumber: 2
-    }
+    },
+    cipherKey: 'Password123',
+    cipherIv: 'Password123',
+    contentIv: 'Password123'
   }
 ]
 
@@ -73,6 +85,25 @@ const getNotesInDb = async () => {
   return notes.map(note => note.toJSON())
 }
 
+const setupTestUser = async () => {
+  const signupResponse = await api
+    .post('/api/auth/signup')
+    .send(initialUsers[0])
+
+  const authCookie = signupResponse.headers['set-cookie']
+
+  await api
+    .post('/api/encryption/setup')
+    .set('Cookie', authCookie)
+    .send({
+      masterPasswordHash: 'MasterPass123!',
+      protectedSymmetricKey: 'dummyProtectedKey',
+      iv: 'dummyIv'
+    })
+
+  return authCookie
+}
+
 module.exports = {
   api,
   initialUsers,
@@ -81,4 +112,5 @@ module.exports = {
   clearDatabase,
   getUsersInDb,
   getNotesInDb,
+  setupTestUser
 }

@@ -4,14 +4,23 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"noted/internal/api"
+	"noted/internal/auth"
+	"noted/internal/encryption"
 	"noted/internal/storage"
 	"strings"
 )
 
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a new note",
+	Short: "Create a new note, requires noted to be unlocked",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		symmetricKey, err := auth.GetSymmetricKey()
+		if err != nil {
+			return fmt.Errorf("noted is locked, please unlock first: %w", err)
+		}
+
+		encryptionService := encryption.NewEncryptionService()
+
 		title, err := cmd.Flags().GetString("title")
 		if err != nil {
 			return err
@@ -35,18 +44,30 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
+		initialContent := fmt.Sprintf("# %s\n\nStart writing here...", title)
+		encrypted, err := encryptionService.EncryptNote(initialContent, symmetricKey)
+		if err != nil {
+			return fmt.Errorf("failed to encrypt note: %w", err)
+		}
+
 		note, err := client.CreateNote(api.CreateNoteRequest{
-			Title:   title,
-			Content: fmt.Sprintf("# %s\n\nStart writing here...", title),
-			Tags:    validTags,
+			Title:     title,
+			Content:   encrypted.Content,
+			ContentIv: encrypted.ContentIv,
+			CipherKey: encrypted.CipherKey,
+			CipherIv:  encrypted.CipherIv,
+			Tags:      validTags,
 		})
 		if err != nil {
 			return err
 		}
 
 		_, err = client.CreateVersion(note.ID, &api.CreateVersionRequest{
-			Type:    "snapshot",
-			Content: note.Content,
+			Type:      "snapshot",
+			Content:   encrypted.Content,
+			ContentIv: encrypted.ContentIv,
+			CipherKey: encrypted.CipherKey,
+			CipherIv:  encrypted.CipherIv,
 			Metadata: api.VersionMetadata{
 				Title:         note.Title,
 				Tags:          note.Tags,
@@ -57,7 +78,7 @@ var createCmd = &cobra.Command{
 			return fmt.Errorf("failed to create initial version: %w", err)
 		}
 
-		_, err = storage.AddNote(note)
+		_, err = storage.AddNote(note, symmetricKey)
 		if err != nil {
 			return fmt.Errorf("failed to save note storage: %w", err)
 		}

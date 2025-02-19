@@ -361,7 +361,7 @@ describe('Auth API', () => {
       const response = await api
         .post('/api/auth/refresh-token')
         .set('Cookie', invalidCookie)
-        .expect(403)
+        .expect(401)
       assert.strictEqual(response.body.error, 'Invalid refresh token')
     })
 
@@ -751,6 +751,155 @@ describe('Auth API', () => {
         const users = await User.find({ email: 'github@test.com' })
         assert.strictEqual(users.length, 1)
         assert.strictEqual(users[0].username, 'existing-github-user')
+      })
+    })
+  })
+
+  describe('Password Reset Flow', () => {
+    beforeEach(async () => {
+      await api
+        .post('/api/auth/signup')
+        .send(initialUsers[0])
+    })
+
+    describe('Request Password Reset (POST /api/auth/request-reset)', () => {
+      test('succeeds with existing email', async () => {
+        const response = await api
+          .post('/api/auth/request-reset')
+          .send({ email: initialUsers[0].email })
+          .expect(200)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.message, 'Password reset link sent to email')
+
+        const user = await User.findOne({ email: initialUsers[0].email })
+        assert(user.passwordResetToken)
+        assert(user.passwordResetExpires > Date.now())
+      })
+
+      test('fails with non-existent email', async () => {
+        const response = await api
+          .post('/api/auth/request-reset')
+          .send({ email: 'nonexistent@test.com' })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'This user does not exist')
+      })
+
+      test('fails with OAuth user', async () => {
+        const oauthUser = new User({
+          username: 'oauthuser',
+          email: 'oauth@test.com',
+          provider: 'google',
+          oauth: true,
+          passwordHash: 'dummy'
+        })
+        await oauthUser.save()
+
+        const response = await api
+          .post('/api/auth/request-reset')
+          .send({ email: 'oauth@test.com' })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'This user does not exist')
+      })
+    })
+
+    describe('Reset Password (POST /api/auth/reset-password)', () => {
+      let resetToken
+
+      beforeEach(async () => {
+        await api
+          .post('/api/auth/request-reset')
+          .send({ email: initialUsers[0].email })
+
+        const user = await User.findOne({ email: initialUsers[0].email })
+        resetToken = user.passwordResetToken
+      })
+
+      test('succeeds with valid token and password', async () => {
+        const newPassword = 'NewPassword123'
+        const response = await api
+          .post('/api/auth/reset-password')
+          .send({
+            token: resetToken,
+            password: newPassword,
+            confirmPassword: newPassword
+          })
+          .expect(200)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.message, 'Password successfully reset')
+
+        await api
+          .post('/api/auth/signin')
+          .send({
+            email: initialUsers[0].email,
+            password: newPassword
+          })
+          .expect(200)
+      })
+
+      test('fails with invalid token', async () => {
+        const response = await api
+          .post('/api/auth/reset-password')
+          .send({
+            token: 'invalid-token',
+            password: 'NewPassword123',
+            confirmPassword: 'NewPassword123'
+          })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Invalid or expired reset token')
+      })
+
+      test('fails with expired token', async () => {
+        const user = await User.findOne({ email: initialUsers[0].email })
+        user.passwordResetExpires = Date.now() - 3600000
+        await user.save()
+
+        const response = await api
+          .post('/api/auth/reset-password')
+          .send({
+            token: resetToken,
+            password: 'NewPassword123',
+            confirmPassword: 'NewPassword123'
+          })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Invalid or expired reset token')
+      })
+
+      test('fails with mismatched passwords', async () => {
+        const response = await api
+          .post('/api/auth/reset-password')
+          .send({
+            token: resetToken,
+            password: 'NewPassword123',
+            confirmPassword: 'DifferentPassword123'
+          })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Passwords do not match')
+      })
+
+      test('fails with weak password', async () => {
+        const response = await api
+          .post('/api/auth/reset-password')
+          .send({
+            token: resetToken,
+            password: 'weak',
+            confirmPassword: 'weak'
+          })
+          .expect(400)
+          .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'Password must be at least 8 characters long and must contain at least one number and one letter')
       })
     })
   })

@@ -119,6 +119,12 @@ const SignIn = () => {
               )
             }
           </div>
+          <div className="flex gap-2 text-sm mt-5">
+            <span>Forgot your password?</span>
+            <Link to="/forgot-password" className="text-blue-500">
+              Reset it here
+            </Link>
+          </div>
           <Notification />
         </div>
       </div>

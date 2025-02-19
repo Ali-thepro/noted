@@ -10,6 +10,9 @@ describe('NoteCard Component', () => {
   const mockNote = {
     id: '123',
     title: 'Test Note',
+    cipherKey: 'testKey',
+    cipherIv: 'testIv',
+    contentIv: 'testContentIv',
     content: '# Test Content',
     tags: ['react', 'javascript', 'testing', 'frontend'],
     updatedAt: '2024-01-01T12:00:00Z',

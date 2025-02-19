@@ -6,11 +6,12 @@
   "scripts": {
     "start": "node index.js",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
-    "test": "cross-env NODE_ENV=test node --test --test-concurrency=1",
-    "coverage:c8": "cross-env NODE_ENV=test c8 node --test --test-concurrency=1",
-    "coverage:node": "cross-env NODE_ENV=test node --experimental-test-coverage --test --test-concurrency=1",
+    "test": "cross-env NODE_ENV=test-no-morgan node --test --test-concurrency=1",
+    "coverage:c8": "cross-env NODE_ENV=test-no-morgan c8 --reporter=html --reporter=text --reporter=cobertura node --test --test-reporter spec --test-reporter-destination stdout --test-reporter junit --test-reporter-destination coverage/junit.xml --test-concurrency=1",
+    "coverage:node": "cross-env NODE_ENV=test-no-morgan node --experimental-test-coverage --test --test-concurrency=1",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "start:test": "cross-env NODE_ENV=test node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +28,7 @@
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "uuid": "^11.0.4"
   },
