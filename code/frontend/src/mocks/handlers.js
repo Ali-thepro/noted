@@ -98,5 +98,32 @@ export const handlers = [
     return HttpResponse.json({
       password: 'password123'
     })
+  }),
+
+  http.post('/api/notes', () => {
+    return HttpResponse.json({
+      id: '123',
+      title: 'New Note',
+      content: 'mockEncryptedContent',
+      tags: ['tag1', 'tag2'],
+      cipherKey: 'mockProtectedKey',
+      cipherIv: 'mockKeyIv',
+      contentIv: 'mockContentIv',
+      user: 'user123',
+      updatedAt: new Date().toISOString()
+    })
+  }),
+
+  http.post('/api/versions', () => {
+    return HttpResponse.json({
+      id: '456',
+      type: 'snapshot',
+      content: 'mockEncryptedContent',
+      metadata: {
+        title: 'New Note',
+        tags: ['tag1', 'tag2'],
+        versionNumber: 1
+      }
+    })
   })
 ]
