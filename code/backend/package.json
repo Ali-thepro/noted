@@ -4,9 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test-no-morgan node --test --test-concurrency=1",
+    "coverage:c8": "cross-env NODE_ENV=test-no-morgan c8 --reporter=html --reporter=text --reporter=cobertura node --test --test-reporter spec --test-reporter-destination stdout --test-reporter junit --test-reporter-destination coverage/junit.xml --test-concurrency=1",
+    "coverage:node": "cross-env NODE_ENV=test-no-morgan node --experimental-test-coverage --test --test-concurrency=1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "start:test": "cross-env NODE_ENV=test node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,8 +20,22 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
-    "mongoose": "^8.9.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.9"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
+    "nodemon": "^3.1.9",
+    "uuid": "^11.0.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@stylistic/eslint-plugin-js": "^2.12.1",
+    "c8": "^10.1.3",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
+    "nock": "^14.0.0",
+    "supertest": "^7.0.0"
   }
 }

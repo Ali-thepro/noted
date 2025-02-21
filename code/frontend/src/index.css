@@ -5,3 +5,192 @@
 body {
   height: 100vh;
 }
+
+
+.toast-position {
+  top: 5rem !important;
+}
+
+/* select for editor status bar */
+
+/* input:focus, textarea:focus, */
+.form-select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.form-select {
+  border: 1px solid #b7babe !important;
+}
+
+
+
+.dark .form-select, .dark .form-select option {
+  color: white;
+  background-color: #374151;
+  border: 1px solid #374151 !important;
+}
+
+.form-select, .form-select option {
+  width: 100%;
+  height: 25px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: black; /* Set the text color to black */
+  background-color: white;
+
+}
+
+/* table for markdown preview */
+
+table {
+  border-collapse: collapse;
+  margin: 1rem auto;
+  display: block;
+  width: 100%;
+  overflow: auto;
+  word-break: normal;
+  word-break: keep-all;
+}
+
+th, td {
+  padding: 6px 13px !important;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+tr {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.dark tr {
+  background-color: #5f5f5f;
+  border-top: 1px solid #ccc;
+}
+
+
+
+.prose {
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+
+/* image preview in markdown */
+
+.prose img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* links preview in markdown */
+
+.prose a {
+  color: #337ab7;
+  text-decoration: none;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+  color: #23527c;
+}
+
+.dark .prose a {
+  color: #5EB7E0;
+}
+
+/* list styling */
+
+.prose ul {
+  list-style-type: disc !important;
+}
+
+.prose ul ul {
+  list-style-type: circle !important;
+}
+
+.prose ul ul ul {
+  list-style-type: square !important;
+}
+
+.prose :where(ul):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  list-style-type: disc !important;
+}
+
+.prose ul > li::marker {
+  color: black !important;
+}
+
+.prose ul ul > li::marker {
+  color: gray !important;
+}
+
+.prose ul ul ul > li::marker {
+  color: black !important;
+}
+
+.dark .prose ul > li::marker {
+  color: white !important;
+}
+
+.dark .prose ul ul > li::marker {
+  color: lightgray !important;
+}
+
+.dark .prose ul ul ul > li::marker {
+  color: white !important;
+}
+
+.header-anchor {
+  /* visibility: hidden; */
+  opacity: 0;
+  text-decoration: none !important;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  transition: visibility 0.2s, opacity 0.2s;
+  color: white !important;
+  float: left;
+  padding-right: 4px;
+  margin-top: 12px;
+  margin-left: -26px;
+}
+
+h1:hover .header-anchor,
+h2:hover .header-anchor,
+h3:hover .header-anchor,
+h4:hover .header-anchor,
+h5:hover .header-anchor,
+h6:hover .header-anchor {
+  visibility: visible;
+  opacity: 1;
+}
+
+.header-anchor:hover {
+  visibility: visible;
+}
+
+/* Code block styling */
+
+.prose code.inline-code {
+  color: var(--tw-prose-pre-code);
+  background-color: var(--tw-prose-pre-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-weight: 400;
+  font-size: 0.875em;
+}
+
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: "" !important;
+}
+
+.prose :where(p > code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(p > code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: "" !important;
+}

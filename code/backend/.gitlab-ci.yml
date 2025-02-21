@@ -1,0 +1,30 @@
+image: node:22.13.0
+
+stages:
+  - lint
+  - test
+
+cache:
+  key: backend-cache
+  paths:
+    - code/backend/node_modules/
+
+before_script:
+  - cd code/backend
+  - npm install
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+
+test:
+  stage: test
+  script:
+    - npm run coverage:c8
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-backend-reports"
+    paths:
+      - code/backend/coverage/cobertura-coverage.xml
+      - code/backend/coverage/junit.xml
+      - code/backend/coverage/index.html

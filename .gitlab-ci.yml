@@ -1,0 +1,89 @@
+stages:
+  - build
+  - report
+
+frontend:
+  stage: build
+  trigger:
+    include: code/frontend/.gitlab-ci.yml
+    strategy: depend
+
+backend:
+  stage: build
+  trigger:
+    include: code/backend/.gitlab-ci.yml
+    strategy: depend
+
+cli:
+  stage: build
+  trigger:
+    include: code/client/.gitlab-ci.yml
+    strategy: depend
+
+report-frontend:
+  stage: report
+  dependencies:
+    - frontend
+  script:
+    - echo "Frontend Coverage Report"
+    - grep -o 'class="strong">[0-9.]*' code/frontend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-frontend-reports"
+    paths:
+      - code/frontend/coverage/coverage-final.json
+      - code/frontend/coverage/junit.xml
+      - code/frontend/coverage/index.html
+    policy: pull
+  coverage: /^([\d.]+)$/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: code/frontend/coverage/cobertura-coverage.xml
+      junit: code/frontend/coverage/junit.xml
+
+
+report-backend:
+  stage: report
+  dependencies:
+    - backend
+  script:
+    - echo "Backend Coverage Report"
+    - grep -o 'class="strong">[0-9.]*' code/backend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-backend-reports"
+    paths:
+      - code/backend/coverage/cobertura-coverage.xml
+      - code/backend/coverage/junit.xml
+      - code/backend/coverage/index.html
+    policy: pull
+  coverage: /^([\d.]+)$/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: code/backend/coverage/cobertura-coverage.xml
+      junit: code/backend/coverage/junit.xml
+
+
+report-cli:
+  stage: report
+  dependencies:
+    - cli
+  script:
+    - echo "Client Coverage Report"
+    - cat code/client/coverage.txt
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-client-reports"
+    paths:
+      - code/client/coverage.txt
+      - code/client/cobertura.xml
+      - code/client/report.xml
+    policy: pull
+  coverage: /total:.*\s(\d+(?:\.\d+)?%)/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: code/client/cobertura.xml
+      junit: code/client/report.xml

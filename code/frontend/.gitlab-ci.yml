@@ -1,0 +1,39 @@
+image: node:22.13.0
+
+stages:
+  - lint
+  - build
+  - test
+
+cache:
+  key: frontend-cache
+  paths:
+    - code/frontend/node_modules/
+
+before_script:
+  - cd code/frontend
+  - npm install
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+  
+build:
+  stage: build
+  script:
+    - npm run build
+    - test -d dist
+    - test -f dist/index.html
+
+test:
+  stage: test
+  allow_failure: true
+  script:
+    - npm run coverage
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-frontend-reports"
+    paths:
+      - code/frontend/coverage/cobertura-coverage.xml
+      - code/frontend/coverage/junit.xml
+      - code/frontend/coverage/index.html
