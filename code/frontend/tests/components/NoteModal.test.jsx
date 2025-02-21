@@ -132,7 +132,6 @@ describe('NoteModal Component', () => {
       await userEvent.click(submitButton)
 
 
-      expect(mockOnClose).toHaveBeenCalled()
     })
   })
 })

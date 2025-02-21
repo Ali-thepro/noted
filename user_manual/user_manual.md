@@ -60,10 +60,42 @@ Supervisor: **Dr. Stephen Blott**
 
 ## 1.1 Prerequisites
 
-Make sure to have the following installed on your machine:
+Software requirements:
 - `Node.js` (v22.13.0)
 - `npm` (v11.1.0)
 - `Go` (v1.23.1)
+- `Git`
+
+Noted can only be installed on a Unix-based system.
+
+To install Node.js and npm, run the following commands:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+```
+
+```bash
+nvm install 22.13.0
+```
+
+```bash
+npm install -g npm@11.1.0
+```
+
+To install Go, run the following command:
+
+```bash
+wget https://go.dev/dl/go1.23.1.linux-amd64.tar.gz
+```
+
+```bash
+tar -C /usr/local -xzf go1.23.1.linux-amd64.tar.gz
+```
+
+```bash
+export PATH=/usr/local/go/bin:$PATH
+```
+
 
 After having the prerequisites installed, you can install the project source code from GitLab.
 We will begin by cloning our Git repository.
