@@ -54,8 +54,6 @@ func TestTagsCmd(t *testing.T) {
 					assert.Contains(t, err.Error(), tt.wantErrMsg)
 				}
 			} else {
-				// Note: This will fail in actual testing because we don't have a mock storage
-				// You would need to mock the storage layer for this to pass
 				assert.Error(t, err)
 			}
 		})
