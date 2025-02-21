@@ -23,7 +23,7 @@ test:
   script:
     - npm run coverage:c8
   cache:
-    key: "$CI_COMMIT_REF_SLUG-reports"
+    key: "$CI_COMMIT_REF_SLUG-backend-reports"
     paths:
       - code/backend/coverage/cobertura-coverage.xml
       - code/backend/coverage/junit.xml

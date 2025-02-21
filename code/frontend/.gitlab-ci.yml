@@ -32,7 +32,7 @@ test:
   script:
     - npm run coverage
   cache:
-    key: "$CI_COMMIT_REF_SLUG-reports"
+    key: "$CI_COMMIT_REF_SLUG-frontend-reports"
     paths:
       - code/frontend/coverage/cobertura-coverage.xml
       - code/frontend/coverage/junit.xml
