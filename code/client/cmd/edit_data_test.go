@@ -93,7 +93,7 @@ func TestEditDataCmd(t *testing.T) {
 			cmd.Flags().BoolP("replace", "r", false, "Replace existing tags")
 
 			for k, v := range tt.flags {
-				cmd.Flags().Set(k, v)
+				cmd.Flags().Set(k, v) //nolint:errcheck // Ignoring error check in test
 			}
 
 			err := editDataCmd.RunE(cmd, tt.args)

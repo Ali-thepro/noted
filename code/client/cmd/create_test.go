@@ -88,7 +88,7 @@ func TestCreateCmd(t *testing.T) {
 			cmd.Flags().StringSlice("tags", []string{}, "Tags for the note")
 
 			for k, v := range tt.flags {
-				cmd.Flags().Set(k, v)
+				cmd.Flags().Set(k, v) //nolint:errcheck // Ignoring error check in test
 			}
 
 			err := createCmd.RunE(cmd, []string{})

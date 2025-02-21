@@ -77,7 +77,7 @@ func TestDiffCmd(t *testing.T) {
 			cmd := &cobra.Command{}
 			cmd.Flags().StringP("title", "t", "", "Title of the note")
 			for k, v := range tt.flags {
-				cmd.Flags().Set(k, v)
+				cmd.Flags().Set(k, v) //nolint:errcheck // Ignoring error check in test
 			}
 
 			err := diffCmd.RunE(cmd, tt.args)

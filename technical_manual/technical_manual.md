@@ -11,6 +11,22 @@ Supervisor: **Dr. Stephen Blott**
  - [1. Introduction](#1-introduction)
    - [1.1 Overview/Motivation](#11-overviewmotivation)
    - [1.2 Glossary](#12-glossary)
+ - [2. System Architecture](#2-system-architecture)
+ - [3. High Level Design](#3-high-level-design)
+    - [3.1 Class Diagram](#31-class-diagram)
+    - [3.2 Sequence Diagrams](#32-sequence-diagrams)
+      - [3.2.1 Unlock Notes (Web)](#321-unlock-notes-web)
+      - [3.2.2 Create Master Password](#322-create-master-password)
+      - [3.2.3 Sign In Web](#323-sign-in-web)
+      - [3.2.4 Sign Up Web](#324-sign-up-web)
+      - [3.2.5 OAuth Flow](#325-oauth-flow)
+      - [3.2.6 CLI Unlock](#326-cli-unlock)
+      - [3.2.7 CLI Login](#327-cli-login)
+      - [3.2.8 CLI Sync](#328-cli-sync)
+      - [3.2.9 Create Note](#329-create-note)
+      - [3.2.10 Edit Note](#3210-edit-note)
+      - [3.2.11 Web Restore Note](#3211-web-restore-note)
+      - [3.2.12 CLI Restore Note](#3212-cli-restore-note)
  - [4. Problems and Resolutions](#4-problems-and-resolutions)
     - [4.1 Choosing the right encryption approach](#41-choosing-the-right-encryption-approach)
     - [4.2 Key Storage](#42-key-storage)
@@ -87,15 +103,45 @@ application. |
 | Argon2id | A password hashing algorithm that is resistant to GPU attacks. |
 | HKDF | A key derivation function that uses a hash function to derive a key from a secret value. |
 | AES-GCM | A symmetric encryption algorithm that uses a block cipher to encrypt and authenticate data. |
-| SHA-256 | A cryptographic hash function that produces a 256-bit hash value. |
 | Initialization Vector (IV) | A random value used to ensure that the same plain text block does not produce the same cipher text block. |
 | Salt | A random value used to ensure that the same password does not produce the same hash value. |
-| Base64 | A binary-to-text encoding scheme that represents binary data in an ASCII string format. |
 | CodeMirror | A versatile text editor component that can be easily integrated into web applications. |
-| Glamour | A library for rendering markdown in a terminal. |
 
 
 # 2. System Architecture
+
+![alt text](images/system-architecture.png)
+
+The system follows a multi-tier architecture that divides responsibilities that divides responsibilities among a React-based web app, a Go-based command-line interface (CLI), and an Express server connected to a MongoDB database. External services such as AWS S3, Google OAuth and GitHub OAuth also form integral parts of this design. 
+
+## 2.1 React Frontend Application
+
+Responsible for the web based user interface display of the project, React Web App allows users to interact and access the services of Noted. Given the client-server architecture model design of Noted, the React Web App component servers an important role within our project, acting as one of the primary interfaces between the user and the system. Tailwind CSS and Flowbite are used for styling the application. The web app relies on Redux for managing global state of the application. By maintaining a central store, Redux allows different components of the application to share and update the same state. This is also very useful for storing the user's session data, making it easily accessible across the application and also allows us to check whether a user is logged in or not. For editing notes the system integrates with CodeMirror, a powerful  browser-based editor that supports syntax highlighting and a rich-text editing experience. We chose CodeMirror due to its customisability. To ensure data security, client-side encryption is used to encrypt the note content before it is sent to the server, so the server only receives the encrypted content. The web app also provides multiple authentication methods, including standard email/password login and OAuth via Google or GitHub handled by the backend.
+
+## 2.2 Go CLI
+
+The Go CLI is a command-line interface that allows users to interact with the system. It is built using the Cobra framework and is responsible for managing the user's notes and interacting with the backend server. Users can write and edit notes in their default text editor before sending the changes to the server. The CLI's design mirrors the the core features of the web app, ensuring that all note-related actions remain consistent across both platforms.
+
+## 2.3 Express Server
+
+A Node.js and Express server power the backend of the application. It is responsible for handling requests from both the web app and the CLI, interfacing with MongoDB for data storage. The backend is largely stateless with respect to note content, as actual encryption and decryption occur client side. It does, however, manage user records, note metadata, version tracking and image uploads. Whenever a user uploads an image, the server transfers it to AWS S3, storing nothing and returning a URL to the image. The backend server also handles user authentication, supporting both email/password login and OAuth via Google or GitHub. Allowing account creation and sign-in through familiar social login methods. JWT tokens are used for handling session and access token states for user authentication. Cookies are used to store the JWT token for the frontend, while the actual JWT token is sent to the CLI. Since encryption is handled on the client side, the server itself remains “zero knowledge,” with no way to read user notes or reset their master passwords. 
+
+![alt text](images/middleware.png)
+
+## 2.4 MongoDB Database
+
+Serving as the system database, the MongoDB database stores all relevant information for the system. The operation of the database is key to facilitating the passage of data throughout the system. 
+
+## 2.5 External Services
+
+Alongside AWS S3 for image storage, the system integrates with Google OAuth and Github OAuth to handle user authentication. Upon user request, the backend redirects to the appropriate OAuth provider, handles the returned tokens and creates user accounts as needed. This mechanism simplifies the onboarding for those who don't want to store their credentials on the server.
+
+
+## 2.6 Encryption & Versioning
+
+To enforce zero-knowledge encryption model, each note is encrypted on the client using a symmetric key derives from the user's master password. Great effort was out into ensuring that the CLI and the web app were both able to handle the encryption and decryption process allowing for a seamless experience across the system. The CLI leverages the `go-diff` library for generating diffs for versioning, while the web app uses Google's `diff-match-patch` library. The `go-diff` library was chosen due to it being a port of the `diff-match-patch` library. These diffs are then encrypted and sent to the server, minimizing both data transfer size and exposure of sensitive content. Periodic snapshots ensure that reconstructing an older version does not require traversing an excessive chain of diffs. By splitting version data into snapshots and diffs, the system provides efficient rollbacks and a compact version history for each note.
+
+
 
 # 3. High Level Design
 
@@ -347,7 +393,7 @@ We used "child pipelines" in our pipeline definition to separate concerns out be
 
 An option we had to solve it was by making the report artifacts of the child pipelines and pull the information back down in a later stage. This didn't seem like a great option, adding extra steps to the testing report. In the end we solved it by creating a keyed cache that would be mounted onto the self hosted runner.  This allowed us to add the test information from the child, then once the child had completed, we could access the information in the parent pipeline and display it as normal on the merge request.
 
-![alt text](https://i.postimg.cc/4N6CDMxZ/image.png)
+![alt text](images/merge-pipeline.png)
 
 ## 4.11 Testing Issues
 
@@ -373,11 +419,11 @@ The solution, however, was quite simple. We just needed to mock the API calls. F
 
 We adopted Jira as our issue tracking and project management tool to help us manage the development of the project. The reason as to why we didn't use GitLab's issue tracker was because we wanted to prepare ourselves for our internship as many companies use Jira for their project management. Also through its integration with GitLab, we were able to import and view Jira issues directly within Gitlab's issues board, ensuring a unified view of our backlog.
 
-![alt text](https://i.postimg.cc/8zWQ2Rv5/image.png)
+![alt text](images/jira-list.png)
 
 The image below is the imported Jira issues into GitLab's issue board.
 
-![alt text](https://i.postimg.cc/MGFLXXV4/image.png)
+![alt text](images/gitlab-board.png)
 
 Our process was straightforward, when a bug emerged or a new feature was planned, we created an issue in Jira and organised these tasks on our KANBAN board. Each issue was clearly described whether it was a bug fix, new feature or test that needed to be done. 
 
@@ -391,9 +437,9 @@ This workflow not only helped us manage bugs and feature efficiently, but also a
 
 From the very beginning we intended to use GitLab's CI/CD to prevent regressions in our code, report metrics, test the application and have a user-friendly interface to find any issues and fix them.
 
-![alt text](https://i.postimg.cc/RZyvwpLg/image.png)
+![alt text](images/gitlab-pipeline.png)
 
-![alt text](https://i.postimg.cc/J04ffjQy/image.png)
+![alt text](images/pipeline-detail.png)
 
 Each aspect of the application had its own pipeline, and we used child pipelines separate concerns. Each aspect had different stages created in the YAML file. Lint stage checks the code for linting issues to make sure it follows the appropriate Go and JavaScript style guidelines, while  the test stage tests the code with unit and integration tests. By making use of GitLab features like Test Cases, and pipelines running on merge requests we ensured that any software regressions from different branches being merged could be spotted and fixed early on.
 
@@ -411,7 +457,7 @@ Next we perform the linting stage. the lint stage uses the `golangci-lint` tool 
 
 This `report-frontend` stage grabs the reports generated by the frontend pipeline and provides them to GitLab.. This allows coverage and tests to be shown on the merge request.  It also allows test coverage to appear in the merge request diff. 
 
-![alt text](https://i.postimg.cc/4N6CDMxZ/image.png)
+![alt text](images/merge-pipeline.png)
 
 
 # ADD COVERAGE BADGES FOR ALL THREE and merge request coverage
@@ -463,39 +509,35 @@ By performing these tests, we were able to catch and address any issues that aro
 
 
 While running system tests, you will see the nice UI that Playwright provides for visually inspecting the application's state during test execution.
-![alt text](https://i.postimg.cc/xdWfKpn0/image.png)
+![alt text](images/playwright.png)
 
 Playwright also provides a timeline for each test, allowing you to go back and forth between the different states of the application. Making it very easy to debug and troubleshoot any issues that arise.
 
-![alt text](https://i.postimg.cc/v87YVvjs/image.png)
+![alt text](images/timeline.png)
 
 As well as that, Playwright also provides a HTML report for each test, allowing you to see the different states of the application during test execution.
 
-![alt text](https://i.postimg.cc/XJHgH517/image.png)
+![alt text](images/report-playwright.png)
 
 ## 6.4 User testing
 
 AS part of our testing strategy we decided to have some users test our system. We invited a group of 6 DCU students to individually test our system and provide us with feedback. Having users test our system was a good learning experience. When building the app there are certain features that you know behave a certain way so you interact with them in a certain way that would give an accurate behaviour. However, when you get users to test it, they don't know that and will interact with the app in a way that is not the same as what you expect. After the testing, a survey was distributed to all participants to fill, which asked questions regarding the features of our project. The results are shown below:
 
-![alt text](https://i.postimg.cc/zGDDFRhc/image.png)
+![alt text](images/survey-1.png)
 
-![alt text](https://i.postimg.cc/xdc0WDtG/image.png)
+![alt text](images/survey-2.png)
 
-![alt text](https://i.postimg.cc/jjmsTgFp/image.png)
+![alt text](images/survey-3.png)
 
-![alt text](https://i.postimg.cc/gjPmXwd4/image.png)
+![alt text](images/survey-4.png)
 
-![alt text](https://i.postimg.cc/zDnJmkSQ/image.png)
+![alt text](images/survey-5.png)
 
-![alt text](https://i.postimg.cc/dtwJJT5V/image.png)
+![alt text](images/survey-6.png)
 
+![alt text](images/survey-7.png)
 
-![alt text](https://i.postimg.cc/HszdnsN4/image.png)
-
-
-
-
-![alt text](https://i.postimg.cc/Pxn5ZVQm/image.png)
+![alt text](images/survey-8.png)
 
 
 While the users were satisfied with the product, they provided us with valuable feedback. This feedback was taking into consideration and the suggested features were implemented.
