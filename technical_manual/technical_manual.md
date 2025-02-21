@@ -90,9 +90,7 @@ Developers  often prefer terminal tools for note-taking but lack a secure, unifi
 | Vite | A build tool and development server that enables fast and efficient web development, often used in conjunction with React. |
 | Tailwind CSS | A  CSS framework for rapidly building custom designs. |
 | Flowbite | A library of components for React that goes along with Tailwind CSS. |
-| Playwright |  A JavaScript end-to-end testing framework that allows you to write and execute tests
-in a browser-like environment, simulating user interactions and verifying the behaviour of your
-application. |
+| Playwright |  A JavaScript end-to-end testing framework that allows you to write and execute tests in a browser-like environment, simulating user interactions and verifying the behaviour of your application. |
 | Vitest | A testing framework for JavaScript used for testing React applications, providing capabilities for testing components. |
 | Cobra | A library for building powerful command-line applications in Go. |
 | AWS S3 | A cloud storage service by AWS for storing and retrieving large amounts of data, often used for media like images. |
@@ -229,7 +227,7 @@ This diagrams describes how the CLI synchronises notes with the backend. When th
 
 ![alt text](images/create-note.png)
 
-This diagram presents the flow for creating a new note, both via the web and CLI. In the web, the user opens a modal to create a note  by entering the title and tag. The frontend generates encryption keys for the note and sends a request to the backed to create a new note with the encrypted content, title, tags and necessary encryption data. Upon successful creation, an initial version of hte note is also created, and the note editor is opened for further modifications. In the CLI flow, the user enters the create note command. The CLI checks whether the sessions is unlocked, generates the note's encryptions keys and sends a request ot the backend to create a new note. After the backend creates the note, the initial version is also created. If the CLi is not unlocked, it triggers the CLI unlock flow.
+This diagram presents the flow for creating a new note, both via the web and CLI. In the web, the user opens a modal to create a note  by entering the title and tag. The frontend generates encryption keys for the note and sends a request to the backed to create a new note with the encrypted content, title, tags and necessary encryption data. Upon successful creation, an initial version of the note is also created, and the note editor is opened for further modifications. In the CLI flow, the user enters the create note command. The CLI checks whether the sessions is unlocked, generates the note's encryptions keys and sends a request ot the backend to create a new note. After the backend creates the note, the initial version is also created. If the CLi is not unlocked, it triggers the CLI unlock flow.
 
 ---
 
@@ -276,7 +274,7 @@ After evaluation various approaches and getting inspiration from systems like Bi
 
 ### Problem
 
-Storing the symmetric key in memory on the CLI was complicated by how Go's Cobra framework spawns a new process for each command. This meant that any in-memory variables would not persist between commands. This was our initial approach as we tried to use the `Memguard` library to securely store the key in memory. Additionally, using hte OS's native key store wasn't an option for us in our WSL environment.
+Storing the symmetric key in memory on the CLI was complicated by how Go's Cobra framework spawns a new process for each command. This meant that any in-memory variables would not persist between commands. This was our initial approach as we tried to use the `Memguard` library to securely store the key in memory. Additionally, using the OS's native key store wasn't an option for us in our WSL environment.
 
 ### Resolution
 
@@ -399,11 +397,11 @@ An option we had to solve it was by making the report artifacts of the child pip
 
 ### Problem
 
-Testing was a big part of our project and we had a few issues while implementing it. We tested out backend using integration tests using Node's built in testing framework. This worked well for the most part, However, the problem came when we began testing the frontend. We used Redux a lot in our application and it was difficult to test the application and the components as a whole. Tests were very difficult to write and we spent a lot fo time mocking the redux stores.
+Testing was a big part of our project and we had a few issues while implementing it. We tested out backend using integration tests using Node's built in testing framework. This worked well for the most part, However, the problem came when we began testing the frontend. We used Redux a lot in our application and it was difficult to test the application and the components as a whole. Tests were very difficult to write and we spent a lot of time mocking the redux stores.
 
 ### Resolution
 
-That was when we had the idea to check if the official Redux documentation had any suggestions on how to test the application. We found [this guide](https://redux.js.org/usage/writing-tests) which had a few good suggestions. They advised using the React testing library which we already were and defined a way to properly test ur components that relied on redux stores. After spending some time configuring it we managed to get it going and it made testing the components of the frontend very very easy compared to what we had before.
+That was when we had the idea to check if the official Redux documentation had any suggestions on how to test the application. We found [this guide](https://redux.js.org/usage/writing-tests) which had a few good suggestions. They advised using the React testing library which we already were and defined a way to properly test your components that relied on redux stores. After spending some time configuring it we managed to get it going and it made testing the components of the frontend very very easy compared to what we had before.
 
 
 ## Problem 
@@ -466,7 +464,7 @@ The coverage percentage for all three aspects can also be seen as a badge on the
 
 ## 6.1.1 Git Usage
 
-Common Git practices were implemented to ensure both developers followed hte correct procedures when committing changes to the repository. The main branch is set as a protected branch to avoid pushing changes directly to the main branch without first testing the code. We created separate branched for different tasks, whether they're feature, bug fixes or test branches, or other JIRA-related to-dos as organised on our KANBAN board. Merge requests are created once a branch is ready to be merged into the main branch. The branch must be tested and checked in the CI pipeline before it can be merged and failure to do so will result in the merge request being blocked until the CI pipeline has run successfully.
+Common Git practices were implemented to ensure both developers followed the correct procedures when committing changes to the repository. The main branch is set as a protected branch to avoid pushing changes directly to the main branch without first testing the code. We created separate branched for different tasks, whether they're feature, bug fixes or test branches, or other JIRA-related to-dos as organised on our KANBAN board. Merge requests are created once a branch is ready to be merged into the main branch. The branch must be tested and checked in the CI pipeline before it can be merged and failure to do so will result in the merge request being blocked until the CI pipeline has run successfully.
 
 
 ## 6.2 Unit/Integration testing
@@ -477,7 +475,7 @@ Common Git practices were implemented to ensure both developers followed hte cor
 
 With Vitest, we were able to test each individual component ensuring they worked correctly in isolation as well as with other components. This allowed us to catch bugs early on and improved the overall quality of the code. It allowed us to simulate user interactions and verify the behaviour of our components. 
 
-Vitest offered a rich set of testing capabilities, such as mocking dependencies and simulating asynchronous operations. This was crucial for testing some of the components such as the editor and components that relied on API calls. As well as using Vitest to mock API async calls, we also used the MSW library to intercept the API calls and return mock data. THis allowed us to create reliable tests for our components.
+Vitest offered a rich set of testing capabilities, such as mocking dependencies and simulating asynchronous operations. This was crucial for testing some of the components such as the editor and components that relied on API calls. As well as using Vitest to mock API async calls, we also used the MSW library to intercept the API calls and return mock data. This allowed us to create reliable tests for our components.
 
 By testing early on, we gained confidence in the reliability of our application and helped us catch and fix bugs early on.
 
