@@ -28,8 +28,6 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
-<<<<<<< HEAD
-=======
       '@stylistic/js/indent': ['error', 2],
       '@stylistic/js/linebreak-style': ['error', 'unix'],
       '@stylistic/js/quotes': ['error', 'single'],
@@ -42,7 +40,6 @@ export default [
       'arrow-spacing': ['error', { 'before': true, 'after': true }],
       'no-console': 'off',
       'eol-last': ['error', 'always'],
->>>>>>> dev
       ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
@@ -54,8 +51,6 @@ export default [
       ],
     },
   },
-<<<<<<< HEAD
-=======
 
   {
     files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', 'tests/**/*.{js,jsx}', 'testSetup.js', 'src/mocks/**/*.{js,jsx}'],
@@ -84,5 +79,4 @@ export default [
     ...configs['flat/recommended'],
     ...testingLibrary.configs['react/recommended'],
   },
->>>>>>> dev
 ]
