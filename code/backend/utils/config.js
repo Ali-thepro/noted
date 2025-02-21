@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config()
 
 const MONGODB_URI = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'test-no-morgan'
   ? process.env.TEST_MONGODB_URI
