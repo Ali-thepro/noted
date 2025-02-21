@@ -23,7 +23,7 @@ const Header = () => {
   const [showVersionHistory, setShowVersionHistory] = useState(false)
 
   const changeTheme = () => {
-    dispatch(setTheme(theme === 'light' ? 'dark' : 'light'))
+    dispatch(setTheme())
   }
 
   const changeViewMode = (mode) => {

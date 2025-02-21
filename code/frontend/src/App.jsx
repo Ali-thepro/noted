@@ -13,6 +13,7 @@ import DemoPage from './pages/DemoPage'
 import NotePage from './pages/NotePage'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import ScrollToTop from './components/ScrollToTop'
 import NotFound from './pages/NotFound'
 
 const App = () => {
@@ -24,6 +25,7 @@ const App = () => {
 
   return (
     <Router>
+      <ScrollToTop />
       <Header />
       <ToastContainer
         position="top-right"
