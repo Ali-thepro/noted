@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"noted/internal/api"
 	"noted/internal/storage"
 
 	"github.com/spf13/cobra"
@@ -94,29 +93,6 @@ func TestRestoreCmd(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Mock API client implementation
-type mockAPIClient struct {
-	api.Client
-	versions []*api.Version
-	note     *api.Note
-}
-
-func (m *mockAPIClient) GetVersions(noteID string) ([]*api.Version, error) {
-	return m.versions, nil
-}
-
-func (m *mockAPIClient) GetNote(noteID string) (*api.Note, error) {
-	return m.note, nil
-}
-
-func (m *mockAPIClient) UpdateNote(noteID string, req api.UpdateNoteRequest) (*api.Note, error) {
-	return m.note, nil
-}
-
-func (m *mockAPIClient) CreateVersion(noteID string, req *api.CreateVersionRequest) (*api.Version, error) {
-	return m.versions[0], nil
 }
 
 func TestRestoreCmdFlags(t *testing.T) {
