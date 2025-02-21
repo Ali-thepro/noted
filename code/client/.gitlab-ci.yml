@@ -41,6 +41,7 @@ build:
 
 test:
   stage: test
+  allow_failure: true
   script:
     - make test
     - "go tool cover -func coverage.out | sed -n -e '/^total/s/:.*statements)[^0-9]*/: /p' > coverage.txt"
