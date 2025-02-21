@@ -39,7 +39,7 @@ build:
     - make build
     - test -x noted
 
-.test:
+test:
   stage: test
   script:
     - make test
@@ -49,7 +49,7 @@ build:
     - go install github.com/jstemmer/go-junit-report/v2@latest
     - go test -v 2>&1 ./... | $GOPATH/bin/go-junit-report -set-exit-code > report.xml
   cache:
-    - key: "$CI_COMMIT_REF_SLUG-reports"
+    - key: "$CI_COMMIT_REF_SLUG-client-reports"
       paths:
         - code/client/report.xml
         - code/client/coverage.txt

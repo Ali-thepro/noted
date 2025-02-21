@@ -22,6 +22,6 @@ test('test', async ({ page }) => {
   
   const fileInput = await page.locator('input[type="file"]');
   await page.waitForTimeout(2000);
-  await fileInput.setInputFiles("C:/Users/Kaushal/Downloads/Gantt chart.png");
+  await fileInput.setInputFiles('../2025-csc1049-ahmada5-noted/code/playwright/test-data/Gantt chart.png');
   await page.waitForTimeout(2000);
 });

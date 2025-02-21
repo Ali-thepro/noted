@@ -36,7 +36,8 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
     try {
       const symmetricKey = memoryStore.get()
       if (!symmetricKey) {
-        throw new Error('Noted is locked')
+        toast.error('Noted is locked')
+        return
       }
 
       const processedTags = tags
@@ -155,6 +156,9 @@ const NoteModal = ({ show, onClose, isEditing = false, noteData = null }) => {
           navigate(`/notes/${newNote.id}`)
         }
       }
+    } catch (error) {
+      toast.error(error.message || 'An error occurred while saving the note')
+      console.error('Note creation/edit error:', error)
     } finally {
       setIsSubmitting(false)
     }
