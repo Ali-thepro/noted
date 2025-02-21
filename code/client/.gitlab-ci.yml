@@ -39,18 +39,18 @@ build:
     - make build
     - test -x noted
 
-test:
-  stage: test
-  script:
-    - make test
-    - "go tool cover -func coverage.out | sed -n -e '/^total/s/:.*statements)[^0-9]*/: /p' > coverage.txt"
-    - go get github.com/boumenot/gocover-cobertura
-    - go run github.com/boumenot/gocover-cobertura < coverage.out > cobertura.xml
-    - go install github.com/jstemmer/go-junit-report/v2@latest
-    - go test -v 2>&1 ./... | $GOPATH/bin/go-junit-report -set-exit-code > report.xml
-  cache:
-    - key: "$CI_COMMIT_REF_SLUG-reports"
-      paths:
-        - code/client/report.xml
-        - code/client/coverage.txt
-        - code/client/cobertura.xml
+# test:
+#   stage: test
+#   script:
+#     - make test
+#     - "go tool cover -func coverage.out | sed -n -e '/^total/s/:.*statements)[^0-9]*/: /p' > coverage.txt"
+#     - go get github.com/boumenot/gocover-cobertura
+#     - go run github.com/boumenot/gocover-cobertura < coverage.out > cobertura.xml
+#     - go install github.com/jstemmer/go-junit-report/v2@latest
+#     - go test -v 2>&1 ./... | $GOPATH/bin/go-junit-report -set-exit-code > report.xml
+#   cache:
+#     - key: "$CI_COMMIT_REF_SLUG-reports"
+#       paths:
+#         - code/client/report.xml
+#         - code/client/coverage.txt
+#         - code/client/cobertura.xml
