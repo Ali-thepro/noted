@@ -109,7 +109,7 @@ export const editNote = (id, noteData) => {
       dispatch(setNotification('Note saved successfully', 'success'))
       return updatedNote
     } catch (error) {
-      let message 
+      let message
 
       if (error?.response?.data.includes('Tags cannot be more than 20 characters')) {
         message = 'Tags cannot be more than 20 characters'
