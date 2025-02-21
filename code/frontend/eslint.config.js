@@ -9,7 +9,7 @@ import testingLibrary from 'eslint-plugin-testing-library'
 import { configs } from 'eslint-plugin-jest-dom'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'tailwind.config.js'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -26,6 +26,7 @@ export default [
       react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      '@stylistic/js': stylisticJs
     },
     rules: {
       '@stylistic/js/indent': ['error', 2],
@@ -48,7 +49,7 @@ export default [
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
-      ],
+      ]
     },
   },
 
