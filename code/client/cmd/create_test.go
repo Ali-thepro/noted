@@ -25,7 +25,6 @@ func TestCreateCmd(t *testing.T) {
 		Tags:      []string{"test"},
 	}
 
-	// Save mock note to index
 	index := &storage.Index{Notes: []storage.Note{*mockNote}}
 	err := storage.SaveIndex(index)
 	assert.NoError(t, err)

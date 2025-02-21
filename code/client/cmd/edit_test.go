@@ -11,7 +11,6 @@ import (
 )
 
 func TestEditCmd(t *testing.T) {
-	// Create temp test directory
 	tmpDir := t.TempDir()
 	t.Setenv("NOTED_CONFIG_DIR", tmpDir)
 
@@ -25,12 +24,10 @@ func TestEditCmd(t *testing.T) {
 		Tags:      []string{"test"},
 	}
 
-	// Save mock note to index
 	index := &storage.Index{Notes: []storage.Note{*mockNote}}
 	err := storage.SaveIndex(index)
 	assert.NoError(t, err)
 
-	// Create test file content
 	err = storage.WriteNoteContent(mockNote.Filename, "test content")
 	assert.NoError(t, err)
 

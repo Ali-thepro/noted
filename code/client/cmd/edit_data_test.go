@@ -11,11 +11,9 @@ import (
 )
 
 func TestEditDataCmd(t *testing.T) {
-	// Create temp test directory
 	tmpDir := t.TempDir()
 	t.Setenv("NOTED_CONFIG_DIR", tmpDir)
 
-	// Setup test data
 	mockNote := &storage.Note{
 		ID:        "test-id",
 		Title:     "Test Note",
