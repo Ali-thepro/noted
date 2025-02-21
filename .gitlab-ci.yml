@@ -28,7 +28,7 @@ report-frontend:
     - echo "Frontend Coverage Report"
     - grep -o 'class="strong">[0-9.]*' code/frontend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
   cache:
-    key: "$CI_COMMIT_REF_SLUG-reports"
+    key: "$CI_COMMIT_REF_SLUG-frontend-reports"
     paths:
       - code/frontend/coverage/coverage-final.json
       - code/frontend/coverage/junit.xml
@@ -51,7 +51,7 @@ report-backend:
     - echo "Backend Coverage Report"
     - grep -o 'class="strong">[0-9.]*' code/backend/coverage/index.html | grep -o '[0-9.]*' | tail -n 1
   cache:
-    key: "$CI_COMMIT_REF_SLUG-reports"
+    key: "$CI_COMMIT_REF_SLUG-backend-reports"
     paths:
       - code/backend/coverage/cobertura-coverage.xml
       - code/backend/coverage/junit.xml
@@ -74,7 +74,7 @@ report-cli:
     - echo "Client Coverage Report"
     - cat code/client/coverage.txt
   cache:
-    key: "$CI_COMMIT_REF_SLUG-reports"
+    key: "$CI_COMMIT_REF_SLUG-client-reports"
     paths:
       - code/client/coverage.txt
       - code/client/cobertura.xml
